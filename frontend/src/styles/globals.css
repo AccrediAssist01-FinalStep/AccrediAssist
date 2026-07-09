@@ -1,0 +1,25 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f8fafc;
+  --color-accent: #7c3aed;
+  --color-success: #16a34a;
+  --color-warning: #ea580c;
+  --color-error: #dc2626;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

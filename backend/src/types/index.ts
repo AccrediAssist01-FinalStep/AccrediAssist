@@ -1,0 +1,13 @@
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data?: T;
+  errors?: string[];
+}
+
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+
+export type UserRole = 'Admin' | 'HOD' | 'Faculty' | 'AccreditationCommittee';
