@@ -15,3 +15,4 @@ export type { UserRole } from '../models/base.model';
 export * from './user.types';
 export * from './auditLog.types';
 export * from './jwt.types';
+export * from './auth.types';
