@@ -25,7 +25,9 @@
     "test:patent-model": "tsx src/scripts/test-patent-model.ts",
     "test:report-model": "tsx src/scripts/test-report-model.ts",
     "test:notification-model": "tsx src/scripts/test-notification-model.ts",
-    "test:audit-log-model": "tsx src/scripts/test-audit-log-model.ts"
+    "test:audit-log-model": "tsx src/scripts/test-audit-log-model.ts",
+    "test:models-review": "tsx src/scripts/test-models-review.ts",
+    "test:models": "npm run test:models-review && npm run test:db && npm run test:pending-model && npm run test:student-achievement-model && npm run test:faculty-achievement-model && npm run test:placement-model && npm run test:internship-model && npm run test:completed-event-report-model && npm run test:publication-model && npm run test:patent-model && npm run test:report-model && npm run test:notification-model && npm run test:audit-log-model"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

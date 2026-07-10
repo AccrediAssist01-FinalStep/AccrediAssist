@@ -10,7 +10,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from '../database/connection';
 import { Notification } from '../models/Notification';
-import { User } from '../models/User';
+import { createTestUser, cleanupTestUser } from './test-helpers';
 
 dotenv.config();
 
@@ -38,12 +38,11 @@ const runTests = async (): Promise<void> => {
 
   await connectDatabase();
   await Notification.deleteMany({});
-  await User.deleteMany({ email: 'notification-test@accrediassist.edu' });
+  await cleanupTestUser('notification-test@accrediassist.edu');
 
-  const user = await User.create({
+  const user = await createTestUser({
     name: 'Notification Tester',
     email: 'notification-test@accrediassist.edu',
-    password: 'Test@12345',
     role: 'Faculty',
   });
 
@@ -128,7 +127,7 @@ const runTests = async (): Promise<void> => {
 
   // Cleanup
   await Notification.deleteMany({});
-  await User.deleteMany({ email: 'notification-test@accrediassist.edu' });
+  await cleanupTestUser('notification-test@accrediassist.edu');
   await disconnectDatabase();
 
   console.log('\nAll Notification model tests passed.');

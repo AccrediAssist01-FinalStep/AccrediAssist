@@ -10,7 +10,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from '../database/connection';
 import { AuditLog } from '../models/AuditLog';
-import { User } from '../models/User';
+import { createTestUser, cleanupTestUser } from './test-helpers';
 
 dotenv.config();
 
@@ -38,12 +38,11 @@ const runTests = async (): Promise<void> => {
 
   await connectDatabase();
   await AuditLog.deleteMany({});
-  await User.deleteMany({ email: 'audit-test@accrediassist.edu' });
+  await cleanupTestUser('audit-test@accrediassist.edu');
 
-  const user = await User.create({
+  const user = await createTestUser({
     name: 'Audit Tester',
     email: 'audit-test@accrediassist.edu',
-    password: 'Test@12345',
     role: 'Admin',
   });
 
@@ -100,21 +99,32 @@ const runTests = async (): Promise<void> => {
     'Missing module is rejected',
   );
 
-  // Test 7: Default timestamp applied when omitted
+  // Test 8: Invalid ipAddress rejected
+  await assertThrows(
+    () =>
+      AuditLog.create({
+        action: 'LOGIN',
+        module: 'Auth',
+        ipAddress: 'not-an-ip',
+      }),
+    'Invalid ipAddress is rejected',
+  );
+
+  // Test 9: Default timestamp applied when omitted
   const autoTimestamp = await AuditLog.create({
     action: 'VIEW',
     module: 'Reports',
   });
   assert(!!autoTimestamp.timestamp, 'timestamp defaults to current date');
 
-  // Test 8: Soft delete via base schema
+  // Test 10: Soft delete via base schema
   await auditLog.softDelete();
   const hidden = await AuditLog.findById(auditLog._id);
   assert(!hidden, 'Soft-deleted record excluded from default queries');
 
   // Cleanup
   await AuditLog.deleteMany({});
-  await User.deleteMany({ email: 'audit-test@accrediassist.edu' });
+  await cleanupTestUser('audit-test@accrediassist.edu');
   await disconnectDatabase();
 
   console.log('\nAll Audit Log model tests passed.');

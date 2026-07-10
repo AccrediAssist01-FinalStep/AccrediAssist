@@ -3,7 +3,7 @@ import { IBaseDocument } from './base.types';
 
 export interface IPatent extends IBaseDocument {
   patentTitle: string;
-  inventors?: string[];
+  inventors: string[];
   patentNumber?: string;
   status: PatentStatus;
   filingDate?: Date;

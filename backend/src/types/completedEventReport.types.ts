@@ -11,7 +11,7 @@ export interface ICompletedEventReport extends IBaseDocument {
   participants?: number;
   summary?: string;
   description?: string;
-  photoUrls?: string[];
+  photoUrls: string[];
   generatedReportUrl?: string;
   approvedBy?: Types.ObjectId;
 }

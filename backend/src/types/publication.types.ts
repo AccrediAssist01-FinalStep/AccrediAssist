@@ -5,7 +5,7 @@ export interface IPublication extends IBaseDocument {
   paperTitle: string;
   journal?: string;
   conference?: string;
-  authors?: string[];
+  authors: string[];
   doi?: string;
   publicationDate?: Date;
   documentUrl?: string;

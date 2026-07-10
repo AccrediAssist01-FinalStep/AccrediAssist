@@ -29,6 +29,13 @@ const auditLogSchema = new Schema<IAuditLog>(
       type: String,
       trim: true,
       maxlength: [45, 'IP address cannot exceed 45 characters'],
+      validate: {
+        validator: (value: string) =>
+          !value ||
+          /^(\d{1,3}\.){3}\d{1,3}$/.test(value) ||
+          /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/.test(value),
+        message: 'IP address must be a valid IPv4 or IPv6 address',
+      },
     },
     timestamp: {
       type: Date,

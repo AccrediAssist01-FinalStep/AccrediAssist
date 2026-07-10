@@ -47,6 +47,7 @@ applyBaseSchema(notificationSchema);
 notificationSchema.index({ userId: 1 });
 notificationSchema.index({ isRead: 1 });
 notificationSchema.index({ type: 1 });
+notificationSchema.index({ userId: 1, isRead: 1 });
 notificationSchema.index({ createdAt: -1 });
 
 export const Notification = mongoose.model<INotification>('Notification', notificationSchema);

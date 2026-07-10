@@ -10,7 +10,7 @@
 import dotenv from 'dotenv';
 import { connectDatabase, disconnectDatabase } from '../database/connection';
 import { Report } from '../models/Report';
-import { User } from '../models/User';
+import { createTestUser, cleanupTestUser } from './test-helpers';
 
 dotenv.config();
 
@@ -38,12 +38,11 @@ const runTests = async (): Promise<void> => {
 
   await connectDatabase();
   await Report.deleteMany({});
-  await User.deleteMany({ email: 'report-test@accrediassist.edu' });
+  await cleanupTestUser('report-test@accrediassist.edu');
 
-  const user = await User.create({
+  const user = await createTestUser({
     name: 'Report Tester',
     email: 'report-test@accrediassist.edu',
-    password: 'Test@12345',
     role: 'Admin',
   });
 
@@ -135,7 +134,7 @@ const runTests = async (): Promise<void> => {
 
   // Cleanup
   await Report.deleteMany({});
-  await User.deleteMany({ email: 'report-test@accrediassist.edu' });
+  await cleanupTestUser('report-test@accrediassist.edu');
   await disconnectDatabase();
 
   console.log('\nAll Report model tests passed.');
