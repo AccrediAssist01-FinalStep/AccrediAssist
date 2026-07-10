@@ -2,22 +2,9 @@ import { userRepository } from '../repositories/user.repository';
 import { hashPassword } from '../utils/password';
 import { AppError } from '../utils/AppError';
 import { CreateUserInput } from '../validations/auth.validation';
-import { IUser, IUserResponse } from '../types/user.types';
+import { IUserResponse } from '../types/user.types';
 import { logger } from '../utils/logger';
-
-const toUserResponse = (user: IUser): IUserResponse => ({
-  _id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  department: user.department,
-  designation: user.designation,
-  profileImage: user.profileImage,
-  isActive: user.isActive,
-  lastLogin: user.lastLogin,
-  createdAt: user.createdAt,
-  updatedAt: user.updatedAt,
-});
+import { toUserResponse } from '../utils/user.mapper';
 
 export class UserService {
   async createUser(input: CreateUserInput): Promise<IUserResponse> {

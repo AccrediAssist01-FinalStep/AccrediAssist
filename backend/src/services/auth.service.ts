@@ -5,21 +5,7 @@ import { generateToken } from '../utils/jwt';
 import { AppError } from '../utils/AppError';
 import { LoginInput } from '../validations/auth.validation';
 import { IUserResponse } from '../types/user.types';
-import { IUser } from '../types/user.types';
-
-const toUserResponse = (user: IUser): IUserResponse => ({
-  _id: user._id,
-  name: user.name,
-  email: user.email,
-  role: user.role,
-  department: user.department,
-  designation: user.designation,
-  profileImage: user.profileImage,
-  isActive: user.isActive,
-  lastLogin: user.lastLogin,
-  createdAt: user.createdAt,
-  updatedAt: user.updatedAt,
-});
+import { toUserResponse } from '../utils/user.mapper';
 
 export class AuthService {
   async login(input: LoginInput, ipAddress?: string) {
@@ -65,6 +51,16 @@ export class AuthService {
       token,
       user: toUserResponse(userWithoutPassword),
     };
+  }
+
+  async getProfile(userId: string): Promise<IUserResponse> {
+    const user = await userRepository.findById(userId);
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    return toUserResponse(user);
   }
 }
 

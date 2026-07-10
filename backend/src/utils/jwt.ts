@@ -1,3 +1,4 @@
+import type { SignOptions } from 'jsonwebtoken';
 import jwt, { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { env } from '../config/env';
 import { JwtPayload, JwtSignOptions } from '../types/jwt.types';
@@ -16,10 +17,9 @@ const getJwtSecret = (): string => {
  */
 export const generateToken = (payload: JwtPayload, options?: JwtSignOptions): string => {
   const secret = getJwtSecret();
+  const expiresIn = (options?.expiresIn ?? env.JWT_EXPIRES_IN) as SignOptions['expiresIn'];
 
-  return jwt.sign(payload, secret, {
-    expiresIn: options?.expiresIn ?? env.JWT_EXPIRES_IN,
-  });
+  return jwt.sign(payload, secret, { expiresIn });
 };
 
 /**

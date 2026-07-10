@@ -1,5 +1,5 @@
 import { User } from '../models/User';
-import { IUser, CreateUserInput, UpdateUserInput } from '../types/user.types';
+import { IUser, SaveUserData, UpdateUserInput } from '../types/user.types';
 
 export class UserRepository {
   async findByEmail(email: string, includePassword = false): Promise<IUser | null> {
@@ -18,7 +18,7 @@ export class UserRepository {
     return User.find({ isDeleted: false }).sort({ createdAt: -1 }).exec();
   }
 
-  async create(data: CreateUserInput, createdBy?: string): Promise<IUser> {
+  async create(data: SaveUserData, createdBy?: string): Promise<IUser> {
     const user = new User({
       ...data,
       email: data.email.toLowerCase(),

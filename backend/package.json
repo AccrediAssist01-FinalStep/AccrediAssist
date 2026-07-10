@@ -12,7 +12,8 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx src/database/seed.ts"
+    "seed": "tsx src/database/seed.ts",
+    "test:auth": "tsx src/scripts/test-auth.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

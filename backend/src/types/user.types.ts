@@ -31,6 +31,15 @@ export interface IUserResponse {
   updatedAt: Date;
 }
 
+export interface SaveUserData {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  department?: string;
+  designation?: string;
+}
+
 export interface CreateUserInput {
   name: string;
   email: string;
