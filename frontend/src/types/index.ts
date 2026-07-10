@@ -14,4 +14,9 @@ export interface User {
   role: UserRole;
   department?: string;
   designation?: string;
+  profileImage?: string;
+  isActive?: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }

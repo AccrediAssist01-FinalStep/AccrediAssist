@@ -3,19 +3,34 @@ import { z } from 'zod';
 
 dotenv.config();
 
+const logLevelSchema = z.enum(['error', 'warn', 'info', 'debug']);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  PORT: z.string().default('5000'),
+  PORT: z.coerce.number().default(5000),
+  LOG_LEVEL: logLevelSchema.default('info'),
+
+  // Database
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
-  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+
+  // Authentication (required in later sprints)
+  JWT_SECRET: z.string().optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
+
+  // AI (required in later sprints)
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_API_BASE_URL: z.string().url().default('https://api.openai.com/v1'),
+
+  // Cloudinary (required in later sprints)
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
+
+  // WhatsApp (required in later sprints)
   WHATSAPP_SESSION_PATH: z.string().default('./sessions'),
   WHATSAPP_ALLOWED_GROUPS: z.string().default(''),
+
+  // CORS
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 });
 

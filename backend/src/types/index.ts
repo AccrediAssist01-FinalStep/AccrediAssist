@@ -10,4 +10,7 @@ export interface PaginationParams {
   limit: number;
 }
 
-export type UserRole = 'Admin' | 'HOD' | 'Faculty' | 'AccreditationCommittee';
+export type { UserRole } from '../models/base.model';
+
+export * from './user.types';
+export * from './auditLog.types';
