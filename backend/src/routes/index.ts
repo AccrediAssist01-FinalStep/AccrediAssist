@@ -8,6 +8,7 @@ import placementRouter from './placement.routes';
 import internshipRouter from './internship.routes';
 import eventReportRouter from './eventReport.routes';
 import publicationRouter from './publication.routes';
+import patentRouter from './patent.routes';
 
 const apiRouter = Router();
 
@@ -20,5 +21,6 @@ apiRouter.use('/placements', placementRouter);
 apiRouter.use('/internships', internshipRouter);
 apiRouter.use('/event-reports', eventReportRouter);
 apiRouter.use('/publications', publicationRouter);
+apiRouter.use('/patents', patentRouter);
 
 export default apiRouter;

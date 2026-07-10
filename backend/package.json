@@ -35,7 +35,8 @@
     "test:placement-api": "tsx src/scripts/test-placement-api.ts",
     "test:internship-api": "tsx src/scripts/test-internship-api.ts",
     "test:event-report-api": "tsx src/scripts/test-event-report-api.ts",
-    "test:publication-api": "tsx src/scripts/test-publication-api.ts"
+    "test:publication-api": "tsx src/scripts/test-publication-api.ts",
+    "test:patent-api": "tsx src/scripts/test-patent-api.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
