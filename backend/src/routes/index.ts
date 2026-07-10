@@ -10,6 +10,8 @@ import eventReportRouter from './eventReport.routes';
 import publicationRouter from './publication.routes';
 import patentRouter from './patent.routes';
 import reportRouter from './report.routes';
+import notificationRouter from './notification.routes';
+import auditLogRouter from './auditLog.routes';
 
 const apiRouter = Router();
 
@@ -24,5 +26,7 @@ apiRouter.use('/event-reports', eventReportRouter);
 apiRouter.use('/publications', publicationRouter);
 apiRouter.use('/patents', patentRouter);
 apiRouter.use('/reports', reportRouter);
+apiRouter.use('/notifications', notificationRouter);
+apiRouter.use('/audit-logs', auditLogRouter);
 
 export default apiRouter;

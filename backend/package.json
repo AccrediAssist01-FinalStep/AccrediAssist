@@ -37,7 +37,9 @@
     "test:event-report-api": "tsx src/scripts/test-event-report-api.ts",
     "test:publication-api": "tsx src/scripts/test-publication-api.ts",
     "test:patent-api": "tsx src/scripts/test-patent-api.ts",
-    "test:report-api": "tsx src/scripts/test-report-api.ts"
+    "test:report-api": "tsx src/scripts/test-report-api.ts",
+    "test:notification-api": "tsx src/scripts/test-notification-api.ts",
+    "test:audit-log-api": "tsx src/scripts/test-audit-log-api.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
