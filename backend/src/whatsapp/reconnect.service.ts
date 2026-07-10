@@ -8,6 +8,7 @@ export class ReconnectService {
   private reconnectTimer: NodeJS.Timeout | null = null;
   private reconnectHandler: ReconnectHandler | null = null;
   private attempts = 0;
+  private exhausted = false;
 
   setReconnectHandler(handler: ReconnectHandler): void {
     this.reconnectHandler = handler;
@@ -30,6 +31,10 @@ export class ReconnectService {
     return this.attempts;
   }
 
+  isExhausted(): boolean {
+    return this.exhausted;
+  }
+
   scheduleReconnect(): void {
     if (!this.shouldReconnect || !this.reconnectHandler || this.reconnectTimer) {
       return;
@@ -41,6 +46,7 @@ export class ReconnectService {
         maxAttempts: reconnectConfig.maxAttempts,
       });
       this.shouldReconnect = false;
+      this.exhausted = true;
       return;
     }
 
@@ -72,6 +78,7 @@ export class ReconnectService {
     this.cancel();
     this.shouldReconnect = false;
     this.attempts = 0;
+    this.exhausted = false;
   }
 
   private async executeReconnect(): Promise<void> {

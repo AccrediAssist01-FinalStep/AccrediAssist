@@ -80,13 +80,17 @@ export class MediaService {
     const extension = this.resolveExtension(mediaInfo.mimeType, mediaInfo.fileName);
     const storedFileName = `${tempFileId}${extension}`;
     const localPath = path.join(mediaConfig.tempPath, storedFileName);
+    const sanitizedFileName = this.sanitizeFileName(
+      mediaInfo.fileName,
+      `${mediaInfo.mediaType}${extension}`,
+    );
 
     await fs.writeFile(localPath, buffer);
 
     const metadata: WhatsAppMediaMetadata = {
       mediaType: mediaInfo.mediaType,
       mimeType: mediaInfo.mimeType,
-      fileName: mediaInfo.fileName,
+      fileName: sanitizedFileName,
       fileSize: buffer.length,
       localPath,
       tempFileId,

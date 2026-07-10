@@ -66,6 +66,8 @@ export interface WhatsAppStatusResponse {
   reconnectAttempts: number;
   isReconnectScheduled: boolean;
   managerStarted: boolean;
+  requiresQrAuthentication: boolean;
+  reconnectExhausted: boolean;
   lastDisconnectedAt?: Date;
   lastConnectedAt?: Date;
 }

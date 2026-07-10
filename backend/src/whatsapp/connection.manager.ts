@@ -59,6 +59,8 @@ export class WhatsAppConnectionManager {
       reconnectAttempts: reconnectService.getAttemptCount(),
       isReconnectScheduled: reconnectService.isScheduled(),
       managerStarted: this.started,
+      requiresQrAuthentication: whatsappService.requiresQrAuthentication(),
+      reconnectExhausted: reconnectService.isExhausted(),
       lastConnectedAt: this.lastConnectedAt,
       lastDisconnectedAt: this.lastDisconnectedAt,
     };

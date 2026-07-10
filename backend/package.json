@@ -49,6 +49,7 @@
     "test:whatsapp-media-handling": "tsx src/scripts/test-whatsapp-media-handling.ts",
     "test:whatsapp-cloudinary": "tsx src/scripts/test-whatsapp-cloudinary.ts",
     "test:whatsapp-api": "tsx src/scripts/test-whatsapp-api.ts",
+    "test:whatsapp": "npm run test:whatsapp-setup && npm run test:whatsapp-connection-manager && npm run test:whatsapp-group-detection && npm run test:whatsapp-message-listener && npm run test:whatsapp-media-handling && npm run test:whatsapp-cloudinary && npm run test:whatsapp-api",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

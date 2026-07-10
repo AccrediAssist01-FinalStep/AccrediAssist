@@ -101,7 +101,14 @@ export class MessageListener {
     }
 
     for (const message of event.messages) {
-      await this.processMessage(message);
+      try {
+        await this.processMessage(message);
+      } catch (error) {
+        logger.warn('Failed to process WhatsApp message', {
+          messageId: message.key.id,
+          error,
+        });
+      }
     }
   }
 
@@ -133,13 +140,22 @@ export class MessageListener {
     let mediaUrl: string | null = null;
     let mediaMetadata = null;
     if (mediaInfo && this.socket) {
-      const processedMedia = await mediaService.processIncomingMedia({
-        message,
-        socket: this.socket,
-        mediaInfo,
-      });
-      mediaUrl = processedMedia.secureUrl;
-      mediaMetadata = processedMedia.metadata;
+      try {
+        const processedMedia = await mediaService.processIncomingMedia({
+          message,
+          socket: this.socket,
+          mediaInfo,
+        });
+        mediaUrl = processedMedia.secureUrl;
+        mediaMetadata = processedMedia.metadata;
+      } catch (error) {
+        logger.warn('Failed to process WhatsApp media message', {
+          messageId: message.key.id,
+          mediaType: mediaInfo.mediaType,
+          error,
+        });
+        return;
+      }
     }
 
     const standardMessage = toStandardMessage({

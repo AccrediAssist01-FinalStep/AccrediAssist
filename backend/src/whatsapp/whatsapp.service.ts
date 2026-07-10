@@ -35,6 +35,7 @@ export class WhatsAppService {
   private autoReconnectEnabled = false;
   private intentionalDisconnect = false;
   private connectionGeneration = 0;
+  private requiresQrAuthenticationFlag = false;
   private onConnectedCallback?: () => void;
   private onDisconnectedCallback?: () => void;
 
@@ -68,6 +69,10 @@ export class WhatsAppService {
 
   isAutoReconnectEnabled(): boolean {
     return this.autoReconnectEnabled;
+  }
+
+  requiresQrAuthentication(): boolean {
+    return this.requiresQrAuthenticationFlag;
   }
 
   enableAutoReconnect(enabled: boolean): void {
@@ -267,6 +272,7 @@ export class WhatsAppService {
     if (connection === 'open') {
       this.status = WhatsAppConnectionStatus.CONNECTED;
       this.qrCode = null;
+      this.requiresQrAuthenticationFlag = false;
       reconnectService.reset();
       this.onConnectedCallback?.();
       logger.info('WhatsApp connected successfully');
@@ -279,12 +285,19 @@ export class WhatsAppService {
     if (connection === 'close') {
       const wasConnected = this.status === WhatsAppConnectionStatus.CONNECTED;
       const statusCode = (lastDisconnect?.error as Boom | undefined)?.output?.statusCode;
-      const shouldReconnect =
-        statusCode !== baileys.DisconnectReason.loggedOut &&
-        statusCode !== baileys.DisconnectReason.connectionReplaced;
+      const isLoggedOut = statusCode === baileys.DisconnectReason.loggedOut;
+      const isConnectionReplaced = statusCode === baileys.DisconnectReason.connectionReplaced;
+      const shouldReconnect = !isLoggedOut && !isConnectionReplaced;
 
+      messageListener.stop();
       reconnectService.markDisconnected(shouldReconnect);
       this.onDisconnectedCallback?.();
+
+      if (isLoggedOut || isConnectionReplaced) {
+        this.requiresQrAuthenticationFlag = true;
+        reconnectService.reset();
+      }
+
       logger.warn('WhatsApp connection closed', { statusCode, shouldReconnect, wasConnected });
 
       if (!wasConnected) {
