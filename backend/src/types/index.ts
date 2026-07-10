@@ -17,5 +17,7 @@ export * from './user.types';
 export * from './auditLog.types';
 export * from './pendingRecord.types';
 export * from './studentAchievement.types';
+export * from './facultyAchievement.types';
+export * from './placement.types';
 export * from './jwt.types';
 export * from './auth.types';

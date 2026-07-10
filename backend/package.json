@@ -16,7 +16,9 @@
     "test:auth": "tsx src/scripts/test-auth.ts",
     "test:db": "tsx src/scripts/test-database-foundation.ts",
     "test:pending-model": "tsx src/scripts/test-pending-record-model.ts",
-    "test:student-achievement-model": "tsx src/scripts/test-student-achievement-model.ts"
+    "test:student-achievement-model": "tsx src/scripts/test-student-achievement-model.ts",
+    "test:faculty-achievement-model": "tsx src/scripts/test-faculty-achievement-model.ts",
+    "test:placement-model": "tsx src/scripts/test-placement-model.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
