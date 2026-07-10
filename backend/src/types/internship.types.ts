@@ -36,3 +36,28 @@ export interface UpdateInternshipInput {
   certificateUrl?: string;
   approvedBy?: Types.ObjectId;
 }
+
+export interface IInternshipResponse {
+  _id: Types.ObjectId;
+  studentName: string;
+  rollNumber?: string;
+  company: string;
+  role?: string;
+  duration?: string;
+  startDate?: Date;
+  endDate?: Date;
+  certificateUrl?: string;
+  approvedBy?: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface InternshipFilters {
+  search?: string;
+  company?: string;
+}
+
+export interface InternshipSort {
+  sortBy: 'studentName' | 'company' | 'startDate' | 'endDate' | 'createdAt';
+  sortOrder: 'asc' | 'desc';
+}
