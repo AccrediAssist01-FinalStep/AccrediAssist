@@ -70,6 +70,13 @@ export interface WhatsAppStatusResponse {
   lastConnectedAt?: Date;
 }
 
+export interface WhatsAppQrResponse {
+  qrCode: string | null;
+  hasQrCode: boolean;
+  status: WhatsAppConnectionStatus;
+  isConnected: boolean;
+}
+
 export interface WhatsAppJoinedGroup {
   id: string;
   name: string;

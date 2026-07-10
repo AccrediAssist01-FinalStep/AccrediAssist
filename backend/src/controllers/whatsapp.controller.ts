@@ -3,11 +3,17 @@ import { BaseController } from './base.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { whatsappConnectionManager } from '../whatsapp/connection.manager';
 import { groupService } from '../whatsapp/group.service';
+import { WhatsAppDisconnectQuery } from '../validations/whatsapp.validation';
 
 class WhatsAppController extends BaseController {
   getStatus = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
     const status = await whatsappConnectionManager.getStatus();
     this.success(res, 'WhatsApp connection status retrieved', status);
+  });
+
+  getQr = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+    const qr = await whatsappConnectionManager.getQrCode();
+    this.success(res, 'WhatsApp QR code retrieved', qr);
   });
 
   connect = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
@@ -17,8 +23,8 @@ class WhatsAppController extends BaseController {
   });
 
   disconnect = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const logout = req.query.logout === 'true';
-    await whatsappConnectionManager.stop({ logout });
+    const query = req.query as unknown as WhatsAppDisconnectQuery;
+    await whatsappConnectionManager.stop({ logout: query.logout });
     const status = await whatsappConnectionManager.getStatus();
     this.success(res, 'WhatsApp connection stopped', status);
   });

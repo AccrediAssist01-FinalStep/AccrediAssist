@@ -1,8 +1,7 @@
 import { logger } from '../utils/logger';
 import { whatsappService } from './whatsapp.service';
 import { reconnectService } from './reconnect.service';
-import { sessionService } from './session.service';
-import { WhatsAppConnectionStatus, WhatsAppStatusResponse } from './types';
+import { WhatsAppConnectionStatus, WhatsAppStatusResponse, WhatsAppQrResponse } from './types';
 
 export class WhatsAppConnectionManager {
   private started = false;
@@ -29,9 +28,8 @@ export class WhatsAppConnectionManager {
     whatsappService.enableAutoReconnect(true);
     this.started = true;
 
-    const hasStoredSession = await sessionService.hasStoredSession();
-    if (hasStoredSession && !whatsappService.isConnected()) {
-      logger.info('WhatsApp connection manager starting with stored session');
+    if (!whatsappService.isConnected()) {
+      logger.info('WhatsApp connection manager starting connection');
       void whatsappService.startConnection({ displayQrInTerminal: false });
     }
   }
@@ -63,6 +61,18 @@ export class WhatsAppConnectionManager {
       managerStarted: this.started,
       lastConnectedAt: this.lastConnectedAt,
       lastDisconnectedAt: this.lastDisconnectedAt,
+    };
+  }
+
+  async getQrCode(): Promise<WhatsAppQrResponse> {
+    const status = whatsappService.getStatus();
+    const qrCode = whatsappService.getQrCode();
+
+    return {
+      qrCode,
+      hasQrCode: Boolean(qrCode),
+      status,
+      isConnected: whatsappService.isConnected(),
     };
   }
 

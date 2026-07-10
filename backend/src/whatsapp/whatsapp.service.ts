@@ -34,6 +34,7 @@ export class WhatsAppService {
   private connectionRejecter: ((error: Error) => void) | null = null;
   private autoReconnectEnabled = false;
   private intentionalDisconnect = false;
+  private connectionGeneration = 0;
   private onConnectedCallback?: () => void;
   private onDisconnectedCallback?: () => void;
 
@@ -137,6 +138,7 @@ export class WhatsAppService {
   }
 
   async disconnect(options: WhatsAppDisconnectOptions = {}): Promise<void> {
+    this.connectionGeneration += 1;
     this.intentionalDisconnect = true;
     reconnectService.cancel();
     messageListener.stop();
@@ -195,6 +197,7 @@ export class WhatsAppService {
   }
 
   private async createSocket(options: WhatsAppConnectOptions): Promise<void> {
+    const generationAtStart = ++this.connectionGeneration;
     await sessionService.ensureSessionDirectory();
     messageListener.stop();
 
@@ -225,6 +228,15 @@ export class WhatsAppService {
     socket.ev.on('connection.update', (update) => {
       this.handleConnectionUpdate(update, baileys, options);
     });
+
+    if (generationAtStart !== this.connectionGeneration) {
+      try {
+        await socket.end(undefined);
+      } catch {
+        // ignore cleanup errors for stale sockets
+      }
+      return;
+    }
 
     this.socket = socket;
   }

@@ -28,6 +28,7 @@ export {
   type WhatsAppConnectOptions,
   type WhatsAppDisconnectOptions,
   type WhatsAppStatusResponse,
+  type WhatsAppQrResponse,
   type WhatsAppJoinedGroup,
   type WhatsAppGroupDetectionResult,
   type WhatsAppMediaMetadata,
