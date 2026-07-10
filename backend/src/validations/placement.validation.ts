@@ -12,6 +12,8 @@ export const placementListQuerySchema = paginationSchema.extend({
   search: z.string().trim().optional(),
   company: z.string().trim().optional(),
   department: z.string().trim().optional(),
+  fromDate: z.coerce.date().optional(),
+  toDate: z.coerce.date().optional(),
   sortBy: z
     .enum(['studentName', 'company', 'department', 'joiningDate', 'createdAt'])
     .default('joiningDate'),

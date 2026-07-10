@@ -35,6 +35,8 @@ const validateDateRange = (data: {
 export const internshipListQuerySchema = paginationSchema.extend({
   search: z.string().trim().optional(),
   company: z.string().trim().optional(),
+  fromDate: z.coerce.date().optional(),
+  toDate: z.coerce.date().optional(),
   sortBy: z
     .enum(['studentName', 'company', 'startDate', 'endDate', 'createdAt'])
     .default('startDate'),

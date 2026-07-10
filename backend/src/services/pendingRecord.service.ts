@@ -5,6 +5,7 @@ import {
   IPendingRecord,
   IPendingRecordResponse,
   PendingRecordFilters,
+  PendingRecordSort,
   RejectPendingRecordInput,
   UpdatePendingRecordInput,
 } from '../types/pendingRecord.types';
@@ -43,10 +44,11 @@ export class PendingRecordService extends BaseService<
   async listPendingRecords(
     filters: PendingRecordFilters,
     pagination: PaginationOptions,
+    sort: PendingRecordSort,
   ): Promise<PaginatedResult<IPendingRecordResponse>> {
-    logger.info('Listing pending records', { filters, pagination });
+    logger.info('Listing pending records', { filters, pagination, sort });
 
-    const result = await pendingRecordRepository.findWithFilters(filters, pagination);
+    const result = await pendingRecordRepository.findWithFilters(filters, pagination, sort);
 
     return {
       items: result.items.map((record) => this.toResponse(record)),

@@ -1,8 +1,17 @@
 import { FilterQuery } from 'mongoose';
 import { PendingRecord } from '../models/PendingRecord';
 import { BaseRepository, PaginatedResult } from './base.repository';
-import { PaginationOptions } from '../database/utils/queryHelpers';
-import { IPendingRecord, PendingRecordFilters } from '../types/pendingRecord.types';
+import {
+  buildPaginationMeta,
+  getPagination,
+  PaginationOptions,
+  withActiveFilter,
+} from '../database/utils/queryHelpers';
+import {
+  IPendingRecord,
+  PendingRecordFilters,
+  PendingRecordSort,
+} from '../types/pendingRecord.types';
 import { PendingRecordStatus } from '../database/enums';
 
 export class PendingRecordRepository extends BaseRepository<IPendingRecord> {
@@ -29,28 +38,41 @@ export class PendingRecordRepository extends BaseRepository<IPendingRecord> {
       query.senderName = { $regex: filters.senderName, $options: 'i' };
     }
 
+    if (filters.search) {
+      const searchRegex = { $regex: filters.search, $options: 'i' };
+      query.$or = [
+        { originalMessage: searchRegex },
+        { groupName: searchRegex },
+        { senderName: searchRegex },
+      ];
+    }
+
     return query;
   }
 
   async findWithFilters(
     filters: PendingRecordFilters = {},
     pagination: PaginationOptions,
+    sort: PendingRecordSort,
   ): Promise<PaginatedResult<IPendingRecord>> {
-    const result = await this.findAll(this.buildFilterQuery(filters), pagination);
+    const query = withActiveFilter(this.buildFilterQuery(filters));
+    const pageOptions = getPagination(pagination);
+    const sortOrder = sort.sortOrder === 'asc' ? 1 : -1;
 
-    if (Array.isArray(result)) {
-      return {
-        items: result,
-        meta: {
-          total: result.length,
-          page: pagination.page ?? 1,
-          limit: pagination.limit ?? result.length,
-          totalPages: 1,
-        },
-      };
-    }
+    const [items, total] = await Promise.all([
+      this.model
+        .find(query)
+        .sort({ [sort.sortBy]: sortOrder })
+        .skip(pageOptions.skip)
+        .limit(pageOptions.limit)
+        .exec(),
+      this.model.countDocuments(query).exec(),
+    ]);
 
-    return result;
+    return {
+      items,
+      meta: buildPaginationMeta(total, pageOptions),
+    };
   }
 
   async updateStatus(

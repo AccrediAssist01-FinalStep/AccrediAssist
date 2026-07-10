@@ -26,8 +26,10 @@ export class NotificationService {
 
     return {
       items: result.items.map((record) => toNotificationResponse(record)),
-      meta: result.meta,
-      unreadCount,
+      meta: {
+        ...result.meta,
+        unreadCount,
+      },
     };
   }
 

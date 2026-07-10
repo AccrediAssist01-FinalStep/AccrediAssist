@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { REPORT_TYPES } from '../database/enums';
-import { paginationSchema } from './common.validation';
+import { objectIdSchema, paginationSchema } from './common.validation';
 
 export const generateReportSchema = z
   .object({
@@ -28,7 +28,7 @@ export const generateReportSchema = z
 export const reportListQuerySchema = paginationSchema.extend({
   search: z.string().trim().optional(),
   reportType: z.enum(REPORT_TYPES).optional(),
-  generatedBy: z.string().trim().optional(),
+  generatedBy: objectIdSchema.optional(),
   fromDate: z.coerce.date().optional(),
   toDate: z.coerce.date().optional(),
   sortBy: z

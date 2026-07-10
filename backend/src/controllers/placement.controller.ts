@@ -14,6 +14,8 @@ class PlacementController extends BaseController {
         search: query.search,
         company: query.company,
         department: query.department,
+        fromDate: query.fromDate,
+        toDate: query.toDate,
       },
       { page: query.page, limit: query.limit },
       { sortBy: query.sortBy, sortOrder: query.sortOrder },

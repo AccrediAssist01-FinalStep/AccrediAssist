@@ -34,6 +34,11 @@ export class NotificationRepository extends BaseRepository<INotification> {
       query.type = filters.type;
     }
 
+    if (filters.search) {
+      const searchRegex = { $regex: filters.search, $options: 'i' };
+      query.$or = [{ title: searchRegex }, { message: searchRegex }];
+    }
+
     return query;
   }
 

@@ -3,13 +3,14 @@ import { authService } from '../services/auth.service';
 import { sendSuccess } from '../utils/apiResponse';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
+import { normalizeClientIp } from '../utils/clientIp';
 
 const getClientIp = (req: Request): string | undefined => {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
+    return normalizeClientIp(forwarded.split(',')[0]);
   }
-  return req.socket.remoteAddress;
+  return normalizeClientIp(req.socket.remoteAddress);
 };
 
 export const login = asyncHandler(async (req: Request, res: Response): Promise<void> => {

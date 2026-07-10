@@ -10,6 +10,7 @@ import {
   UpdateInternshipInput,
 } from '../types/internship.types';
 import { toInternshipResponse } from '../utils/internship.mapper';
+import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { PaginationOptions } from '../database/utils/queryHelpers';
 import { PaginatedResult } from '../repositories/base.repository';
@@ -86,6 +87,17 @@ export class InternshipService extends BaseService<
     userId: string,
   ): Promise<IInternshipResponse> {
     logger.info('Updating internship', { internshipId: id, userId });
+
+    const existing = await internshipRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundError('Record not found');
+    }
+
+    const startDate = input.startDate ?? existing.startDate;
+    const endDate = input.endDate ?? existing.endDate;
+    if (startDate && endDate && endDate < startDate) {
+      throw new BadRequestError('End date must be on or after start date');
+    }
 
     const updated = await this.update(id, input, userId);
 

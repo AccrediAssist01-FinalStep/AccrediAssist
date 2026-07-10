@@ -52,10 +52,16 @@ export interface IPendingRecordResponse {
 }
 
 export interface PendingRecordFilters {
+  search?: string;
   status?: PendingRecordStatus;
   category?: RecordCategory;
   groupName?: string;
   senderName?: string;
+}
+
+export interface PendingRecordSort {
+  sortBy: 'createdAt' | 'status' | 'category' | 'senderName' | 'confidenceScore';
+  sortOrder: 'asc' | 'desc';
 }
 
 export interface RejectPendingRecordInput {

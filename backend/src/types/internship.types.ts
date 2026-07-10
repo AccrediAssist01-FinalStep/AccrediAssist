@@ -55,6 +55,8 @@ export interface IInternshipResponse {
 export interface InternshipFilters {
   search?: string;
   company?: string;
+  fromDate?: Date;
+  toDate?: Date;
 }
 
 export interface InternshipSort {

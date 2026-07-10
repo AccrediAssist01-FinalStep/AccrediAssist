@@ -21,6 +21,16 @@ export class InternshipRepository extends BaseRepository<IInternship> {
       query.company = { $regex: filters.company, $options: 'i' };
     }
 
+    if (filters.fromDate || filters.toDate) {
+      query.startDate = {};
+      if (filters.fromDate) {
+        query.startDate.$gte = filters.fromDate;
+      }
+      if (filters.toDate) {
+        query.startDate.$lte = filters.toDate;
+      }
+    }
+
     if (filters.search) {
       const searchRegex = { $regex: filters.search, $options: 'i' };
       query.$or = [

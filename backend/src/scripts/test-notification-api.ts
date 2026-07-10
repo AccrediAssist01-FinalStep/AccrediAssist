@@ -165,15 +165,14 @@ const runTests = async (): Promise<void> => {
   assert(list.status === 200, 'GET /notifications returns 200');
   const listData = list.body.data as {
     items: { userId: string; isRead: boolean }[];
-    meta: { total: number };
-    unreadCount: number;
+    meta: { total: number; unreadCount: number };
   };
   assert(listData.items.length === 2, 'User A sees only their notifications');
   assert(
     listData.items.every((item) => item.userId === userAId),
     'Notifications are scoped to authenticated user',
   );
-  assert(listData.unreadCount === 1, 'Unread count is returned');
+  assert(listData.meta.unreadCount === 1, 'Unread count is returned in meta');
 
   const unreadOnly = await request(
     'GET',
@@ -210,7 +209,7 @@ const runTests = async (): Promise<void> => {
 
   const afterRead = await request('GET', '/api/v1/notifications', undefined, userAToken);
   assert(
-    (afterRead.body.data as { unreadCount: number }).unreadCount === 0,
+    (afterRead.body.data as { meta: { unreadCount: number } }).meta.unreadCount === 0,
     'Unread count decreases after mark as read',
   );
 

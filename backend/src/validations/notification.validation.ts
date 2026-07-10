@@ -3,6 +3,7 @@ import { NOTIFICATION_TYPES } from '../database/enums';
 import { paginationSchema } from './common.validation';
 
 export const notificationListQuerySchema = paginationSchema.extend({
+  search: z.string().trim().optional(),
   isRead: z
     .enum(['true', 'false'])
     .optional()

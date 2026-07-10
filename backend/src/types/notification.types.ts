@@ -39,6 +39,7 @@ export interface INotificationResponse {
 }
 
 export interface NotificationFilters {
+  search?: string;
   isRead?: boolean;
   type?: NotificationType;
 }
@@ -51,5 +52,4 @@ export interface NotificationSort {
 export interface NotificationListResult {
   items: INotificationResponse[];
   meta: PaginationMeta;
-  unreadCount: number;
 }

@@ -13,6 +13,7 @@ class NotificationController extends BaseController {
     const result = await notificationService.listForUser(
       userId,
       {
+        search: query.search,
         isRead: query.isRead,
         type: query.type,
       },
@@ -20,7 +21,7 @@ class NotificationController extends BaseController {
       { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
 
-    this.success(res, 'Notifications retrieved successfully', result);
+    this.paginated(res, 'Notifications retrieved successfully', result.items, result.meta);
   });
 
   markAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {

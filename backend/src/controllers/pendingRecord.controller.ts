@@ -11,12 +11,14 @@ class PendingRecordController extends BaseController {
 
     const result = await pendingRecordService.listPendingRecords(
       {
+        search: query.search,
         status: query.status,
         category: query.category,
         groupName: query.groupName,
         senderName: query.senderName,
       },
       { page: query.page, limit: query.limit },
+      { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
 
     this.paginated(res, 'Pending records retrieved successfully', result.items, result.meta);

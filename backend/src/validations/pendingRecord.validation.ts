@@ -3,10 +3,15 @@ import { PENDING_RECORD_STATUSES, RECORD_CATEGORIES } from '../database/enums';
 import { paginationSchema } from './common.validation';
 
 export const pendingRecordListQuerySchema = paginationSchema.extend({
+  search: z.string().trim().optional(),
   status: z.enum(PENDING_RECORD_STATUSES).optional(),
   category: z.enum(RECORD_CATEGORIES).optional(),
   groupName: z.string().trim().optional(),
   senderName: z.string().trim().optional(),
+  sortBy: z
+    .enum(['createdAt', 'status', 'category', 'senderName', 'confidenceScore'])
+    .default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export const updatePendingRecordSchema = z.object({

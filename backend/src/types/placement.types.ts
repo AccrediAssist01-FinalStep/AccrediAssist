@@ -56,6 +56,8 @@ export interface PlacementFilters {
   search?: string;
   company?: string;
   department?: string;
+  fromDate?: Date;
+  toDate?: Date;
 }
 
 export interface PlacementSort {

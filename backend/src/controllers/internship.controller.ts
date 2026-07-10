@@ -13,6 +13,8 @@ class InternshipController extends BaseController {
       {
         search: query.search,
         company: query.company,
+        fromDate: query.fromDate,
+        toDate: query.toDate,
       },
       { page: query.page, limit: query.limit },
       { sortBy: query.sortBy, sortOrder: query.sortOrder },

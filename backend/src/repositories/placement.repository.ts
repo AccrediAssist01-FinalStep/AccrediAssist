@@ -25,6 +25,16 @@ export class PlacementRepository extends BaseRepository<IPlacement> {
       query.department = { $regex: filters.department, $options: 'i' };
     }
 
+    if (filters.fromDate || filters.toDate) {
+      query.joiningDate = {};
+      if (filters.fromDate) {
+        query.joiningDate.$gte = filters.fromDate;
+      }
+      if (filters.toDate) {
+        query.joiningDate.$lte = filters.toDate;
+      }
+    }
+
     if (filters.search) {
       const searchRegex = { $regex: filters.search, $options: 'i' };
       query.$or = [
