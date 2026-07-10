@@ -23,5 +23,7 @@ export * from './internship.types';
 export * from './completedEventReport.types';
 export * from './publication.types';
 export * from './patent.types';
+export * from './report.types';
+export * from './notification.types';
 export * from './jwt.types';
 export * from './auth.types';

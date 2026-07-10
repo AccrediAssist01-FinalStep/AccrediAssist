@@ -1,5 +1,5 @@
-import { Document, Types } from 'mongoose';
-import { IBaseDocument } from '../types/base.types';
+import { Types } from 'mongoose';
+import { IBaseDocument } from './base.types';
 
 export interface IAuditLog extends IBaseDocument {
   userId?: Types.ObjectId;
@@ -7,15 +7,14 @@ export interface IAuditLog extends IBaseDocument {
   module: string;
   description?: string;
   ipAddress?: string;
-  relatedRecordId?: Types.ObjectId;
   timestamp: Date;
 }
 
 export interface CreateAuditLogInput {
-  userId?: string;
+  userId?: Types.ObjectId | string;
   action: string;
   module: string;
   description?: string;
   ipAddress?: string;
-  relatedRecordId?: string;
+  timestamp?: Date;
 }

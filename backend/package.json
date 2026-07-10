@@ -22,7 +22,10 @@
     "test:internship-model": "tsx src/scripts/test-internship-model.ts",
     "test:completed-event-report-model": "tsx src/scripts/test-completed-event-report-model.ts",
     "test:publication-model": "tsx src/scripts/test-publication-model.ts",
-    "test:patent-model": "tsx src/scripts/test-patent-model.ts"
+    "test:patent-model": "tsx src/scripts/test-patent-model.ts",
+    "test:report-model": "tsx src/scripts/test-report-model.ts",
+    "test:notification-model": "tsx src/scripts/test-notification-model.ts",
+    "test:audit-log-model": "tsx src/scripts/test-audit-log-model.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

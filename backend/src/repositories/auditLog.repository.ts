@@ -9,8 +9,7 @@ export class AuditLogRepository {
       module: data.module,
       description: data.description,
       ipAddress: data.ipAddress,
-      relatedRecordId: data.relatedRecordId,
-      timestamp: new Date(),
+      timestamp: data.timestamp ?? new Date(),
     });
   }
 }

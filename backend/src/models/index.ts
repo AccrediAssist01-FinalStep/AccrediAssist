@@ -8,6 +8,8 @@ export { Internship } from './Internship';
 export { CompletedEventReport } from './CompletedEventReport';
 export { Publication } from './Publication';
 export { Patent } from './Patent';
+export { Report } from './Report';
+export { Notification } from './Notification';
 
 export type {
   UserRole,
@@ -16,6 +18,8 @@ export type {
   AchievementType,
   EventType,
   PatentStatus,
+  ReportType,
+  NotificationType,
 } from '../database/enums';
 export {
   USER_ROLES,
@@ -24,6 +28,8 @@ export {
   ACHIEVEMENT_TYPES,
   EVENT_TYPES,
   PATENT_STATUSES,
+  REPORT_TYPES,
+  NOTIFICATION_TYPES,
 } from '../database/enums';
 export type { IBaseDocument, BaseDocument } from '../types/base.types';
 export type { IUser, IUserDocument } from '../types/user.types';
@@ -35,3 +41,6 @@ export type { IInternship } from '../types/internship.types';
 export type { ICompletedEventReport } from '../types/completedEventReport.types';
 export type { IPublication } from '../types/publication.types';
 export type { IPatent } from '../types/patent.types';
+export type { IReport } from '../types/report.types';
+export type { INotification } from '../types/notification.types';
+export type { IAuditLog } from '../types/auditLog.types';

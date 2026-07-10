@@ -12,25 +12,27 @@ const auditLogSchema = new Schema<IAuditLog>(
       type: String,
       required: [true, 'Action is required'],
       trim: true,
+      maxlength: [100, 'Action cannot exceed 100 characters'],
     },
     module: {
       type: String,
       required: [true, 'Module is required'],
       trim: true,
+      maxlength: [100, 'Module cannot exceed 100 characters'],
     },
     description: {
       type: String,
       trim: true,
+      maxlength: [1000, 'Description cannot exceed 1000 characters'],
     },
     ipAddress: {
       type: String,
       trim: true,
-    },
-    relatedRecordId: {
-      type: Schema.Types.ObjectId,
+      maxlength: [45, 'IP address cannot exceed 45 characters'],
     },
     timestamp: {
       type: Date,
+      required: [true, 'Timestamp is required'],
       default: Date.now,
     },
   },
