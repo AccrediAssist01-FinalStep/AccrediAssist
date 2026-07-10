@@ -2,6 +2,16 @@ export { loadBaileys, isBaileysAvailable } from './baileys.loader';
 export { whatsappService, WhatsAppService } from './whatsapp.service';
 export { sessionService, SessionService } from './session.service';
 export { messageListener, MessageListener } from './message.listener';
+export {
+  extractTextFromMessage,
+  toStandardMessage,
+  toStandardMessageJson,
+  resolveMessageTimestamp,
+  resolveSenderLabel,
+  createTestMessageUtils,
+  type BaileysMessageUtils,
+  type WhatsAppIncomingMessageJson,
+} from './message.mapper';
 export { mediaService, MediaService } from './media.service';
 export { groupFilter, GroupFilter } from './group.filter';
 export { groupService, GroupService } from './group.service';

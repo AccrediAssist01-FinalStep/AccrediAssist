@@ -139,6 +139,7 @@ export class WhatsAppService {
   async disconnect(options: WhatsAppDisconnectOptions = {}): Promise<void> {
     this.intentionalDisconnect = true;
     reconnectService.cancel();
+    messageListener.stop();
     this.cancelConnectionWait();
 
     if (!this.socket) {
@@ -257,6 +258,9 @@ export class WhatsAppService {
       reconnectService.reset();
       this.onConnectedCallback?.();
       logger.info('WhatsApp connected successfully');
+      if (this.socket) {
+        void messageListener.start(this.socket);
+      }
       this.resolveConnectionWait();
     }
 
