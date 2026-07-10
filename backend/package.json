@@ -40,9 +40,11 @@
     "test:report-api": "tsx src/scripts/test-report-api.ts",
     "test:notification-api": "tsx src/scripts/test-notification-api.ts",
     "test:audit-log-api": "tsx src/scripts/test-audit-log-api.ts",
-    "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api"
+    "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api",
+    "test:whatsapp-setup": "tsx src/scripts/test-whatsapp-setup.ts"
   },
   "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cors": "^2.8.5",
