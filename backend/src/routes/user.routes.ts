@@ -1,7 +1,10 @@
 import { Router } from 'express';
+import { createUser } from '../controllers/user.controller';
+import { validate } from '../middleware/validate.middleware';
+import { createUserSchema } from '../validations/auth.validation';
 
 const userRouter = Router();
 
-// User management routes will be registered in a later sprint
+userRouter.post('/', validate(createUserSchema), createUser);
 
 export default userRouter;

@@ -13,14 +13,24 @@ export const loginSchema = z.object({
     .min(1, 'Password is required'),
 });
 
-// Reserved for future user management APIs (not wired yet)
 export const createUserSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(userRoles),
-  department: z.string().optional(),
-  designation: z.string().optional(),
+  name: z
+    .string({ required_error: 'Name is required' })
+    .trim()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
+  email: z
+    .string({ required_error: 'Email is required' })
+    .trim()
+    .toLowerCase()
+    .email('Invalid email format'),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .min(8, 'Password must be at least 8 characters')
+    .max(128, 'Password cannot exceed 128 characters'),
+  role: z.enum(userRoles, { required_error: 'Role is required' }),
+  department: z.string().trim().optional(),
+  designation: z.string().trim().optional(),
 });
 
 export const updateUserSchema = z.object({
