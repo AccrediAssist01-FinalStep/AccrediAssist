@@ -130,13 +130,16 @@ export class MessageListener {
       return;
     }
 
+    let mediaUrl: string | null = null;
     let mediaMetadata = null;
     if (mediaInfo && this.socket) {
-      mediaMetadata = await mediaService.downloadAndSave({
+      const processedMedia = await mediaService.processIncomingMedia({
         message,
         socket: this.socket,
         mediaInfo,
       });
+      mediaUrl = processedMedia.secureUrl;
+      mediaMetadata = processedMedia.metadata;
     }
 
     const standardMessage = toStandardMessage({
@@ -144,6 +147,7 @@ export class MessageListener {
       sender: resolveSenderLabel(message),
       text: text ?? caption ?? '',
       timestamp: resolveMessageTimestamp(message),
+      media: mediaUrl,
       mediaMetadata,
     });
 

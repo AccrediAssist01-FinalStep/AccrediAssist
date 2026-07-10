@@ -4,6 +4,10 @@ import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { logger } from '../utils/logger';
 import { BadRequestError } from '../utils/errors';
+import {
+  CloudinaryUploadHandler,
+  cloudinaryService,
+} from '../services/cloudinary.service';
 import { loadBaileys } from './baileys.loader';
 import { mediaConfig } from './whatsapp.config';
 import { DetectedWhatsAppMedia, WhatsAppMediaMetadata, WhatsAppMediaType } from './types';
@@ -24,6 +28,11 @@ export interface DownloadMediaInput {
   mediaInfo: DetectedWhatsAppMedia;
 }
 
+export interface ProcessedWhatsAppMedia {
+  secureUrl: string;
+  metadata: WhatsAppMediaMetadata;
+}
+
 const MIME_EXTENSION_MAP: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/png': '.png',
@@ -36,8 +45,17 @@ const MIME_EXTENSION_MAP: Record<string, string> = {
   'text/plain': '.txt',
 };
 
+const defaultCloudinaryUploadHandler: CloudinaryUploadHandler = async (input) =>
+  cloudinaryService.uploadWhatsAppMedia({
+    ...input,
+    folder: input.folder ?? mediaConfig.cloudinaryFolder,
+  });
+
 export class MediaService {
-  constructor(private downloadBuffer: MediaBufferDownloader = defaultMediaBufferDownloader) {}
+  constructor(
+    private downloadBuffer: MediaBufferDownloader = defaultMediaBufferDownloader,
+    private uploadToCloudinary: CloudinaryUploadHandler = defaultCloudinaryUploadHandler,
+  ) {}
 
   async ensureTempDirectory(): Promise<string> {
     await fs.mkdir(mediaConfig.tempPath, { recursive: true });
@@ -84,6 +102,48 @@ export class MediaService {
     });
 
     return metadata;
+  }
+
+  async processIncomingMedia(input: DownloadMediaInput): Promise<ProcessedWhatsAppMedia> {
+    const tempMetadata = await this.downloadAndSave(input);
+
+    try {
+      const uploadResult = await this.uploadToCloudinary({
+        filePath: tempMetadata.localPath!,
+        fileName: tempMetadata.fileName,
+        mediaType: tempMetadata.mediaType,
+        folder: mediaConfig.cloudinaryFolder,
+      });
+
+      await this.deleteTempMedia(tempMetadata.tempFileId);
+
+      const metadata: WhatsAppMediaMetadata = {
+        mediaType: tempMetadata.mediaType,
+        mimeType: tempMetadata.mimeType,
+        fileName: tempMetadata.fileName,
+        fileSize: tempMetadata.fileSize,
+        tempFileId: tempMetadata.tempFileId,
+        downloadedAt: tempMetadata.downloadedAt,
+        uploadedAt: new Date(),
+        secureUrl: uploadResult.secureUrl,
+        publicId: uploadResult.publicId,
+      };
+
+      logger.info('WhatsApp media uploaded to Cloudinary', {
+        mediaType: metadata.mediaType,
+        fileName: metadata.fileName,
+        secureUrl: metadata.secureUrl,
+        publicId: metadata.publicId,
+      });
+
+      return {
+        secureUrl: uploadResult.secureUrl,
+        metadata,
+      };
+    } catch (error) {
+      await this.deleteTempMedia(tempMetadata.tempFileId).catch(() => undefined);
+      throw error;
+    }
   }
 
   async deleteTempMedia(tempFileId: string): Promise<void> {

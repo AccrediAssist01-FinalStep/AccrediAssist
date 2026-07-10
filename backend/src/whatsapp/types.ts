@@ -22,9 +22,12 @@ export interface WhatsAppMediaMetadata {
   mimeType: string;
   fileName: string;
   fileSize: number;
-  localPath: string;
   tempFileId: string;
   downloadedAt: Date;
+  uploadedAt?: Date;
+  secureUrl?: string;
+  publicId?: string;
+  localPath?: string;
 }
 
 export interface DetectedWhatsAppMedia {

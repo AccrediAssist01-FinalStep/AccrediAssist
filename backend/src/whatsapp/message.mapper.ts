@@ -12,6 +12,7 @@ export interface StandardMessageInput {
   sender: string;
   text: string;
   timestamp: Date;
+  media?: string | null;
   mediaMetadata?: WhatsAppMediaMetadata | null;
 }
 
@@ -129,7 +130,7 @@ export const toStandardMessage = (input: StandardMessageInput): WhatsAppIncoming
   sender: input.sender,
   message: input.text,
   timestamp: input.timestamp,
-  media: null,
+  media: input.media ?? null,
   mediaMetadata: input.mediaMetadata ?? null,
 });
 

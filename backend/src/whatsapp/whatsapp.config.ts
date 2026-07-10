@@ -27,4 +27,5 @@ export const reconnectConfig = {
 export const mediaConfig = {
   tempPath: path.resolve(process.cwd(), env.WHATSAPP_MEDIA_TEMP_PATH),
   maxFileSizeBytes: 20 * 1024 * 1024,
+  cloudinaryFolder: 'accrediassist/whatsapp',
 } as const;

@@ -244,6 +244,8 @@ const testListenerMediaIntegration = async (): Promise<void> => {
 
   const { mediaService: singletonMediaService } = await import('../whatsapp/media.service');
   const originalDownload = singletonMediaService['downloadBuffer'].bind(singletonMediaService);
+  const originalUpload = singletonMediaService['uploadToCloudinary'].bind(singletonMediaService);
+
   singletonMediaService['downloadBuffer'] = async (message) => {
     if (message.key.id === 'TEST_PDF_ID') {
       return Buffer.from('%PDF-1.4 listener pdf');
@@ -251,6 +253,12 @@ const testListenerMediaIntegration = async (): Promise<void> => {
 
     return Buffer.from('listener-image-bytes');
   };
+  singletonMediaService['uploadToCloudinary'] = async () => ({
+    secureUrl: 'https://res.cloudinary.com/demo/raw/upload/v1/offer-letter.pdf',
+    publicId: 'accrediassist/whatsapp/offer-letter.pdf',
+    resourceType: 'raw',
+    bytes: 21,
+  });
 
   listener.setMessageHandler((message) => {
     received.push(toStandardMessageJson(message));
@@ -281,11 +289,15 @@ const testListenerMediaIntegration = async (): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, 25));
 
     assert(received.length === 1, 'Listener processes approved group media messages');
-    assert(received[0]?.media === null, 'Cloudinary media URL remains null');
+    assert(
+      received[0]?.media === 'https://res.cloudinary.com/demo/raw/upload/v1/offer-letter.pdf',
+      'Standard message stores secure Cloudinary URL',
+    );
     assert(received[0]?.mediaMetadata?.mediaType === 'pdf', 'Listener attaches media metadata');
     assert(received[0]?.message === 'Offer letter attached', 'Listener uses media caption as message text');
   } finally {
     singletonMediaService['downloadBuffer'] = originalDownload;
+    singletonMediaService['uploadToCloudinary'] = originalUpload;
     listener.stop();
     Object.defineProperty(mediaConfig, 'tempPath', {
       configurable: true,
