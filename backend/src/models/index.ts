@@ -5,18 +5,21 @@ export { StudentAchievement } from './StudentAchievement';
 export { FacultyAchievement } from './FacultyAchievement';
 export { Placement } from './Placement';
 export { Internship } from './Internship';
+export { CompletedEventReport } from './CompletedEventReport';
 
 export type {
   UserRole,
   PendingRecordStatus,
   RecordCategory,
   AchievementType,
+  EventType,
 } from '../database/enums';
 export {
   USER_ROLES,
   PENDING_RECORD_STATUSES,
   RECORD_CATEGORIES,
   ACHIEVEMENT_TYPES,
+  EVENT_TYPES,
 } from '../database/enums';
 export type { IBaseDocument, BaseDocument } from '../types/base.types';
 export type { IUser, IUserDocument } from '../types/user.types';
@@ -25,3 +28,4 @@ export type { IStudentAchievement } from '../types/studentAchievement.types';
 export type { IFacultyAchievement } from '../types/facultyAchievement.types';
 export type { IPlacement } from '../types/placement.types';
 export type { IInternship } from '../types/internship.types';
+export type { ICompletedEventReport } from '../types/completedEventReport.types';
