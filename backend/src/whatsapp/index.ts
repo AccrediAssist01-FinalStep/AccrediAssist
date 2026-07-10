@@ -6,8 +6,11 @@ export { mediaService, MediaService } from './media.service';
 export { groupFilter, GroupFilter } from './group.filter';
 export { reconnectService, ReconnectService } from './reconnect.service';
 export { whatsappConfig, baileysConfig } from './whatsapp.config';
+export { displayQrInTerminal } from './qr.display';
 export {
   WhatsAppConnectionStatus,
   type WhatsAppIncomingMessage,
   type WhatsAppModuleStatus,
+  type WhatsAppConnectOptions,
+  type WhatsAppDisconnectOptions,
 } from './types';

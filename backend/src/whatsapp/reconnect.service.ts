@@ -1,12 +1,19 @@
 import { logger } from '../utils/logger';
 
 export class ReconnectService {
-  async scheduleReconnect(): Promise<void> {
-    logger.info('WhatsApp reconnect handling is not implemented yet');
+  private shouldReconnect = false;
+
+  markDisconnected(shouldReconnect: boolean): void {
+    this.shouldReconnect = shouldReconnect;
+    logger.info('WhatsApp reconnect state updated', { shouldReconnect });
+  }
+
+  shouldAttemptReconnect(): boolean {
+    return this.shouldReconnect;
   }
 
   reset(): void {
-    logger.debug('WhatsApp reconnect state reset');
+    this.shouldReconnect = false;
   }
 }
 

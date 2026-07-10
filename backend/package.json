@@ -41,7 +41,9 @@
     "test:notification-api": "tsx src/scripts/test-notification-api.ts",
     "test:audit-log-api": "tsx src/scripts/test-audit-log-api.ts",
     "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api",
-    "test:whatsapp-setup": "tsx src/scripts/test-whatsapp-setup.ts"
+    "test:whatsapp-setup": "tsx src/scripts/test-whatsapp-setup.ts",
+    "test:whatsapp-connection": "tsx src/scripts/test-whatsapp-connection.ts",
+    "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc13",
@@ -56,6 +58,7 @@
     "mongoose": "^8.12.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.2",
+    "qrcode-terminal": "^0.12.0",
     "socket.io": "^4.8.1",
     "zod": "^3.24.2"
   },

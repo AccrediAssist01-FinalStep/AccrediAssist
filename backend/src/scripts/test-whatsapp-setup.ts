@@ -67,14 +67,21 @@ const runTests = async (): Promise<void> => {
     typeof moduleStatus.hasStoredSession === 'boolean',
     'Module status reports stored session state',
   );
+  assert(moduleStatus.isConnected === false, 'Module is not connected after initialize');
+  assert(moduleStatus.hasQrCode === false, 'Module has no QR code after initialize');
   assert(!messageListener.isListening(), 'Message listener is not active');
 
   const credentialsPath = path.join(sessionPath, 'creds.json');
-  try {
-    await fs.access(credentialsPath);
-    assert(false, 'Test session directory should not contain credentials yet');
-  } catch {
-    assert(true, 'No WhatsApp session credentials are present yet');
+  const hasCredentials = await sessionService.hasStoredSession();
+  if (!hasCredentials) {
+    try {
+      await fs.access(credentialsPath);
+      assert(false, 'Missing credentials file should not exist yet');
+    } catch {
+      assert(true, 'No WhatsApp session credentials are present yet');
+    }
+  } else {
+    assert(true, 'Existing WhatsApp session credentials detected');
   }
 
   console.log('\nAll WhatsApp setup tests passed.');

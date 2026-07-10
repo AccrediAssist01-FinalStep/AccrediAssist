@@ -19,4 +19,15 @@ export interface WhatsAppModuleStatus {
   sessionPath: string;
   allowedGroups: string[];
   hasStoredSession: boolean;
+  isConnected: boolean;
+  hasQrCode: boolean;
+}
+
+export interface WhatsAppConnectOptions {
+  displayQrInTerminal?: boolean;
+  connectionTimeoutMs?: number;
+}
+
+export interface WhatsAppDisconnectOptions {
+  logout?: boolean;
 }

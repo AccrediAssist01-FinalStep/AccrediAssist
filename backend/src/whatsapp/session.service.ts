@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { whatsappConfig } from './whatsapp.config';
+import { loadBaileys } from './baileys.loader';
 import { logger } from '../utils/logger';
 
 const CREDENTIALS_FILE = 'creds.json';
@@ -25,6 +26,12 @@ export class SessionService {
     } catch {
       return false;
     }
+  }
+
+  async loadAuthState() {
+    const baileys = await loadBaileys();
+    const sessionPath = await this.ensureSessionDirectory();
+    return baileys.useMultiFileAuthState(sessionPath);
   }
 }
 
