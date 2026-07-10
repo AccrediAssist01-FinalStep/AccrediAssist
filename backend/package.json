@@ -33,7 +33,8 @@
     "test:student-achievement-api": "tsx src/scripts/test-student-achievement-api.ts",
     "test:faculty-achievement-api": "tsx src/scripts/test-faculty-achievement-api.ts",
     "test:placement-api": "tsx src/scripts/test-placement-api.ts",
-    "test:internship-api": "tsx src/scripts/test-internship-api.ts"
+    "test:internship-api": "tsx src/scripts/test-internship-api.ts",
+    "test:event-report-api": "tsx src/scripts/test-event-report-api.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

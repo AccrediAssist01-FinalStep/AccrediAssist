@@ -6,6 +6,7 @@ import studentAchievementRouter from './studentAchievement.routes';
 import facultyAchievementRouter from './facultyAchievement.routes';
 import placementRouter from './placement.routes';
 import internshipRouter from './internship.routes';
+import eventReportRouter from './eventReport.routes';
 
 const apiRouter = Router();
 
@@ -16,5 +17,6 @@ apiRouter.use('/student-achievements', studentAchievementRouter);
 apiRouter.use('/faculty-achievements', facultyAchievementRouter);
 apiRouter.use('/placements', placementRouter);
 apiRouter.use('/internships', internshipRouter);
+apiRouter.use('/event-reports', eventReportRouter);
 
 export default apiRouter;
