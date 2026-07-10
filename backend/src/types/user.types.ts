@@ -1,4 +1,4 @@
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { IBaseDocument, UserRole } from '../models/base.model';
 
 export interface IUser extends IBaseDocument {
@@ -11,6 +11,10 @@ export interface IUser extends IBaseDocument {
   profileImage?: string;
   isActive: boolean;
   lastLogin?: Date;
+}
+
+export interface IUserDocument extends IUser {
+  _id: Types.ObjectId;
 }
 
 export interface IUserResponse {
@@ -46,7 +50,15 @@ export interface UpdateUserInput {
   isActive?: boolean;
 }
 
-export interface LoginInput {
-  email: string;
-  password: string;
-}
+export type UserDocumentFields = Pick<
+  IUser,
+  | 'name'
+  | 'email'
+  | 'password'
+  | 'role'
+  | 'department'
+  | 'designation'
+  | 'profileImage'
+  | 'isActive'
+  | 'lastLogin'
+>;

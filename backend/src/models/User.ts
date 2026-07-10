@@ -8,6 +8,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: [true, 'Name is required'],
       trim: true,
+      minlength: [2, 'Name must be at least 2 characters'],
       maxlength: [100, 'Name cannot exceed 100 characters'],
     },
     email: {
@@ -16,29 +17,41 @@ const userSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
+      maxlength: [255, 'Email cannot exceed 255 characters'],
+      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address'],
     },
     password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
+      maxlength: [128, 'Password cannot exceed 128 characters'],
       select: false,
     },
     role: {
       type: String,
-      enum: USER_ROLES,
+      enum: {
+        values: USER_ROLES,
+        message: '{VALUE} is not a valid role',
+      },
       required: [true, 'Role is required'],
     },
     department: {
       type: String,
       trim: true,
+      maxlength: [100, 'Department cannot exceed 100 characters'],
     },
     designation: {
       type: String,
       trim: true,
+      maxlength: [100, 'Designation cannot exceed 100 characters'],
     },
     profileImage: {
       type: String,
+      trim: true,
+      validate: {
+        validator: (value: string) => !value || /^https?:\/\/.+/.test(value),
+        message: 'Profile image must be a valid URL',
+      },
     },
     isActive: {
       type: Boolean,
@@ -48,13 +61,17 @@ const userSchema = new Schema<IUser>(
       type: Date,
     },
   },
-  baseSchemaOptions,
+  {
+    ...baseSchemaOptions,
+    collection: 'users',
+  },
 );
 
 addBaseFields(userSchema);
 
-userSchema.index({ email: 1 });
+userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
 userSchema.index({ isDeleted: 1 });
+userSchema.index({ isActive: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);
