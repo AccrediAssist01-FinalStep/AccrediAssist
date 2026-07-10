@@ -10,8 +10,9 @@ export interface PaginationParams {
   limit: number;
 }
 
-export type { UserRole } from '../models/base.model';
+export type { UserRole } from '../database/enums';
 
+export * from './base.types';
 export * from './user.types';
 export * from './auditLog.types';
 export * from './jwt.types';

@@ -13,7 +13,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "seed": "tsx src/database/seed.ts",
-    "test:auth": "tsx src/scripts/test-auth.ts"
+    "test:auth": "tsx src/scripts/test-auth.ts",
+    "test:db": "tsx src/scripts/test-database-foundation.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

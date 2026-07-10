@@ -1,5 +1,5 @@
 import { Document, Types } from 'mongoose';
-import { IBaseDocument } from '../models/base.model';
+import { IBaseDocument } from '../types/base.types';
 
 export interface IAuditLog extends IBaseDocument {
   userId?: Types.ObjectId;

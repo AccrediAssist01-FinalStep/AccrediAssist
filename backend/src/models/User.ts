@@ -1,6 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
 import { IUser } from '../types/user.types';
-import { addBaseFields, baseSchemaOptions, USER_ROLES } from './base.model';
+import {
+  applyBaseSchema,
+  baseSchemaOptions,
+  enumField,
+  USER_ROLES,
+} from '../database';
 
 const userSchema = new Schema<IUser>(
   {
@@ -29,10 +34,7 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: {
-        values: USER_ROLES,
-        message: '{VALUE} is not a valid role',
-      },
+      enum: enumField(USER_ROLES, 'role'),
       required: [true, 'Role is required'],
     },
     department: {
@@ -67,11 +69,10 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-addBaseFields(userSchema);
+applyBaseSchema(userSchema);
 
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1 });
-userSchema.index({ isDeleted: 1 });
 userSchema.index({ isActive: 1 });
 
 export const User = mongoose.model<IUser>('User', userSchema);

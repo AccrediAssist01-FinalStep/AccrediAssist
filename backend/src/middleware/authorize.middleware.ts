@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserRole } from '../models/base.model';
+import { UserRole } from '../database/enums';
 import { AppError } from '../utils/AppError';
 import { logger } from '../utils/logger';
 import {

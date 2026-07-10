@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { IAuditLog } from '../types/auditLog.types';
-import { addBaseFields, baseSchemaOptions } from './base.model';
+import { applyBaseSchema, baseSchemaOptions } from '../database';
 
 const auditLogSchema = new Schema<IAuditLog>(
   {
@@ -34,10 +34,13 @@ const auditLogSchema = new Schema<IAuditLog>(
       default: Date.now,
     },
   },
-  baseSchemaOptions,
+  {
+    ...baseSchemaOptions,
+    collection: 'audit_logs',
+  },
 );
 
-addBaseFields(auditLogSchema);
+applyBaseSchema(auditLogSchema);
 
 auditLogSchema.index({ timestamp: -1 });
 auditLogSchema.index({ userId: 1 });

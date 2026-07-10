@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
-import { IBaseDocument, UserRole } from '../models/base.model';
+import { IBaseDocument } from '../types/base.types';
+import { UserRole } from '../database/enums';
 
 export interface IUser extends IBaseDocument {
   name: string;
