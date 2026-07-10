@@ -4,6 +4,7 @@ export { PendingRecord } from './PendingRecord';
 export { StudentAchievement } from './StudentAchievement';
 export { FacultyAchievement } from './FacultyAchievement';
 export { Placement } from './Placement';
+export { Internship } from './Internship';
 
 export type {
   UserRole,
@@ -23,3 +24,4 @@ export type { IPendingRecord } from '../types/pendingRecord.types';
 export type { IStudentAchievement } from '../types/studentAchievement.types';
 export type { IFacultyAchievement } from '../types/facultyAchievement.types';
 export type { IPlacement } from '../types/placement.types';
+export type { IInternship } from '../types/internship.types';

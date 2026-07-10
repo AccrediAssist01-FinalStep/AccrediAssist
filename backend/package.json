@@ -18,7 +18,8 @@
     "test:pending-model": "tsx src/scripts/test-pending-record-model.ts",
     "test:student-achievement-model": "tsx src/scripts/test-student-achievement-model.ts",
     "test:faculty-achievement-model": "tsx src/scripts/test-faculty-achievement-model.ts",
-    "test:placement-model": "tsx src/scripts/test-placement-model.ts"
+    "test:placement-model": "tsx src/scripts/test-placement-model.ts",
+    "test:internship-model": "tsx src/scripts/test-internship-model.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
