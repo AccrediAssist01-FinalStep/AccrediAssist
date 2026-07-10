@@ -17,3 +17,9 @@ export const baileysConfig = {
   syncFullHistory: false,
   markOnlineOnConnect: false,
 } as const;
+
+export const reconnectConfig = {
+  baseDelayMs: 3_000,
+  maxDelayMs: 30_000,
+  maxAttempts: 10,
+} as const;

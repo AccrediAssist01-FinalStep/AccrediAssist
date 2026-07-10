@@ -31,3 +31,18 @@ export interface WhatsAppConnectOptions {
 export interface WhatsAppDisconnectOptions {
   logout?: boolean;
 }
+
+export interface WhatsAppStatusResponse {
+  status: WhatsAppConnectionStatus;
+  isConnected: boolean;
+  isDisconnected: boolean;
+  hasStoredSession: boolean;
+  hasQrCode: boolean;
+  allowedGroups: string[];
+  autoReconnectEnabled: boolean;
+  reconnectAttempts: number;
+  isReconnectScheduled: boolean;
+  managerStarted: boolean;
+  lastDisconnectedAt?: Date;
+  lastConnectedAt?: Date;
+}

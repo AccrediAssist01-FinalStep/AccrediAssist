@@ -12,6 +12,7 @@ import patentRouter from './patent.routes';
 import reportRouter from './report.routes';
 import notificationRouter from './notification.routes';
 import auditLogRouter from './auditLog.routes';
+import whatsappRouter from './whatsapp.routes';
 
 const apiRouter = Router();
 
@@ -28,5 +29,6 @@ apiRouter.use('/patents', patentRouter);
 apiRouter.use('/reports', reportRouter);
 apiRouter.use('/notifications', notificationRouter);
 apiRouter.use('/audit-logs', auditLogRouter);
+apiRouter.use('/whatsapp', whatsappRouter);
 
 export default apiRouter;

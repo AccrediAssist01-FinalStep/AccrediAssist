@@ -32,9 +32,25 @@ export class WhatsAppService {
   private connectionTimeout: NodeJS.Timeout | null = null;
   private connectionResolver: (() => void) | null = null;
   private connectionRejecter: ((error: Error) => void) | null = null;
+  private autoReconnectEnabled = false;
+  private intentionalDisconnect = false;
+  private onConnectedCallback?: () => void;
+  private onDisconnectedCallback?: () => void;
+
+  setConnectionCallbacks(callbacks: {
+    onConnected?: () => void;
+    onDisconnected?: () => void;
+  }): void {
+    this.onConnectedCallback = callbacks.onConnected;
+    this.onDisconnectedCallback = callbacks.onDisconnected;
+  }
 
   getStatus(): WhatsAppConnectionStatus {
     return this.status;
+  }
+
+  setStatus(status: WhatsAppConnectionStatus): void {
+    this.status = status;
   }
 
   getQrCode(): string | null {
@@ -43,6 +59,17 @@ export class WhatsAppService {
 
   isConnected(): boolean {
     return this.status === WhatsAppConnectionStatus.CONNECTED;
+  }
+
+  isAutoReconnectEnabled(): boolean {
+    return this.autoReconnectEnabled;
+  }
+
+  enableAutoReconnect(enabled: boolean): void {
+    this.autoReconnectEnabled = enabled;
+    if (!enabled) {
+      reconnectService.cancel();
+    }
   }
 
   getAllowedGroups(): string[] {
@@ -62,16 +89,107 @@ export class WhatsAppService {
     return this.getModuleStatus();
   }
 
+  async startConnection(options: WhatsAppConnectOptions = {}): Promise<WhatsAppModuleStatus> {
+    if (this.isConnected()) {
+      return this.getModuleStatus();
+    }
+
+    if (
+      this.status === WhatsAppConnectionStatus.CONNECTING ||
+      this.status === WhatsAppConnectionStatus.RECONNECTING ||
+      this.status === WhatsAppConnectionStatus.AWAITING_QR
+    ) {
+      return this.getModuleStatus();
+    }
+
+    await this.createSocket(options);
+    return this.getModuleStatus();
+  }
+
   async connect(options: WhatsAppConnectOptions = {}): Promise<WhatsAppModuleStatus> {
     if (this.isConnected()) {
       return this.getModuleStatus();
     }
 
-    if (this.status === WhatsAppConnectionStatus.CONNECTING) {
+    if (
+      this.status === WhatsAppConnectionStatus.CONNECTING ||
+      this.status === WhatsAppConnectionStatus.RECONNECTING ||
+      this.status === WhatsAppConnectionStatus.AWAITING_QR
+    ) {
       await this.waitForConnection(options.connectionTimeoutMs ?? 120_000);
       return this.getModuleStatus();
     }
 
+    await this.createSocket(options);
+
+    try {
+      await this.waitForConnection(options.connectionTimeoutMs ?? 120_000);
+    } catch (error) {
+      await this.disconnect();
+      throw error;
+    }
+
+    return this.getModuleStatus();
+  }
+
+  async disconnect(options: WhatsAppDisconnectOptions = {}): Promise<void> {
+    this.intentionalDisconnect = true;
+    reconnectService.cancel();
+    this.cancelConnectionWait();
+
+    if (!this.socket) {
+      this.status = WhatsAppConnectionStatus.DISCONNECTED;
+      this.qrCode = null;
+      this.intentionalDisconnect = false;
+      return;
+    }
+
+    const activeSocket = this.socket;
+    this.socket = null;
+    this.qrCode = null;
+    this.status = WhatsAppConnectionStatus.DISCONNECTED;
+
+    try {
+      if (options.logout) {
+        await activeSocket.logout('AccrediAssist logout');
+        reconnectService.reset();
+        logger.info('WhatsApp session logged out');
+      } else {
+        await activeSocket.end(undefined);
+        logger.info('WhatsApp connection closed');
+      }
+    } catch (error) {
+      logger.warn('WhatsApp disconnect encountered an error', { error });
+    } finally {
+      this.intentionalDisconnect = false;
+    }
+  }
+
+  async getModuleStatus(): Promise<WhatsAppModuleStatus> {
+    return {
+      status: this.status,
+      sessionPath: sessionService.getSessionDirectory(),
+      allowedGroups: groupFilter.getAllowedGroups(),
+      hasStoredSession: await sessionService.hasStoredSession(),
+      isConnected: this.isConnected(),
+      hasQrCode: Boolean(this.qrCode),
+    };
+  }
+
+  getConfiguration() {
+    return {
+      sessionPath: whatsappConfig.sessionPath,
+      allowedGroups: whatsappConfig.allowedGroups,
+      baileys: baileysConfig,
+    };
+  }
+
+  async isBaileysAvailable(): Promise<boolean> {
+    const baileys = await loadBaileys();
+    return typeof baileys.default === 'function';
+  }
+
+  private async createSocket(options: WhatsAppConnectOptions): Promise<void> {
     await sessionService.ensureSessionDirectory();
     messageListener.stop();
 
@@ -104,66 +222,6 @@ export class WhatsAppService {
     });
 
     this.socket = socket;
-
-    try {
-      await this.waitForConnection(options.connectionTimeoutMs ?? 120_000);
-    } catch (error) {
-      await this.disconnect();
-      throw error;
-    }
-
-    return this.getModuleStatus();
-  }
-
-  async disconnect(options: WhatsAppDisconnectOptions = {}): Promise<void> {
-    this.cancelConnectionWait();
-
-    if (!this.socket) {
-      this.status = WhatsAppConnectionStatus.DISCONNECTED;
-      this.qrCode = null;
-      return;
-    }
-
-    const activeSocket = this.socket;
-    this.socket = null;
-    this.qrCode = null;
-    this.status = WhatsAppConnectionStatus.DISCONNECTED;
-
-    try {
-      if (options.logout) {
-        await activeSocket.logout('AccrediAssist logout');
-        logger.info('WhatsApp session logged out');
-      } else {
-        await activeSocket.end(undefined);
-        logger.info('WhatsApp connection closed');
-      }
-    } catch (error) {
-      logger.warn('WhatsApp disconnect encountered an error', { error });
-    }
-  }
-
-  async getModuleStatus(): Promise<WhatsAppModuleStatus> {
-    return {
-      status: this.status,
-      sessionPath: sessionService.getSessionDirectory(),
-      allowedGroups: groupFilter.getAllowedGroups(),
-      hasStoredSession: await sessionService.hasStoredSession(),
-      isConnected: this.isConnected(),
-      hasQrCode: Boolean(this.qrCode),
-    };
-  }
-
-  getConfiguration() {
-    return {
-      sessionPath: whatsappConfig.sessionPath,
-      allowedGroups: whatsappConfig.allowedGroups,
-      baileys: baileysConfig,
-    };
-  }
-
-  async isBaileysAvailable(): Promise<boolean> {
-    const baileys = await loadBaileys();
-    return typeof baileys.default === 'function';
   }
 
   private handleConnectionUpdate(
@@ -184,27 +242,32 @@ export class WhatsAppService {
     }
 
     if (connection === 'connecting') {
-      this.status = WhatsAppConnectionStatus.CONNECTING;
+      if (this.status !== WhatsAppConnectionStatus.RECONNECTING) {
+        this.status = WhatsAppConnectionStatus.CONNECTING;
+      }
     }
 
     if (connection === 'open') {
       this.status = WhatsAppConnectionStatus.CONNECTED;
       this.qrCode = null;
       reconnectService.reset();
+      this.onConnectedCallback?.();
       logger.info('WhatsApp connected successfully');
       this.resolveConnectionWait();
     }
 
     if (connection === 'close') {
+      const wasConnected = this.status === WhatsAppConnectionStatus.CONNECTED;
       const statusCode = (lastDisconnect?.error as Boom | undefined)?.output?.statusCode;
       const shouldReconnect =
         statusCode !== baileys.DisconnectReason.loggedOut &&
         statusCode !== baileys.DisconnectReason.connectionReplaced;
 
       reconnectService.markDisconnected(shouldReconnect);
-      logger.warn('WhatsApp connection closed', { statusCode, shouldReconnect });
+      this.onDisconnectedCallback?.();
+      logger.warn('WhatsApp connection closed', { statusCode, shouldReconnect, wasConnected });
 
-      if (this.status !== WhatsAppConnectionStatus.CONNECTED) {
+      if (!wasConnected) {
         this.rejectConnectionWait(
           new Error(
             shouldReconnect
@@ -216,6 +279,15 @@ export class WhatsAppService {
 
       this.socket = null;
       this.status = WhatsAppConnectionStatus.DISCONNECTED;
+
+      if (
+        wasConnected &&
+        shouldReconnect &&
+        this.autoReconnectEnabled &&
+        !this.intentionalDisconnect
+      ) {
+        reconnectService.scheduleReconnect();
+      }
     }
   }
 

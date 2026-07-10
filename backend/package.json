@@ -43,6 +43,7 @@
     "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api",
     "test:whatsapp-setup": "tsx src/scripts/test-whatsapp-setup.ts",
     "test:whatsapp-connection": "tsx src/scripts/test-whatsapp-connection.ts",
+    "test:whatsapp-connection-manager": "tsx src/scripts/test-whatsapp-connection-manager.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

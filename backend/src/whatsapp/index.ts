@@ -5,7 +5,8 @@ export { messageListener, MessageListener } from './message.listener';
 export { mediaService, MediaService } from './media.service';
 export { groupFilter, GroupFilter } from './group.filter';
 export { reconnectService, ReconnectService } from './reconnect.service';
-export { whatsappConfig, baileysConfig } from './whatsapp.config';
+export { whatsappConnectionManager, WhatsAppConnectionManager } from './connection.manager';
+export { whatsappConfig, baileysConfig, reconnectConfig } from './whatsapp.config';
 export { displayQrInTerminal } from './qr.display';
 export {
   WhatsAppConnectionStatus,
@@ -13,4 +14,5 @@ export {
   type WhatsAppModuleStatus,
   type WhatsAppConnectOptions,
   type WhatsAppDisconnectOptions,
+  type WhatsAppStatusResponse,
 } from './types';
