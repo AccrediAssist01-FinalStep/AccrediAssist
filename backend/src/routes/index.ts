@@ -9,6 +9,7 @@ import internshipRouter from './internship.routes';
 import eventReportRouter from './eventReport.routes';
 import publicationRouter from './publication.routes';
 import patentRouter from './patent.routes';
+import reportRouter from './report.routes';
 
 const apiRouter = Router();
 
@@ -22,5 +23,6 @@ apiRouter.use('/internships', internshipRouter);
 apiRouter.use('/event-reports', eventReportRouter);
 apiRouter.use('/publications', publicationRouter);
 apiRouter.use('/patents', patentRouter);
+apiRouter.use('/reports', reportRouter);
 
 export default apiRouter;
