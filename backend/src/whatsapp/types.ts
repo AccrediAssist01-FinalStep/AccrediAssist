@@ -12,6 +12,26 @@ export interface WhatsAppIncomingMessage {
   message: string;
   timestamp: Date;
   media: string | null;
+  mediaMetadata?: WhatsAppMediaMetadata | null;
+}
+
+export type WhatsAppMediaType = 'image' | 'pdf' | 'document';
+
+export interface WhatsAppMediaMetadata {
+  mediaType: WhatsAppMediaType;
+  mimeType: string;
+  fileName: string;
+  fileSize: number;
+  localPath: string;
+  tempFileId: string;
+  downloadedAt: Date;
+}
+
+export interface DetectedWhatsAppMedia {
+  mediaType: WhatsAppMediaType;
+  mimeType: string;
+  fileName: string;
+  caption: string;
 }
 
 export interface WhatsAppModuleStatus {

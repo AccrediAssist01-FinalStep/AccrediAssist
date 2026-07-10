@@ -4,6 +4,8 @@ export { sessionService, SessionService } from './session.service';
 export { messageListener, MessageListener } from './message.listener';
 export {
   extractTextFromMessage,
+  detectSupportedMedia,
+  extractMediaCaption,
   toStandardMessage,
   toStandardMessageJson,
   resolveMessageTimestamp,
@@ -12,12 +14,12 @@ export {
   type BaileysMessageUtils,
   type WhatsAppIncomingMessageJson,
 } from './message.mapper';
-export { mediaService, MediaService } from './media.service';
+export { mediaService, MediaService, resolveMediaType, defaultMediaBufferDownloader } from './media.service';
 export { groupFilter, GroupFilter } from './group.filter';
 export { groupService, GroupService } from './group.service';
 export { reconnectService, ReconnectService } from './reconnect.service';
 export { whatsappConnectionManager, WhatsAppConnectionManager } from './connection.manager';
-export { whatsappConfig, baileysConfig, reconnectConfig } from './whatsapp.config';
+export { whatsappConfig, baileysConfig, reconnectConfig, mediaConfig } from './whatsapp.config';
 export { displayQrInTerminal } from './qr.display';
 export {
   WhatsAppConnectionStatus,
@@ -28,4 +30,7 @@ export {
   type WhatsAppStatusResponse,
   type WhatsAppJoinedGroup,
   type WhatsAppGroupDetectionResult,
+  type WhatsAppMediaMetadata,
+  type WhatsAppMediaType,
+  type DetectedWhatsAppMedia,
 } from './types';

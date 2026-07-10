@@ -23,3 +23,8 @@ export const reconnectConfig = {
   maxDelayMs: 30_000,
   maxAttempts: 10,
 } as const;
+
+export const mediaConfig = {
+  tempPath: path.resolve(process.cwd(), env.WHATSAPP_MEDIA_TEMP_PATH),
+  maxFileSizeBytes: 20 * 1024 * 1024,
+} as const;

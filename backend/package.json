@@ -46,6 +46,7 @@
     "test:whatsapp-connection-manager": "tsx src/scripts/test-whatsapp-connection-manager.ts",
     "test:whatsapp-group-detection": "tsx src/scripts/test-whatsapp-group-detection.ts",
     "test:whatsapp-message-listener": "tsx src/scripts/test-whatsapp-message-listener.ts",
+    "test:whatsapp-media-handling": "tsx src/scripts/test-whatsapp-media-handling.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

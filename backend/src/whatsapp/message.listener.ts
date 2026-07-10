@@ -3,12 +3,15 @@ import { loadBaileys } from './baileys.loader';
 import { groupFilter } from './group.filter';
 import {
   BaileysMessageUtils,
+  detectSupportedMedia,
+  extractMediaCaption,
   extractTextFromMessage,
   resolveMessageTimestamp,
   resolveSenderLabel,
   toStandardMessage,
   toStandardMessageJson,
 } from './message.mapper';
+import { mediaService } from './media.service';
 import { WhatsAppIncomingMessage } from './types';
 
 type WASocket = import('@whiskeysockets/baileys').WASocket;
@@ -118,16 +121,30 @@ export class MessageListener {
       return;
     }
 
-    const text = extractTextFromMessage(message, this.baileysUtils ?? (await this.loadBaileysUtils()));
-    if (!text) {
+    const utils = this.baileysUtils ?? (await this.loadBaileysUtils());
+    const text = extractTextFromMessage(message, utils);
+    const mediaInfo = detectSupportedMedia(message, utils);
+    const caption = extractMediaCaption(message, utils);
+
+    if (!text && !mediaInfo) {
       return;
+    }
+
+    let mediaMetadata = null;
+    if (mediaInfo && this.socket) {
+      mediaMetadata = await mediaService.downloadAndSave({
+        message,
+        socket: this.socket,
+        mediaInfo,
+      });
     }
 
     const standardMessage = toStandardMessage({
       groupName,
       sender: resolveSenderLabel(message),
-      text,
+      text: text ?? caption ?? '',
       timestamp: resolveMessageTimestamp(message),
+      mediaMetadata,
     });
 
     this.receivedMessages.push(standardMessage);

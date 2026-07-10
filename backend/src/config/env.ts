@@ -28,6 +28,7 @@ const envSchema = z.object({
 
   // WhatsApp (required in later sprints)
   WHATSAPP_SESSION_PATH: z.string().default('./sessions'),
+  WHATSAPP_MEDIA_TEMP_PATH: z.string().default('./sessions/temp-media'),
   WHATSAPP_ALLOWED_GROUPS: z.string().default(''),
 
   // CORS
