@@ -44,6 +44,7 @@
     "test:whatsapp-setup": "tsx src/scripts/test-whatsapp-setup.ts",
     "test:whatsapp-connection": "tsx src/scripts/test-whatsapp-connection.ts",
     "test:whatsapp-connection-manager": "tsx src/scripts/test-whatsapp-connection-manager.ts",
+    "test:whatsapp-group-detection": "tsx src/scripts/test-whatsapp-group-detection.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

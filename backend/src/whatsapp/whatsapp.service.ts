@@ -61,6 +61,10 @@ export class WhatsAppService {
     return this.status === WhatsAppConnectionStatus.CONNECTED;
   }
 
+  getSocket(): WASocket | null {
+    return this.socket;
+  }
+
   isAutoReconnectEnabled(): boolean {
     return this.autoReconnectEnabled;
   }

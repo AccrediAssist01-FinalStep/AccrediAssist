@@ -46,3 +46,21 @@ export interface WhatsAppStatusResponse {
   lastDisconnectedAt?: Date;
   lastConnectedAt?: Date;
 }
+
+export interface WhatsAppJoinedGroup {
+  id: string;
+  name: string;
+  isAllowed: boolean;
+}
+
+export interface WhatsAppGroupDetectionResult {
+  isConnected: boolean;
+  configuration: {
+    allowedGroups: string[];
+    source: 'WHATSAPP_ALLOWED_GROUPS';
+  };
+  joinedGroups: WhatsAppJoinedGroup[];
+  monitoredGroups: WhatsAppJoinedGroup[];
+  unknownGroups: WhatsAppJoinedGroup[];
+  missingAllowedGroups: string[];
+}

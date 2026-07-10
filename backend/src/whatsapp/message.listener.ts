@@ -1,4 +1,6 @@
-import { logger } from '../utils/logger';
+import { groupFilter } from './group.filter';
+
+export type WhatsAppChatClassification = 'private' | 'unknown' | 'allowed';
 
 export class MessageListener {
   private listening = false;
@@ -7,8 +9,23 @@ export class MessageListener {
     return this.listening;
   }
 
+  classifyChat(jid: string, groupName?: string): WhatsAppChatClassification {
+    if (groupFilter.isPrivateChat(jid)) {
+      return 'private';
+    }
+
+    if (!groupName || groupFilter.isUnknownGroup(groupName)) {
+      return 'unknown';
+    }
+
+    return 'allowed';
+  }
+
+  shouldProcess(jid: string, groupName?: string): boolean {
+    return this.classifyChat(jid, groupName) === 'allowed';
+  }
+
   start(): void {
-    logger.info('WhatsApp message listener is not active yet');
     this.listening = false;
   }
 
