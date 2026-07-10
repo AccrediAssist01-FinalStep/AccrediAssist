@@ -3,10 +3,17 @@ import { z } from 'zod';
 const userRoles = ['Admin', 'HOD', 'Faculty', 'AccreditationCommittee'] as const;
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(1, 'Password is required'),
+  email: z
+    .string({ required_error: 'Email is required' })
+    .trim()
+    .toLowerCase()
+    .email('Invalid email format'),
+  password: z
+    .string({ required_error: 'Password is required' })
+    .min(1, 'Password is required'),
 });
 
+// Reserved for future user management APIs (not wired yet)
 export const createUserSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   email: z.string().email('Invalid email format'),

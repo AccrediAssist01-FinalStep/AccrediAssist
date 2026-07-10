@@ -1,8 +1,8 @@
 import { Router } from 'express';
+import authRouter from './auth.routes';
 
 const apiRouter = Router();
 
-// API v1 routes will be registered here in subsequent sprints
-// Base path: /api/v1
+apiRouter.use('/auth', authRouter);
 
 export default apiRouter;

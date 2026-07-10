@@ -13,8 +13,8 @@ const envSchema = z.object({
   // Database
   MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
 
-  // Authentication (required in later sprints)
-  JWT_SECRET: z.string().optional(),
+  // Authentication
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_EXPIRES_IN: z.string().default('7d'),
 
   // AI (required in later sprints)
