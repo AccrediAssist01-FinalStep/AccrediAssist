@@ -31,7 +31,8 @@
     "test:crud-infrastructure": "tsx src/scripts/test-crud-infrastructure.ts",
     "test:pending-api": "tsx src/scripts/test-pending-api.ts",
     "test:student-achievement-api": "tsx src/scripts/test-student-achievement-api.ts",
-    "test:faculty-achievement-api": "tsx src/scripts/test-faculty-achievement-api.ts"
+    "test:faculty-achievement-api": "tsx src/scripts/test-faculty-achievement-api.ts",
+    "test:placement-api": "tsx src/scripts/test-placement-api.ts"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

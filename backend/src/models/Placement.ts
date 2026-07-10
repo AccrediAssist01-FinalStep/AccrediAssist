@@ -20,6 +20,11 @@ const placementSchema = new Schema<IPlacement>(
       trim: true,
       maxlength: [50, 'Roll number cannot exceed 50 characters'],
     },
+    department: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Department cannot exceed 100 characters'],
+    },
     company: {
       type: String,
       required: [true, 'Company is required'],
@@ -59,6 +64,7 @@ applyBaseSchema(placementSchema);
 
 placementSchema.index({ studentName: 1 });
 placementSchema.index({ company: 1 });
+placementSchema.index({ department: 1 });
 placementSchema.index({ joiningDate: -1 });
 
 export const Placement = mongoose.model<IPlacement>('Placement', placementSchema);
