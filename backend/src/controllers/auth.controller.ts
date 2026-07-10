@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service';
 import { sendSuccess } from '../utils/apiResponse';
-import { AppError } from '../utils/AppError';
+import { asyncHandler } from '../middleware/asyncHandler';
+import { UnauthorizedError } from '../utils/errors';
 
 const getClientIp = (req: Request): string | undefined => {
   const forwarded = req.headers['x-forwarded-for'];
@@ -11,28 +12,16 @@ const getClientIp = (req: Request): string | undefined => {
   return req.socket.remoteAddress;
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const result = await authService.login(req.body, getClientIp(req));
-    sendSuccess(res, 'Login successful', result);
-  } catch (error) {
-    next(error);
-  }
-};
+export const login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const result = await authService.login(req.body, getClientIp(req));
+  sendSuccess(res, 'Login successful', result);
+});
 
-export const getProfile = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    if (!req.user) {
-      throw new AppError('Authentication required', 401);
-    }
-
-    const user = await authService.getProfile(req.user.id);
-    sendSuccess(res, 'Profile retrieved successfully', user);
-  } catch (error) {
-    next(error);
+export const getProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  if (!req.user) {
+    throw new UnauthorizedError();
   }
-};
+
+  const user = await authService.getProfile(req.user.id);
+  sendSuccess(res, 'Profile retrieved successfully', user);
+});

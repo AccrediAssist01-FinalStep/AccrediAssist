@@ -1,15 +1,4 @@
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message: string;
-  data?: T;
-  errors?: string[];
-}
-
-export interface PaginationParams {
-  page: number;
-  limit: number;
-}
-
+export * from './api.types';
 export type { UserRole } from '../database/enums';
 
 export * from './base.types';
