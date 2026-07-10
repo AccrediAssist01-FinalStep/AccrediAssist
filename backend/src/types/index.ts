@@ -15,5 +15,6 @@ export type { UserRole } from '../database/enums';
 export * from './base.types';
 export * from './user.types';
 export * from './auditLog.types';
+export * from './pendingRecord.types';
 export * from './jwt.types';
 export * from './auth.types';
