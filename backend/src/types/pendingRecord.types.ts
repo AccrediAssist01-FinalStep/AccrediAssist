@@ -35,3 +35,29 @@ export interface UpdatePendingRecordInput {
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
 }
+
+export interface IPendingRecordResponse {
+  _id: Types.ObjectId;
+  originalMessage: string;
+  groupName?: string;
+  senderName?: string;
+  category: RecordCategory;
+  extractedData?: Record<string, unknown>;
+  confidenceScore: number;
+  status: PendingRecordStatus;
+  reviewedBy?: Types.ObjectId;
+  reviewedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PendingRecordFilters {
+  status?: PendingRecordStatus;
+  category?: RecordCategory;
+  groupName?: string;
+  senderName?: string;
+}
+
+export interface RejectPendingRecordInput {
+  reason?: string;
+}
