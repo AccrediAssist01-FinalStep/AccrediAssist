@@ -232,7 +232,7 @@ const createMockedPipeline = (): AiPipelineService => {
         return extractionFixtures[resolveFixtureKey(message)] as unknown as Record<string, unknown>;
       }
 
-      if (prompt.includes('Classify the institutional record')) {
+      if (prompt.includes('Classify the extracted institutional record')) {
         if (prompt.includes('internship')) {
           return { category: 'Internship', confidence: 92, reasoning: 'Internship record.' };
         }

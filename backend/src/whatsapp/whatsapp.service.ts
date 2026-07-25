@@ -6,6 +6,7 @@ import { sessionService } from './session.service';
 import { groupFilter } from './group.filter';
 import { messageListener } from './message.listener';
 import { reconnectService } from './reconnect.service';
+import { pendingReviewWorkflowService } from '../services/pendingReviewWorkflow.service';
 import { baileysConfig, whatsappConfig } from './whatsapp.config';
 import { displayQrInTerminal } from './qr.display';
 import {
@@ -277,6 +278,7 @@ export class WhatsAppService {
       this.onConnectedCallback?.();
       logger.info('WhatsApp connected successfully');
       if (this.socket) {
+        pendingReviewWorkflowService.registerWhatsAppMessageHandler();
         void messageListener.start(this.socket);
       }
       this.resolveConnectionWait();
