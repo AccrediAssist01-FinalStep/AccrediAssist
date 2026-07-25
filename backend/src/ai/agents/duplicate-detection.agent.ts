@@ -1,4 +1,5 @@
 import {
+  DuplicateCollectionName,
   DuplicateDetectionInput,
   DuplicateDetectionResponse,
 } from '../interfaces/duplicate-detection.interface';
@@ -22,6 +23,7 @@ export class DuplicateDetectionAgent {
 
     let bestScore = 0;
     let matchingRecordId: string | null = null;
+    let matchingCollection: DuplicateCollectionName | null = null;
 
     for (const candidate of candidates) {
       const score = calculateSimilarityScore(
@@ -30,9 +32,17 @@ export class DuplicateDetectionAgent {
         candidate.fields,
       );
 
-      if (score > bestScore) {
+      const isBetterMatch =
+        score > bestScore ||
+        (score === bestScore &&
+          score > 0 &&
+          matchingCollection === 'pending_records' &&
+          candidate.collection !== 'pending_records');
+
+      if (isBetterMatch) {
         bestScore = score;
         matchingRecordId = candidate.id;
+        matchingCollection = candidate.collection;
       }
     }
 

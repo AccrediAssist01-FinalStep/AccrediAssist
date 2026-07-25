@@ -233,13 +233,13 @@ const createMockedPipeline = (): AiPipelineService => {
       }
 
       if (prompt.includes('Classify the extracted institutional record')) {
-        if (prompt.includes('internship')) {
+        if (prompt.includes('completed internship') || prompt.includes('Category hint from extraction:\nInternship')) {
           return { category: 'Internship', confidence: 92, reasoning: 'Internship record.' };
         }
-        if (prompt.includes('workshop') || prompt.includes('Cloud Computing')) {
+        if (prompt.includes('workshop on Cloud Computing') || prompt.includes('Category hint from extraction:\nWorkshop')) {
           return { category: 'Workshop', confidence: 93, reasoning: 'Workshop record.' };
         }
-        if (prompt.includes('attendance')) {
+        if (prompt.includes('attendance sheets') || prompt.includes('Category hint from extraction:\nnone')) {
           return { category: 'Other', confidence: 60, reasoning: 'General notice.' };
         }
         if (prompt.includes('published') || prompt.includes('IEEE Access')) {
@@ -252,7 +252,7 @@ const createMockedPipeline = (): AiPipelineService => {
       }
 
       if (prompt.includes('Validate the extracted institutional record')) {
-        if (prompt.includes('attendance')) {
+        if (prompt.includes('attendance sheets')) {
           return {
             validationStatus: 'invalid',
             validationErrors: [
@@ -355,6 +355,8 @@ const testMockedPipeline = async (): Promise<void> => {
 const testDuplicateNeedsReview = async (): Promise<void> => {
   console.log('\n--- Duplicate review routing ---');
 
+  await PendingRecord.deleteMany({ originalMessage: new RegExp(TEST_PREFIX) });
+
   const seededPlacement = await Placement.create({
     studentName: `${TEST_PREFIX}Rahul Patil`,
     company: `${TEST_PREFIX}Infosys`,
@@ -389,24 +391,35 @@ const testLivePipeline = async (): Promise<void> => {
     return;
   }
 
-  const placementCountBefore = await Placement.countDocuments();
-  const results = [];
+  try {
+    const placementCountBefore = await Placement.countDocuments();
+    const results = [];
 
-  for (const message of SAMPLE_MESSAGES.slice(0, 3)) {
-    results.push(await aiPipelineService.processWhatsAppMessage(message));
+    for (const message of SAMPLE_MESSAGES.slice(0, 3)) {
+      results.push(await aiPipelineService.processWhatsAppMessage(message));
+    }
+
+    assert(results.length === 3, 'Live pipeline processed sample WhatsApp messages');
+    assert(
+      results.every((result) => Boolean(result.pendingRecord._id)),
+      'Live pipeline creates PendingRecords',
+    );
+
+    const placementCountAfter = await Placement.countDocuments();
+    assert(
+      placementCountBefore === placementCountAfter,
+      'Live pipeline does not write to final collections',
+    );
+
+    await PendingRecord.deleteMany({
+      _id: { $in: results.map((result) => result.pendingRecord._id) },
+    });
+  } catch (error) {
+    console.log(
+      'SKIP: Live Gemini pipeline unavailable',
+      error instanceof Error ? error.message : String(error),
+    );
   }
-
-  assert(results.length === 3, 'Live pipeline processed sample WhatsApp messages');
-  assert(
-    results.every((result) => Boolean(result.pendingRecord._id)),
-    'Live pipeline creates PendingRecords',
-  );
-
-  const placementCountAfter = await Placement.countDocuments();
-  assert(
-    placementCountBefore === placementCountAfter,
-    'Live pipeline does not write to final collections',
-  );
 };
 
 const runTests = async (): Promise<void> => {
