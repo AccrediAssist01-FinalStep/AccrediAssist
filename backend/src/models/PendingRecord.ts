@@ -48,6 +48,11 @@ const pendingRecordSchema = new Schema<IPendingRecord>(
       default: 'Pending',
       required: [true, 'Status is required'],
     },
+    rejectionReason: {
+      type: String,
+      trim: true,
+      maxlength: [1000, 'Rejection reason cannot exceed 1000 characters'],
+    },
     reviewedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',

@@ -9,6 +9,7 @@ export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordR
   extractedData: record.extractedData,
   confidenceScore: record.confidenceScore,
   status: record.status,
+  rejectionReason: record.rejectionReason,
   reviewedBy: record.reviewedBy,
   reviewedAt: record.reviewedAt,
   createdAt: record.createdAt,

@@ -31,7 +31,11 @@ export const updatePendingRecordSchema = z.object({
 });
 
 export const rejectPendingRecordSchema = z.object({
-  reason: z.string().trim().max(1000, 'Reason cannot exceed 1000 characters').optional(),
+  reason: z
+    .string({ required_error: 'Rejection reason is required' })
+    .trim()
+    .min(1, 'Rejection reason is required')
+    .max(1000, 'Reason cannot exceed 1000 characters'),
 });
 
 export type PendingRecordListQuery = z.infer<typeof pendingRecordListQuerySchema>;

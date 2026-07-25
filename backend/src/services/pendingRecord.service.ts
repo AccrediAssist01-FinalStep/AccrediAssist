@@ -1,6 +1,7 @@
 import { pendingRecordRepository } from '../repositories/pendingRecord.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
 import { pendingRecordApprovalService } from './pendingRecordApproval.service';
+import { pendingRecordRejectionService } from './pendingRecordRejection.service';
 import { BaseService } from './base.service';
 import {
   IPendingRecord,
@@ -91,49 +92,9 @@ export class PendingRecordService extends BaseService<
   async rejectPendingRecord(
     id: string,
     userId: string,
-    input?: RejectPendingRecordInput,
+    input: RejectPendingRecordInput,
   ): Promise<IPendingRecordResponse> {
-    const existing = await pendingRecordRepository.findById(id);
-
-    if (!existing) {
-      throw new NotFoundError('Pending record not found');
-    }
-
-    this.ensureReviewable(existing, 'reject');
-
-    logger.info('Rejecting pending record', {
-      pendingRecordId: id,
-      userId,
-      reason: input?.reason,
-    });
-
-    const updateData: Partial<IPendingRecord> = {
-      status: 'Rejected',
-      reviewedBy: userId,
-      reviewedAt: new Date(),
-    };
-
-    if (input?.reason) {
-      updateData.extractedData = {
-        ...(existing.extractedData ?? {}),
-        rejectionReason: input.reason,
-      };
-    }
-
-    const rejected = await pendingRecordRepository.update(id, updateData, userId);
-
-    if (!rejected) {
-      throw new BadRequestError('Failed to reject pending record');
-    }
-
-    await auditLogRepository.create({
-      userId,
-      action: 'REJECT',
-      module: 'PendingRecord',
-      description: `Pending record ${id} rejected${input?.reason ? `: ${input.reason}` : ''}`,
-    });
-
-    return this.toResponse(rejected);
+    return pendingRecordRejectionService.rejectPendingRecord(id, userId, input);
   }
 
   private ensureReviewable(

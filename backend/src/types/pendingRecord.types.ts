@@ -10,6 +10,7 @@ export interface IPendingRecord extends IBaseDocument {
   extractedData?: Record<string, unknown>;
   confidenceScore: number;
   status: PendingRecordStatus;
+  rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
 }
@@ -32,6 +33,7 @@ export interface UpdatePendingRecordInput {
   extractedData?: Record<string, unknown>;
   confidenceScore?: number;
   status?: PendingRecordStatus;
+  rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
 }
@@ -45,6 +47,7 @@ export interface IPendingRecordResponse {
   extractedData?: Record<string, unknown>;
   confidenceScore: number;
   status: PendingRecordStatus;
+  rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
   createdAt: Date;
@@ -66,5 +69,5 @@ export interface PendingRecordSort {
 }
 
 export interface RejectPendingRecordInput {
-  reason?: string;
+  reason: string;
 }

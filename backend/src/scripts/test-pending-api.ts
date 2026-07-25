@@ -253,6 +253,10 @@ const runTests = async (): Promise<void> => {
     (rejected.body.data as { status: string }).status === 'Rejected',
     'PUT /pending/:id/reject sets status to Rejected',
   );
+  assert(
+    (rejected.body.data as { rejectionReason: string }).rejectionReason === 'Insufficient evidence',
+    'PUT /pending/:id/reject stores rejection reason',
+  );
 
   // Test 11: Cannot update approved record
   const updateApproved = await request(
