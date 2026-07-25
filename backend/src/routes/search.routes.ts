@@ -3,11 +3,14 @@ import { searchController } from '../controllers/search.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorizePermission } from '../middleware/authorize.middleware';
 import { validate, validateQuery } from '../middleware/validate.middleware';
-import { searchListQuerySchema, searchExecuteSchema, searchRequestSchema } from '../validations/search.validation';
+import { searchListQuerySchema, searchExecuteSchema, searchRequestSchema, searchHistoryListQuerySchema } from '../validations/search.validation';
 
 const searchRouter = Router();
 
 searchRouter.use(authenticate, authorizePermission('search'));
+
+searchRouter.get('/history', validateQuery(searchHistoryListQuerySchema), searchController.getHistory);
+searchRouter.delete('/history', searchController.clearHistory);
 
 searchRouter.get('/status', searchController.status);
 searchRouter.get('/collections', searchController.collections);

@@ -16,6 +16,11 @@ import {
 } from '../interfaces/smart-search-response.interface';
 import { searchRepository, SearchRepository } from '../repositories/search.repository';
 import {
+  searchHistoryService,
+  SearchHistoryService,
+} from './search-history.service';
+import { buildStructuredSearchHistoryQuery } from '../utils/search-history.util';
+import {
   buildSmartSearchApiResponse,
   buildSmartSearchUnderstanding,
 } from '../utils/search-response.util';
@@ -24,6 +29,7 @@ export class SearchService {
   constructor(
     private readonly agent: SmartSearchAgent = smartSearchAgent,
     private readonly repository: SearchRepository = searchRepository,
+    private readonly historyService: SearchHistoryService = searchHistoryService,
   ) {}
 
   getModuleStatus(): SearchModuleStatus {
@@ -68,7 +74,7 @@ export class SearchService {
       },
     });
 
-    return buildSmartSearchApiResponse({
+    const response = buildSmartSearchApiResponse({
       understanding: buildSmartSearchUnderstanding(
         {
           collection: input.collection,
@@ -80,6 +86,14 @@ export class SearchService {
       ),
       execution,
     });
+
+    await this.historyService.recordSearch(
+      userId,
+      buildStructuredSearchHistoryQuery(input.collection, input.filters ?? {}),
+      execution.meta.total,
+    );
+
+    return response;
   }
 
   async search(input: SmartSearchRequestOptions, userId: string): Promise<SmartSearchApiResponse> {
@@ -113,7 +127,7 @@ export class SearchService {
       },
     });
 
-    return buildSmartSearchApiResponse({
+    const response = buildSmartSearchApiResponse({
       query,
       understanding: buildSmartSearchUnderstanding(parsed.result, 'gemini', {
         model: parsed.model,
@@ -121,6 +135,10 @@ export class SearchService {
       }),
       execution,
     });
+
+    await this.historyService.recordSearch(userId, query, execution.meta.total);
+
+    return response;
   }
 }
 

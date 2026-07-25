@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { BaseController } from './base.controller';
 import { searchService } from '../search/services/search.service';
+import { searchHistoryService } from '../search/services/search-history.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
-import { SearchListQuery, SearchExecuteBody, SearchRequestBody } from '../validations/search.validation';
+import { SearchListQuery, SearchExecuteBody, SearchRequestBody, SearchHistoryListQuery } from '../validations/search.validation';
 
 const parseFields = (value?: string | string[]): string[] | undefined => {
   if (!value) {
@@ -87,6 +88,25 @@ class SearchController extends BaseController {
     );
 
     this.success(res, 'Search executed successfully', result);
+  });
+
+  getHistory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const query = req.query as unknown as SearchHistoryListQuery;
+
+    const result = await searchHistoryService.getHistory(userId, {
+      page: query.page,
+      limit: query.limit,
+    });
+
+    this.paginated(res, 'Search history retrieved successfully', result.items, result.meta);
+  });
+
+  clearHistory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const result = await searchHistoryService.clearHistory(userId);
+
+    this.success(res, 'Search history cleared successfully', result);
   });
 
   private requireUserId(req: Request): string {

@@ -10,6 +10,7 @@ export { Publication } from './Publication';
 export { Patent } from './Patent';
 export { Report } from './Report';
 export { Notification } from './Notification';
+export { SearchHistory } from './SearchHistory';
 
 export type {
   UserRole,
@@ -43,4 +44,5 @@ export type { IPublication } from '../types/publication.types';
 export type { IPatent } from '../types/patent.types';
 export type { IReport } from '../types/report.types';
 export type { INotification } from '../types/notification.types';
+export type { ISearchHistory, ISearchHistoryResponse } from '../types/searchHistory.types';
 export type { IAuditLog } from '../types/auditLog.types';

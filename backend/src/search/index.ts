@@ -21,8 +21,11 @@ export { buildSearchMongoFilter, buildFullTextFilter, buildRegexFullTextFilter }
 export { buildSearchSortSpec } from './utils/search-sort.util';
 export { buildSearchProjection } from './utils/search-projection.util';
 export { buildSearchSummary } from './utils/search-summary.util';
+export { buildStructuredSearchHistoryQuery } from './utils/search-history.util';
 export { searchService, SearchService } from './services/search.service';
+export { searchHistoryService, SearchHistoryService } from './services/search-history.service';
 export { searchRepository, SearchRepository } from './repositories/search.repository';
+export { searchHistoryRepository, SearchHistoryRepository } from './repositories/search-history.repository';
 export { smartSearchAgent, SmartSearchAgent } from './agents/smart-search.agent';
 export {
   SMART_SEARCH_COLLECTIONS,

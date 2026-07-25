@@ -38,3 +38,7 @@ export const searchListQuerySchema = paginationSchema.extend({
 export type SearchRequestBody = z.infer<typeof searchRequestSchema>;
 export type SearchExecuteBody = z.infer<typeof searchExecuteSchema>;
 export type SearchListQuery = z.infer<typeof searchListQuerySchema>;
+
+export const searchHistoryListQuerySchema = paginationSchema;
+
+export type SearchHistoryListQuery = z.infer<typeof searchHistoryListQuerySchema>;
