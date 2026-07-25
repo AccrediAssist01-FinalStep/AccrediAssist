@@ -2,6 +2,7 @@ export { aiService, AiService } from './services/ai.service';
 export { geminiProvider, GeminiProvider } from './providers/gemini.provider';
 export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
+export { validationAgent, ValidationAgent } from './agents/validation.agent';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';
 export {
   EXTRACTION_RESULT_KEYS,
@@ -15,6 +16,14 @@ export {
   isClassificationCategory,
   normalizeClassificationResult,
 } from './utils/classification-result.util';
+export {
+  VALIDATION_ERROR_CODES,
+  VALIDATION_RESULT_KEYS,
+  VALIDATION_STATUSES,
+  hasValidationErrorCode,
+  normalizeValidationResult,
+  validationResultSchema,
+} from './utils/validation-result.util';
 export {
   getPromptTemplateMetadata,
   listPromptTemplates,
@@ -53,3 +62,11 @@ export type {
   ClassificationInput,
   ClassificationResult,
 } from './interfaces/classification.interface';
+export type {
+  ValidationAgentResponse,
+  ValidationErrorCode,
+  ValidationInput,
+  ValidationIssue,
+  ValidationResult,
+  ValidationStatus,
+} from './interfaces/validation.interface';

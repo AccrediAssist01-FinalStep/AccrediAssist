@@ -1,4 +1,4 @@
-Validate the extracted record below.
+Validate the extracted institutional record below.
 
 Category: {{category}}
 
@@ -7,3 +7,6 @@ Extracted data:
 
 Original message:
 {{message}}
+
+Existing titles for duplicate checking:
+{{existingTitles}}
