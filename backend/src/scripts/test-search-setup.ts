@@ -110,9 +110,9 @@ const testModuleStatus = (): void => {
 
   const status = searchService.getModuleStatus();
 
-  assert(status.queryUnderstanding === true, 'Query understanding is enabled');
+  assert(status.queryUnderstanding === isGeminiConfigured(), 'Query understanding reflects Gemini configuration');
   assert(status.databaseSearch === true, 'Database search is enabled');
-  assert(status.integrated === true, 'Gemini and MongoDB search are integrated');
+  assert(status.integrated === isGeminiConfigured(), 'Integration status reflects Gemini configuration');
   assert(status.geminiConfigured === isGeminiConfigured(), 'Gemini configured flag matches environment');
   assert(status.supportedCollections.length === DEFAULT_SMART_SEARCH_COLLECTIONS.length, 'Supported collections are exposed');
 };

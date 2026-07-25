@@ -1,19 +1,61 @@
-import { SmartSearchSort } from '../config/search-fields.config';
-import {
-  GlobalSearchApiData,
-} from '../interfaces/global-search.interface';import { SearchExecutionResult } from '../interfaces/search-execution.interface';
+import { SmartSearchCollection, SMART_SEARCH_COLLECTIONS } from '../config/search-collections.config';
+import { FULL_TEXT_FILTER_KEYS } from '../config/search-execution.config';
+import { SMART_SEARCH_COLLECTION_FIELDS, SmartSearchSort } from '../config/search-fields.config';
+import { GlobalSearchApiData } from '../interfaces/global-search.interface';
+import { SearchExecutionResult } from '../interfaces/search-execution.interface';
 import {
   SmartSearchApiResponse,
   SmartSearchUnderstanding,
 } from '../interfaces/smart-search-response.interface';
 
+const isAllowedFilterKey = (
+  collection: SmartSearchCollection,
+  key: string,
+): boolean =>
+  FULL_TEXT_FILTER_KEYS.includes(key as (typeof FULL_TEXT_FILTER_KEYS)[number]) ||
+  key === 'year' ||
+  SMART_SEARCH_COLLECTION_FIELDS[collection].includes(
+    key as (typeof SMART_SEARCH_COLLECTION_FIELDS)[SmartSearchCollection][number],
+  );
+
+export const inferCollectionFromFilters = (
+  filters: Record<string, unknown>,
+): SmartSearchCollection | undefined => {
+  const keys = Object.keys(filters).filter(
+    (key) =>
+      !FULL_TEXT_FILTER_KEYS.includes(key as (typeof FULL_TEXT_FILTER_KEYS)[number]) &&
+      key !== 'year',
+  );
+
+  if (keys.length === 0) {
+    return undefined;
+  }
+
+  const matches = SMART_SEARCH_COLLECTIONS.filter((collection) =>
+    keys.every((key) => isAllowedFilterKey(collection, key)),
+  );
+
+  return matches.length === 1 ? matches[0] : undefined;
+};
+
 export const mergeSearchFilters = (
   parsedFilters: Record<string, unknown>,
   requestFilters: Record<string, unknown> = {},
-): Record<string, unknown> => ({
-  ...parsedFilters,
-  ...requestFilters,
-});
+  collection?: SmartSearchCollection,
+): Record<string, unknown> => {
+  const merged = {
+    ...parsedFilters,
+    ...requestFilters,
+  };
+
+  if (!collection) {
+    return merged;
+  }
+
+  return Object.fromEntries(
+    Object.entries(merged).filter(([key]) => isAllowedFilterKey(collection, key)),
+  );
+};
 
 export const resolveSearchSort = (
   parsedSort: SmartSearchSort,

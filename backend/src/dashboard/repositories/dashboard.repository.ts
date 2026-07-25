@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+import { PENDING_REVIEW_STATUSES } from '../../database/enums';
 import { AuditLog } from '../../models/AuditLog';
 import { CompletedEventReport } from '../../models/CompletedEventReport';
 import { FacultyAchievement } from '../../models/FacultyAchievement';
@@ -23,7 +24,8 @@ import {
   studentNameProjectionPipeline,
 } from '../utils/dashboard-aggregation.util';
 
-const PENDING_REVIEW_STATUSES = ['Pending', 'Needs Review'];
+
+const PENDING_REVIEW_STATUS_LIST = [...PENDING_REVIEW_STATUSES];
 
 const countDocuments = async <T extends IBaseDocument>(model: Model<T>): Promise<number> => {
   const result = await model.aggregate<{ total: number }>(countPipeline);
@@ -39,6 +41,21 @@ const countCreatedInRange = async <T extends IBaseDocument>(
     {
       $match: {
         ...ACTIVE_MATCH,
+        createdAt: { $gte: start, $lte: end },
+      },
+    },
+    { $count: 'total' },
+  ]);
+
+  return extractCount(result);
+};
+
+const countPendingInRange = async (start: Date, end: Date): Promise<number> => {
+  const result = await PendingRecord.aggregate<{ total: number }>([
+    {
+      $match: {
+        ...ACTIVE_MATCH,
+        status: { $in: PENDING_REVIEW_STATUS_LIST },
         createdAt: { $gte: start, $lte: end },
       },
     },
@@ -105,7 +122,7 @@ export class DashboardRepository {
       {
         $match: {
           ...ACTIVE_MATCH,
-          status: { $in: PENDING_REVIEW_STATUSES },
+          status: { $in: PENDING_REVIEW_STATUS_LIST },
         },
       },
       { $count: 'total' },
@@ -134,16 +151,7 @@ export class DashboardRepository {
       countCreatedInRange(Publication, start, end),
       countCreatedInRange(Patent, start, end),
       countCreatedInRange(CompletedEventReport, start, end),
-      PendingRecord.aggregate<{ total: number }>([
-        {
-          $match: {
-            ...ACTIVE_MATCH,
-            status: { $in: PENDING_REVIEW_STATUSES },
-            createdAt: { $gte: start, $lte: end },
-          },
-        },
-        { $count: 'total' },
-      ]).then(extractCount),
+      countPendingInRange(start, end),
     ]);
 
     return {
@@ -181,10 +189,11 @@ export class DashboardRepository {
         const counts = await Promise.all(
           collections.map((model) => countCreatedInRange(model, range.start, range.end)),
         );
+        const pendingCount = await countPendingInRange(range.start, range.end);
 
         return {
           month,
-          total: counts.reduce((sum, value) => sum + value, 0),
+          total: counts.reduce((sum, value) => sum + value, 0) + pendingCount,
         };
       }),
     );
@@ -206,16 +215,7 @@ export class DashboardRepository {
       countCreatedInRange(Publication, start, end),
       countCreatedInRange(Patent, start, end),
       countCreatedInRange(CompletedEventReport, start, end),
-      PendingRecord.aggregate<{ total: number }>([
-        {
-          $match: {
-            ...ACTIVE_MATCH,
-            status: { $in: PENDING_REVIEW_STATUSES },
-            createdAt: { $gte: start, $lte: end },
-          },
-        },
-        { $count: 'total' },
-      ]).then(extractCount),
+      countPendingInRange(start, end),
     ]);
 
     return {

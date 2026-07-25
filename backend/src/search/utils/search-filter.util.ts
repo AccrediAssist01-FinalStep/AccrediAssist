@@ -70,10 +70,25 @@ export const buildSearchMongoFilter = (
     }
 
     if (key === 'authors' || key === 'inventors') {
-      const regex = buildRegexFilter(value);
+      if (Array.isArray(value)) {
+        const regexes = value
+          .map((entry) => buildRegexFilter(entry))
+          .filter((entry): entry is { $regex: string; $options: string } => Boolean(entry));
 
-      if (regex) {
-        mongoFilter[key] = regex;
+        if (regexes.length === 1) {
+          mongoFilter[key] = regexes[0];
+        } else if (regexes.length > 1) {
+          mongoFilter.$and = [
+            ...(Array.isArray(mongoFilter.$and) ? mongoFilter.$and : []),
+            ...regexes.map((regex) => ({ [key]: regex })),
+          ];
+        }
+      } else {
+        const regex = buildRegexFilter(value);
+
+        if (regex) {
+          mongoFilter[key] = regex;
+        }
       }
 
       continue;

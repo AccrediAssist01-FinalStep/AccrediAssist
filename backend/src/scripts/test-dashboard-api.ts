@@ -96,6 +96,8 @@ const login = async (email: string): Promise<string> => {
 };
 
 const seedDashboardData = async (): Promise<void> => {
+  const createdAt = new Date('2026-07-15T12:00:00.000Z');
+
   await Promise.all([
     Placement.deleteMany({}),
     Internship.deleteMany({}),
@@ -112,11 +114,13 @@ const seedDashboardData = async (): Promise<void> => {
       studentName: 'Rahul Patil',
       company: 'TCS',
       joiningDate: new Date('2026-07-01'),
+      createdAt,
     },
     {
       studentName: 'Ananya Deshmukh',
       company: 'Infosys',
       joiningDate: new Date('2026-07-05'),
+      createdAt,
     },
   ]);
 
@@ -125,11 +129,13 @@ const seedDashboardData = async (): Promise<void> => {
       studentName: 'Rahul Patil',
       company: 'Google',
       endDate: new Date('2026-07-10'),
+      createdAt,
     },
     {
       studentName: 'Priya Nair',
       company: 'Microsoft',
       endDate: new Date('2026-06-15'),
+      createdAt,
     },
   ]);
 
@@ -140,6 +146,7 @@ const seedDashboardData = async (): Promise<void> => {
       title: 'Cricket Winner',
       date: new Date('2026-07-08'),
       photos: [],
+      createdAt,
     },
   ]);
 
@@ -150,6 +157,7 @@ const seedDashboardData = async (): Promise<void> => {
       title: 'Best Paper Award',
       date: new Date('2026-07-02'),
       photos: [],
+      createdAt,
     },
     {
       facultyName: 'Dr. Rao',
@@ -157,6 +165,7 @@ const seedDashboardData = async (): Promise<void> => {
       title: 'Outstanding Faculty',
       date: new Date('2026-07-03'),
       photos: [],
+      createdAt,
     },
   ]);
 
@@ -166,6 +175,7 @@ const seedDashboardData = async (): Promise<void> => {
       paperTitle: 'AI in Education',
       authors: ['Dr. Sharma'],
       publicationDate: new Date('2026-07-04'),
+      createdAt,
     },
   ]);
 
@@ -175,12 +185,14 @@ const seedDashboardData = async (): Promise<void> => {
       inventors: ['Dr. Sharma'],
       status: 'Granted',
       filingDate: new Date('2026-07-06'),
+      createdAt,
     },
     {
       patentTitle: 'IoT Sensor',
       inventors: ['Dr. Rao'],
       status: 'Filed',
       filingDate: new Date('2026-07-07'),
+      createdAt,
     },
   ]);
 
@@ -191,6 +203,7 @@ const seedDashboardData = async (): Promise<void> => {
       status: 'Pending',
       extractedData: { company: 'TCS' },
       confidenceScore: 80,
+      createdAt,
     },
     {
       originalMessage: 'Needs review internship',
@@ -198,6 +211,7 @@ const seedDashboardData = async (): Promise<void> => {
       status: 'Needs Review',
       extractedData: { company: 'Google' },
       confidenceScore: 70,
+      createdAt,
     },
     {
       originalMessage: 'Approved record',
@@ -205,6 +219,7 @@ const seedDashboardData = async (): Promise<void> => {
       status: 'Approved',
       extractedData: { company: 'Infosys' },
       confidenceScore: 95,
+      createdAt,
     },
   ]);
 

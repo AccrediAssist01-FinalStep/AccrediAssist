@@ -15,6 +15,9 @@ export const PENDING_RECORD_STATUSES = [
 ] as const;
 export type PendingRecordStatus = (typeof PENDING_RECORD_STATUSES)[number];
 
+export const PENDING_REVIEW_STATUSES = ['Pending', 'Needs Review'] as const;
+export type PendingReviewStatus = (typeof PENDING_REVIEW_STATUSES)[number];
+
 // Record categories (AI classification)
 export const RECORD_CATEGORIES = [
   'Placement',

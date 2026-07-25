@@ -36,6 +36,18 @@ export const searchListQuerySchema = paginationSchema.extend({
     .max(500, 'Search query cannot exceed 500 characters'),
   department: z.string().trim().max(100).optional(),
   collection: z.enum(SMART_SEARCH_COLLECTIONS).optional(),
+  filters: z.preprocess((value) => {
+    if (typeof value === 'string' && value.trim()) {
+      try {
+        return JSON.parse(value) as Record<string, unknown>;
+      } catch {
+        return value;
+      }
+    }
+
+    return value;
+  }, z.record(z.unknown()).optional()),
+  sort: z.enum(SMART_SEARCH_SORT_VALUES).optional(),
   fields: z.string().trim().optional(),
 });
 

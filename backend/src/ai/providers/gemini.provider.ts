@@ -17,6 +17,13 @@ import { getAiConfig, isGeminiConfigured } from '../utils/ai-config.util';
 
 const MAX_ATTEMPTS = 2;
 
+const stripMarkdownJson = (text: string): string => {
+  const trimmed = text.trim();
+  const fencedMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+
+  return fencedMatch ? fencedMatch[1].trim() : trimmed;
+};
+
 interface GeminiInvokeOptions {
   prompt: string;
   systemInstruction?: string;
@@ -107,7 +114,7 @@ export class GeminiProvider implements AiProvider {
     let data: T;
 
     try {
-      data = JSON.parse(result.text) as T;
+      data = JSON.parse(stripMarkdownJson(result.text)) as T;
     } catch {
       logger.error('Gemini returned invalid JSON', { response: result.text });
       throw new ValidationError('Gemini returned invalid JSON');

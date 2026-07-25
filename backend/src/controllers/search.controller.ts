@@ -62,6 +62,8 @@ class SearchController extends BaseController {
         query: queryParams.query,
         department: queryParams.department,
         collection: queryParams.collection,
+        filters: queryParams.filters,
+        sort: queryParams.sort,
         page: queryParams.page,
         limit: queryParams.limit,
         fields: parseFields(queryParams.fields),
