@@ -1,0 +1,7 @@
+Classify the institutional record below into exactly one category.
+
+Extracted data:
+{{extractedData}}
+
+Original message:
+{{message}}

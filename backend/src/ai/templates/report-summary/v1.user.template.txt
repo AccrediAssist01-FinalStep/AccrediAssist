@@ -1,0 +1,8 @@
+Generate a formal academic summary for the report below.
+
+Report type: {{reportType}}
+Month: {{month}}
+Year: {{year}}
+
+Approved records:
+{{records}}

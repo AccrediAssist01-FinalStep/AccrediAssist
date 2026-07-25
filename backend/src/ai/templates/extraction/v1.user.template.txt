@@ -1,0 +1,8 @@
+Extract structured information from the message below.
+
+Group: {{groupName}}
+Sender: {{senderName}}
+Timestamp: {{timestamp}}
+
+Message:
+{{message}}

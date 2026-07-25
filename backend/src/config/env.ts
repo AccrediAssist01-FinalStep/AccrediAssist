@@ -21,6 +21,7 @@ const envSchema = z.object({
   AI_PROVIDER: z.enum(['gemini']).default('gemini'),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  AI_TEMPLATES_PATH: z.string().default('./src/ai/templates'),
 
   // Cloudinary (required in later sprints)
   CLOUDINARY_CLOUD_NAME: z.string().optional(),

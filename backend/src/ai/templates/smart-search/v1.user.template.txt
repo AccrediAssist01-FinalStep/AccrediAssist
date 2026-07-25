@@ -1,0 +1,10 @@
+Convert the natural language query below into structured search filters.
+
+User query:
+{{query}}
+
+Department context:
+{{department}}
+
+Available collections:
+{{collections}}

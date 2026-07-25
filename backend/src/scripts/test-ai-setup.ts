@@ -51,8 +51,12 @@ const testModuleStructure = async (): Promise<void> => {
     '../ai/interfaces/ai-config.interface.ts',
     '../ai/interfaces/ai-provider.interface.ts',
     '../ai/utils/ai-config.util.ts',
-    '../ai/prompts/.gitkeep',
-    '../ai/templates/.gitkeep',
+    '../ai/utils/prompt-template.util.ts',
+    '../ai/templates/extraction/v1.system.txt',
+    '../ai/templates/classification/v1.system.txt',
+    '../ai/templates/validation/v1.system.txt',
+    '../ai/templates/report-summary/v1.system.txt',
+    '../ai/templates/smart-search/v1.system.txt',
   ];
 
   for (const relativePath of requiredPaths) {

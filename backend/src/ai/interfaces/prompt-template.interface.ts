@@ -1,0 +1,25 @@
+export type PromptTemplateName =
+  | 'extraction'
+  | 'classification'
+  | 'validation'
+  | 'report-summary'
+  | 'smart-search';
+
+export interface PromptTemplateMetadata {
+  id: string;
+  name: PromptTemplateName;
+  version: string;
+  lastUpdated: string;
+  userTemplateFile?: string;
+}
+
+export interface PromptTemplate {
+  id: string;
+  name: PromptTemplateName;
+  version: string;
+  lastUpdated: string;
+  system: string;
+  userTemplate?: string;
+}
+
+export type PromptTemplateVariables = Record<string, string>;

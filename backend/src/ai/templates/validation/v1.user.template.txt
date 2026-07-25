@@ -1,0 +1,9 @@
+Validate the extracted record below.
+
+Category: {{category}}
+
+Extracted data:
+{{extractedData}}
+
+Original message:
+{{message}}
