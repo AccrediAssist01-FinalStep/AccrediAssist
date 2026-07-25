@@ -1,7 +1,7 @@
 import { PaginationOptions } from '../../database/utils/queryHelpers';
 import { SmartSearchCollection } from '../config/search-collections.config';
 import { SmartSearchSort } from '../config/search-fields.config';
-import { SearchResponse, SearchResultItem } from './search.interface';
+import { SearchResultItem } from './search.interface';
 
 export interface SearchExecuteRequest {
   collection: SmartSearchCollection;
@@ -10,10 +10,6 @@ export interface SearchExecuteRequest {
   department?: string;
   fields?: string[];
   pagination?: PaginationOptions;
-}
-
-export interface SearchExecuteResponse extends Omit<SearchResponse, 'query' | 'confidence'> {
-  collection: SmartSearchCollection;
 }
 
 export interface SearchExecutionResult {

@@ -54,6 +54,7 @@
     "test:search-setup": "tsx src/scripts/test-search-setup.ts",
     "test:smart-search-query": "tsx src/scripts/test-smart-search-query.ts",
     "test:search-execution": "tsx src/scripts/test-search-execution.ts",
+    "test:smart-search-flow": "tsx src/scripts/test-smart-search-flow.ts",
     "test:gemini-provider": "tsx src/scripts/test-gemini-provider.ts",
     "test:prompt-templates": "tsx src/scripts/test-prompt-templates.ts",
     "test:extraction-agent": "tsx src/scripts/test-extraction-agent.ts",

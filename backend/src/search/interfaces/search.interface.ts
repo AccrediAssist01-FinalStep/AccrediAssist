@@ -29,6 +29,7 @@ export interface SearchResponse {
 export interface SearchModuleStatus {
   queryUnderstanding: boolean;
   databaseSearch: boolean;
+  integrated: boolean;
   geminiConfigured: boolean;
   geminiModel: string;
   supportedCollections: readonly SmartSearchCollection[];

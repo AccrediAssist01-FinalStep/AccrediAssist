@@ -111,6 +111,11 @@ export type {
   SearchResultItem,
   SearchModuleStatus,
 } from '../search/interfaces/search.interface';
+export type {
+  SmartSearchApiResponse,
+  SmartSearchUnderstanding,
+  SmartSearchResults,
+} from '../search/interfaces/smart-search-response.interface';
 export type { SmartSearchCollection } from '../search/config/search-collections.config';
 export type { SmartSearchSort } from '../search/config/search-fields.config';
 export {

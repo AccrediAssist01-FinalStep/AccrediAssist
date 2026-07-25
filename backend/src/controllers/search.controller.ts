@@ -5,6 +5,21 @@ import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
 import { SearchListQuery, SearchExecuteBody, SearchRequestBody } from '../validations/search.validation';
 
+const parseFields = (value?: string | string[]): string[] | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => entry.trim()).filter(Boolean);
+  }
+
+  return value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+};
+
 class SearchController extends BaseController {
   status = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
     this.success(res, 'Smart search module status retrieved successfully', searchService.getModuleStatus());
@@ -25,6 +40,9 @@ class SearchController extends BaseController {
         query: body.query,
         department: body.department,
         collection: body.collection,
+        page: body.page,
+        limit: body.limit,
+        fields: body.fields,
       },
       userId,
     );
@@ -34,13 +52,16 @@ class SearchController extends BaseController {
 
   searchByQuery = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const query = req.query as unknown as SearchListQuery;
+    const queryParams = req.query as unknown as SearchListQuery;
 
     const result = await searchService.search(
       {
-        query: query.query,
-        department: query.department,
-        collection: query.collection,
+        query: queryParams.query,
+        department: queryParams.department,
+        collection: queryParams.collection,
+        page: queryParams.page,
+        limit: queryParams.limit,
+        fields: parseFields(queryParams.fields),
       },
       userId,
     );
@@ -59,10 +80,8 @@ class SearchController extends BaseController {
         sort: body.sort,
         department: body.department,
         fields: body.fields,
-        pagination: {
-          page: body.page,
-          limit: body.limit,
-        },
+        page: body.page,
+        limit: body.limit,
       },
       userId,
     );

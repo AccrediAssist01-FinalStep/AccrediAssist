@@ -7,15 +7,18 @@ import {
   SmartSearchCollection,
 } from '../config/search-collections.config';
 import {
-  SearchExecuteRequest,
-  SearchExecuteResponse,
-} from '../interfaces/search-execution.interface';
-import {
   SearchModuleStatus,
-  SearchRequest,
-  SearchResponse,
 } from '../interfaces/search.interface';
+import {
+  SmartSearchApiResponse,
+  SmartSearchRequestOptions,
+  StructuredSearchRequestOptions,
+} from '../interfaces/smart-search-response.interface';
 import { searchRepository, SearchRepository } from '../repositories/search.repository';
+import {
+  buildSmartSearchApiResponse,
+  buildSmartSearchUnderstanding,
+} from '../utils/search-response.util';
 
 export class SearchService {
   constructor(
@@ -29,6 +32,7 @@ export class SearchService {
     return {
       queryUnderstanding: true,
       databaseSearch: true,
+      integrated: true,
       geminiConfigured: isGeminiConfigured(),
       geminiModel: providerStatus.model,
       supportedCollections: DEFAULT_SMART_SEARCH_COLLECTIONS,
@@ -40,9 +44,9 @@ export class SearchService {
   }
 
   async executeStructuredSearch(
-    input: SearchExecuteRequest,
+    input: StructuredSearchRequestOptions,
     userId: string,
-  ): Promise<SearchExecuteResponse> {
+  ): Promise<SmartSearchApiResponse> {
     if (!input.collection) {
       throw new BadRequestError('Search collection is required');
     }
@@ -52,18 +56,33 @@ export class SearchService {
       collection: input.collection,
     });
 
-    const result = await this.repository.execute(input);
-
-    return {
+    const execution = await this.repository.execute({
       collection: input.collection,
       filters: input.filters ?? {},
-      sort: input.sort || undefined,
-      items: result.items,
-      meta: result.meta,
-    };
+      sort: input.sort,
+      department: input.department,
+      fields: input.fields,
+      pagination: {
+        page: input.page,
+        limit: input.limit,
+      },
+    });
+
+    return buildSmartSearchApiResponse({
+      understanding: buildSmartSearchUnderstanding(
+        {
+          collection: input.collection,
+          filters: input.filters ?? {},
+          sort: input.sort ?? '',
+          confidence: null,
+        },
+        'structured',
+      ),
+      execution,
+    });
   }
 
-  async search(input: SearchRequest, userId: string): Promise<SearchResponse> {
+  async search(input: SmartSearchRequestOptions, userId: string): Promise<SmartSearchApiResponse> {
     const query = input.query.trim();
 
     if (!query) {
@@ -82,22 +101,26 @@ export class SearchService {
       throw new BadRequestError('Could not determine a search collection for the query');
     }
 
-    const executed = await this.repository.execute({
+    const execution = await this.repository.execute({
       collection: parsed.result.collection,
       filters: parsed.result.filters,
       sort: parsed.result.sort,
       department: input.department,
+      fields: input.fields,
+      pagination: {
+        page: input.page,
+        limit: input.limit,
+      },
     });
 
-    return {
+    return buildSmartSearchApiResponse({
       query,
-      collection: parsed.result.collection,
-      filters: parsed.result.filters,
-      sort: parsed.result.sort || undefined,
-      confidence: parsed.result.confidence,
-      items: executed.items,
-      meta: executed.meta,
-    };
+      understanding: buildSmartSearchUnderstanding(parsed.result, 'gemini', {
+        model: parsed.model,
+        provider: parsed.provider,
+      }),
+      execution,
+    });
   }
 }
 

@@ -3,7 +3,7 @@ import { SMART_SEARCH_COLLECTIONS } from '../search/config/search-collections.co
 import { SMART_SEARCH_SORT_VALUES } from '../search/config/search-fields.config';
 import { paginationSchema } from './common.validation';
 
-export const searchRequestSchema = z.object({
+export const searchRequestSchema = paginationSchema.extend({
   query: z
     .string({ required_error: 'Search query is required' })
     .trim()
@@ -11,6 +11,7 @@ export const searchRequestSchema = z.object({
     .max(500, 'Search query cannot exceed 500 characters'),
   department: z.string().trim().max(100).optional(),
   collection: z.enum(SMART_SEARCH_COLLECTIONS).optional(),
+  fields: z.array(z.string().trim().min(1)).max(30).optional(),
 });
 
 export const searchExecuteSchema = paginationSchema.extend({
@@ -31,6 +32,7 @@ export const searchListQuerySchema = paginationSchema.extend({
     .max(500, 'Search query cannot exceed 500 characters'),
   department: z.string().trim().max(100).optional(),
   collection: z.enum(SMART_SEARCH_COLLECTIONS).optional(),
+  fields: z.string().trim().optional(),
 });
 
 export type SearchRequestBody = z.infer<typeof searchRequestSchema>;

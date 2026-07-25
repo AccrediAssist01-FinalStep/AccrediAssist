@@ -1,8 +1,18 @@
 export type {
   SearchExecuteRequest,
-  SearchExecuteResponse,
   SearchExecutionResult,
 } from './interfaces/search-execution.interface';
+export type {
+  SmartSearchApiResponse,
+  SmartSearchUnderstanding,
+  SmartSearchResults,
+  SmartSearchRequestOptions,
+  StructuredSearchRequestOptions,
+} from './interfaces/smart-search-response.interface';
+export {
+  buildSmartSearchApiResponse,
+  buildSmartSearchUnderstanding,
+} from './utils/search-response.util';
 export {
   SEARCH_COLLECTION_CONFIG,
   FULL_TEXT_FILTER_KEYS,

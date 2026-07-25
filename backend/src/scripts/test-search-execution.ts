@@ -31,11 +31,16 @@ interface ApiResult {
     success: boolean;
     message: string;
     data?: {
-      collection: string;
-      items: Array<{ recordId: string; summary: string; data?: Record<string, unknown> }>;
-      meta: { total: number; page: number; limit: number; totalPages: number };
-      filters?: Record<string, unknown>;
-      sort?: string;
+      understanding: {
+        collection: string;
+        filters?: Record<string, unknown>;
+        sort?: string;
+        source?: string;
+      };
+      results: {
+        items: Array<{ recordId: string; summary: string; data?: Record<string, unknown> }>;
+        meta: { total: number; page: number; limit: number; totalPages: number };
+      };
     };
   };
 }
@@ -352,9 +357,10 @@ const testServiceExecution = async (): Promise<void> => {
     'test-user',
   );
 
-  assert(result.collection === 'publications', 'Service returns requested collection');
-  assert(result.items.length === 1, 'Service executes facultyName filter');
-  assert(result.meta.total === 1, 'Service returns pagination metadata');
+  assert(result.understanding.collection === 'publications', 'Service returns requested collection');
+  assert(result.understanding.source === 'structured', 'Structured path marks understanding source');
+  assert(result.results.items.length === 1, 'Service executes facultyName filter');
+  assert(result.results.meta.total === 1, 'Service returns pagination metadata');
 };
 
 const testExecuteApi = async (): Promise<void> => {
@@ -384,11 +390,11 @@ const testExecuteApi = async (): Promise<void> => {
 
   assert(execute.status === 200, 'POST /search/execute returns 200');
   assert(execute.body.success === true, 'Execute API success flag is true');
-  assert(execute.body.data?.collection === 'placements', 'Execute API returns collection');
-  assert(execute.body.data?.items.length === 2, 'Execute API returns matching records');
-  assert(execute.body.data?.meta.total === 2, 'Execute API returns pagination meta');
+  assert(execute.body.data?.understanding.collection === 'placements', 'Execute API returns collection');
+  assert(execute.body.data?.results.items.length === 2, 'Execute API returns matching records');
+  assert(execute.body.data?.results.meta.total === 2, 'Execute API returns pagination meta');
   assert(
-    execute.body.data?.items.every((item) => item.data && 'studentName' in item.data),
+    execute.body.data?.results.items.every((item) => item.data && 'studentName' in item.data),
     'Execute API returns projected record data',
   );
 
@@ -404,7 +410,7 @@ const testExecuteApi = async (): Promise<void> => {
 
   assert(textSearch.status === 200, 'Execute API supports full text topic filter');
   assert(
-    (textSearch.body.data?.items.length ?? 0) >= 1,
+    (textSearch.body.data?.results.items.length ?? 0) >= 1,
     'Execute API full text search returns results',
   );
 };
