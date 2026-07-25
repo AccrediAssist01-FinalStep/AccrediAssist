@@ -1,5 +1,6 @@
 import { User } from '../models/User';
 import { IUser, SaveUserData, UpdateUserInput } from '../types/user.types';
+import { UserRole } from '../database/enums';
 
 export class UserRepository {
   async findByEmail(email: string, includePassword = false): Promise<IUser | null> {
@@ -16,6 +17,11 @@ export class UserRepository {
 
   async findAll(): Promise<IUser[]> {
     return User.find({ isDeleted: false }).sort({ createdAt: -1 }).exec();
+  }
+
+  async findIdsByRole(role: UserRole): Promise<string[]> {
+    const users = await User.find({ role, isDeleted: false }).select('_id').exec();
+    return users.map((user) => user._id.toString());
   }
 
   async create(data: SaveUserData, createdBy?: string): Promise<IUser> {

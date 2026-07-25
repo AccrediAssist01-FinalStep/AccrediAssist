@@ -9,6 +9,7 @@ import {
 import { toPendingRecordResponse } from '../utils/pendingRecord.mapper';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { notificationService } from './notification.service';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -59,7 +60,13 @@ export class PendingRecordRejectionService {
       timestamp: reviewedAt,
     });
 
-    return toPendingRecordResponse(rejected);
+    const response = toPendingRecordResponse(rejected);
+
+    await notificationService.safelyNotify(() =>
+      notificationService.notifyFacultyPendingRecordRejected(response),
+    );
+
+    return response;
   }
 
   private ensureRejectable(record: IPendingRecord): void {

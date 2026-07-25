@@ -20,6 +20,7 @@ import {
 import { toPendingRecordResponse } from '../utils/pendingRecord.mapper';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { notificationService } from './notification.service';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -79,7 +80,13 @@ export class PendingRecordApprovalService {
       description: `Pending record ${id} approved into ${targetModule} ${approvalResult.createdRecordId}`,
     });
 
-    return toPendingRecordResponse(approved);
+    const response = toPendingRecordResponse(approved);
+
+    await notificationService.safelyNotify(() =>
+      notificationService.notifyFacultyPendingRecordApproved(response),
+    );
+
+    return response;
   }
 
   private ensureReviewable(record: IPendingRecord): void {

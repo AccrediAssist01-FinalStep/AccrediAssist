@@ -13,6 +13,7 @@ import {
 import { toPendingRecordResponse } from '../utils/pendingRecord.mapper';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { notificationService } from './notification.service';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -36,7 +37,13 @@ export class PendingReviewService {
       status: input.status ?? 'Pending',
     });
 
-    return toPendingRecordResponse(record);
+    const response = toPendingRecordResponse(record);
+
+    await notificationService.safelyNotify(() =>
+      notificationService.notifyFacultyPendingRecordCreated(response),
+    );
+
+    return response;
   }
 
   async updatePendingRecord(

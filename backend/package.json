@@ -64,6 +64,7 @@
     "test:pending-reject-api": "tsx src/scripts/test-pending-reject-api.ts",
     "test:pending-edit-api": "tsx src/scripts/test-pending-edit-api.ts",
     "test:pending-review-workflow": "tsx src/scripts/test-pending-review-workflow.ts",
+    "test:pending-notifications": "tsx src/scripts/test-pending-notifications.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {
