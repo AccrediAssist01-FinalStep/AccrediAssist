@@ -1,5 +1,6 @@
 import { pendingRecordRepository } from '../repositories/pendingRecord.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
+import { pendingRecordApprovalService } from './pendingRecordApproval.service';
 import { BaseService } from './base.service';
 import {
   IPendingRecord,
@@ -84,30 +85,7 @@ export class PendingRecordService extends BaseService<
   }
 
   async approvePendingRecord(id: string, userId: string): Promise<IPendingRecordResponse> {
-    const existing = await pendingRecordRepository.findById(id);
-
-    if (!existing) {
-      throw new NotFoundError('Pending record not found');
-    }
-
-    this.ensureReviewable(existing, 'approve');
-
-    logger.info('Approving pending record', { pendingRecordId: id, userId });
-
-    const approved = await pendingRecordRepository.updateStatus(id, 'Approved', userId);
-
-    if (!approved) {
-      throw new BadRequestError('Failed to approve pending record');
-    }
-
-    await auditLogRepository.create({
-      userId,
-      action: 'APPROVE',
-      module: 'PendingRecord',
-      description: `Pending record ${id} approved`,
-    });
-
-    return this.toResponse(approved);
+    return pendingRecordApprovalService.approvePendingRecord(id, userId);
   }
 
   async rejectPendingRecord(

@@ -12,6 +12,7 @@ import dotenv from 'dotenv';
 import app from '../app';
 import { connectDatabase, disconnectDatabase } from '../database/connection';
 import { PendingRecord } from '../models/PendingRecord';
+import { Placement } from '../models/Placement';
 import { createTestUser, cleanupTestUser } from './test-helpers';
 
 dotenv.config();
@@ -220,6 +221,9 @@ const runTests = async (): Promise<void> => {
     (approved.body.data as { status: string }).status === 'Approved',
     'PUT /pending/:id/approve sets status to Approved',
   );
+
+  const createdPlacement = await Placement.findOne({ studentName: 'Rahul Patil', company: 'TCS' });
+  assert(Boolean(createdPlacement), 'Approve creates placement record in target collection');
 
   // Test 9: Cannot approve already approved record
   const reApprove = await request(

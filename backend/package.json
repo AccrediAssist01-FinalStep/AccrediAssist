@@ -60,6 +60,7 @@
     "test:ai-pipeline": "tsx src/scripts/test-ai-pipeline.ts",
     "test:pending-review-service": "tsx src/scripts/test-pending-review-service.ts",
     "test:faculty-review-api": "tsx src/scripts/test-faculty-review-api.ts",
+    "test:pending-approve-api": "tsx src/scripts/test-pending-approve-api.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {
