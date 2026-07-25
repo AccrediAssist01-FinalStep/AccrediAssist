@@ -13,6 +13,7 @@ export interface SearchResultItem {
   recordId: string;
   summary: string;
   score?: number;
+  data?: Record<string, unknown>;
 }
 
 export interface SearchResponse {

@@ -60,5 +60,15 @@ applyBaseSchema(publicationSchema);
 publicationSchema.index({ facultyName: 1 });
 publicationSchema.index({ paperTitle: 1 });
 publicationSchema.index({ publicationDate: -1 });
+publicationSchema.index(
+  {
+    facultyName: 'text',
+    paperTitle: 'text',
+    journal: 'text',
+    conference: 'text',
+    doi: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const Publication = mongoose.model<IPublication>('Publication', publicationSchema);

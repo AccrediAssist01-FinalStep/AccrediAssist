@@ -54,5 +54,13 @@ applyBaseSchema(patentSchema);
 patentSchema.index({ patentTitle: 1 });
 patentSchema.index({ status: 1 });
 patentSchema.index({ filingDate: -1 });
+patentSchema.index(
+  {
+    patentTitle: 'text',
+    patentNumber: 'text',
+    status: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const Patent = mongoose.model<IPatent>('Patent', patentSchema);

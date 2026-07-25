@@ -86,6 +86,18 @@ studentAchievementSchema.index({ studentName: 1 });
 studentAchievementSchema.index({ achievementType: 1 });
 studentAchievementSchema.index({ date: -1 });
 studentAchievementSchema.index({ department: 1 });
+studentAchievementSchema.index(
+  {
+    studentName: 'text',
+    rollNumber: 'text',
+    department: 'text',
+    achievementType: 'text',
+    title: 'text',
+    description: 'text',
+    organization: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const StudentAchievement = mongoose.model<IStudentAchievement>(
   'StudentAchievement',

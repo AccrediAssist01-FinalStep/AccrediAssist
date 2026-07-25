@@ -80,6 +80,17 @@ applyBaseSchema(facultyAchievementSchema);
 facultyAchievementSchema.index({ facultyName: 1 });
 facultyAchievementSchema.index({ achievementType: 1 });
 facultyAchievementSchema.index({ date: -1 });
+facultyAchievementSchema.index(
+  {
+    facultyName: 'text',
+    designation: 'text',
+    achievementType: 'text',
+    title: 'text',
+    description: 'text',
+    organization: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const FacultyAchievement = mongoose.model<IFacultyAchievement>(
   'FacultyAchievement',

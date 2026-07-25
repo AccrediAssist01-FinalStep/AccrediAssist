@@ -82,6 +82,17 @@ applyBaseSchema(completedEventReportSchema);
 completedEventReportSchema.index({ eventTitle: 1 });
 completedEventReportSchema.index({ eventType: 1 });
 completedEventReportSchema.index({ date: -1 });
+completedEventReportSchema.index(
+  {
+    eventTitle: 'text',
+    eventType: 'text',
+    venue: 'text',
+    coordinator: 'text',
+    summary: 'text',
+    description: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const CompletedEventReport = mongoose.model<ICompletedEventReport>(
   'CompletedEventReport',

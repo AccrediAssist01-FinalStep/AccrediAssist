@@ -3,7 +3,7 @@ import { BaseController } from './base.controller';
 import { searchService } from '../search/services/search.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
-import { SearchListQuery, SearchRequestBody } from '../validations/search.validation';
+import { SearchListQuery, SearchExecuteBody, SearchRequestBody } from '../validations/search.validation';
 
 class SearchController extends BaseController {
   status = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
@@ -46,6 +46,28 @@ class SearchController extends BaseController {
     );
 
     this.success(res, 'Search completed successfully', result);
+  });
+
+  execute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const body = req.body as SearchExecuteBody;
+
+    const result = await searchService.executeStructuredSearch(
+      {
+        collection: body.collection,
+        filters: body.filters,
+        sort: body.sort,
+        department: body.department,
+        fields: body.fields,
+        pagination: {
+          page: body.page,
+          limit: body.limit,
+        },
+      },
+      userId,
+    );
+
+    this.success(res, 'Search executed successfully', result);
   });
 
   private requireUserId(req: Request): string {

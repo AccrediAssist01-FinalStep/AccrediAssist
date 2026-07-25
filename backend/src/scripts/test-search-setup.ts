@@ -111,7 +111,7 @@ const testModuleStatus = (): void => {
   const status = searchService.getModuleStatus();
 
   assert(status.queryUnderstanding === true, 'Query understanding is enabled');
-  assert(status.databaseSearch === false, 'Database search remains disabled');
+  assert(status.databaseSearch === true, 'Database search is enabled');
   assert(status.geminiConfigured === isGeminiConfigured(), 'Gemini configured flag matches environment');
   assert(status.supportedCollections.length === DEFAULT_SMART_SEARCH_COLLECTIONS.length, 'Supported collections are exposed');
 };

@@ -66,5 +66,16 @@ placementSchema.index({ studentName: 1 });
 placementSchema.index({ company: 1 });
 placementSchema.index({ department: 1 });
 placementSchema.index({ joiningDate: -1 });
+placementSchema.index(
+  {
+    studentName: 'text',
+    rollNumber: 'text',
+    department: 'text',
+    company: 'text',
+    role: 'text',
+    package: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const Placement = mongoose.model<IPlacement>('Placement', placementSchema);

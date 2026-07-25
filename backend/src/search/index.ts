@@ -1,4 +1,18 @@
+export type {
+  SearchExecuteRequest,
+  SearchExecuteResponse,
+  SearchExecutionResult,
+} from './interfaces/search-execution.interface';
+export {
+  SEARCH_COLLECTION_CONFIG,
+  FULL_TEXT_FILTER_KEYS,
+} from './config/search-execution.config';
+export { buildSearchMongoFilter, buildFullTextFilter, buildRegexFullTextFilter } from './utils/search-filter.util';
+export { buildSearchSortSpec } from './utils/search-sort.util';
+export { buildSearchProjection } from './utils/search-projection.util';
+export { buildSearchSummary } from './utils/search-summary.util';
 export { searchService, SearchService } from './services/search.service';
+export { searchRepository, SearchRepository } from './repositories/search.repository';
 export { smartSearchAgent, SmartSearchAgent } from './agents/smart-search.agent';
 export {
   SMART_SEARCH_COLLECTIONS,

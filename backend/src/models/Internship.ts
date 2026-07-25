@@ -70,5 +70,15 @@ applyBaseSchema(internshipSchema);
 internshipSchema.index({ studentName: 1 });
 internshipSchema.index({ company: 1 });
 internshipSchema.index({ startDate: -1 });
+internshipSchema.index(
+  {
+    studentName: 'text',
+    rollNumber: 'text',
+    company: 'text',
+    role: 'text',
+    duration: 'text',
+  },
+  { name: 'search_text_index' },
+);
 
 export const Internship = mongoose.model<IInternship>('Internship', internshipSchema);
