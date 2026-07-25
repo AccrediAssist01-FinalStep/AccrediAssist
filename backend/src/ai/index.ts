@@ -3,7 +3,15 @@ export { geminiProvider, GeminiProvider } from './providers/gemini.provider';
 export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
 export { validationAgent, ValidationAgent } from './agents/validation.agent';
+export { duplicateDetectionAgent, DuplicateDetectionAgent } from './agents/duplicate-detection.agent';
+export { duplicateDetectionRepository, DuplicateDetectionRepository } from './repositories/duplicate-detection.repository';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';
+export {
+  calculateSimilarityScore,
+  DEFAULT_DUPLICATE_THRESHOLD,
+  getDuplicateThreshold,
+  toComparableFields,
+} from './utils/duplicate-similarity.util';
 export {
   EXTRACTION_RESULT_KEYS,
   extractionResultSchema,
@@ -70,3 +78,10 @@ export type {
   ValidationResult,
   ValidationStatus,
 } from './interfaces/validation.interface';
+export type {
+  DuplicateCollectionName,
+  DuplicateDetectionInput,
+  DuplicateDetectionResponse,
+  DuplicateDetectionResult,
+  DuplicateRecordCandidate,
+} from './interfaces/duplicate-detection.interface';
