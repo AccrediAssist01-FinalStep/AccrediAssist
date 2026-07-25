@@ -14,6 +14,7 @@ import notificationRouter from './notification.routes';
 import auditLogRouter from './auditLog.routes';
 import whatsappRouter from './whatsapp.routes';
 import searchRouter from './search.routes';
+import dashboardRouter from './dashboard.routes';
 
 const apiRouter = Router();
 
@@ -32,5 +33,6 @@ apiRouter.use('/notifications', notificationRouter);
 apiRouter.use('/audit-logs', auditLogRouter);
 apiRouter.use('/whatsapp', whatsappRouter);
 apiRouter.use('/search', searchRouter);
+apiRouter.use('/dashboard', dashboardRouter);
 
 export default apiRouter;
