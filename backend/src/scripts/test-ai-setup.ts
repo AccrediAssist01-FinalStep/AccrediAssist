@@ -96,8 +96,15 @@ const testProviderInitialization = async (): Promise<void> => {
   }
 };
 
+const testProviderMethods = (): void => {
+  console.log('\n--- Provider methods ---');
+
+  assert(typeof geminiProvider.generateText === 'function', 'generateText method is available');
+  assert(typeof geminiProvider.generateJSON === 'function', 'generateJSON method is available');
+};
+
 const testProviderSkeletonMethods = async (): Promise<void> => {
-  console.log('\n--- Provider skeleton methods ---');
+  console.log('\n--- Agent skeleton methods ---');
 
   await assertRejects(
     () => geminiProvider.extractInformation(),
@@ -136,6 +143,7 @@ const runTests = async (): Promise<void> => {
   await testGeminiSdk();
   testAiConfiguration();
   await testProviderInitialization();
+  testProviderMethods();
   await testProviderSkeletonMethods();
 
   console.log('\nAll AI module initialization tests passed.');
