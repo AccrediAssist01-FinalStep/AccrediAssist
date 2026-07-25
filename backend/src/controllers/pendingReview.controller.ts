@@ -1,8 +1,11 @@
 import { Request, Response } from 'express';
 import { BaseController } from './base.controller';
 import { pendingReviewService } from '../services/pendingReview.service';
+import { pendingRecordEditService } from '../services/pendingRecordEdit.service';
 import { asyncHandler } from '../middleware/asyncHandler';
+import { UnauthorizedError } from '../utils/errors';
 import { PendingRecordListQuery } from '../validations/pendingRecord.validation';
+import { EditPendingRecordBody } from '../validations/pendingRecordEdit.validation';
 
 class PendingReviewController extends BaseController {
   list = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -34,9 +37,18 @@ class PendingReviewController extends BaseController {
   });
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await pendingReviewService.updatePendingRecord(req.params.id, req.body);
+    const userId = this.requireUserId(req);
+    const body = req.body as EditPendingRecordBody;
+    const record = await pendingRecordEditService.editPendingRecord(req.params.id, userId, body);
     this.success(res, 'Pending record updated successfully', record);
   });
+
+  private requireUserId(req: Request): string {
+    if (!req.user) {
+      throw new UnauthorizedError();
+    }
+    return req.user.id;
+  }
 }
 
 export const pendingReviewController = new PendingReviewController();

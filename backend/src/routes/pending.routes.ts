@@ -8,8 +8,8 @@ import { idParamSchema } from '../validations/common.validation';
 import {
   pendingRecordListQuerySchema,
   rejectPendingRecordSchema,
-  updatePendingRecordSchema,
 } from '../validations/pendingRecord.validation';
+import { editPendingRecordSchema } from '../validations/pendingRecordEdit.validation';
 
 const pendingRouter = Router();
 
@@ -33,7 +33,7 @@ pendingRouter.patch(
   '/:id',
   authorizePermission('pending_records_review'),
   validateParams(idParamSchema),
-  validate(updatePendingRecordSchema),
+  validate(editPendingRecordSchema),
   pendingReviewController.update,
 );
 

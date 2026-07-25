@@ -62,6 +62,7 @@
     "test:faculty-review-api": "tsx src/scripts/test-faculty-review-api.ts",
     "test:pending-approve-api": "tsx src/scripts/test-pending-approve-api.ts",
     "test:pending-reject-api": "tsx src/scripts/test-pending-reject-api.ts",
+    "test:pending-edit-api": "tsx src/scripts/test-pending-edit-api.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

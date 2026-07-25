@@ -2,6 +2,26 @@ import { Types } from 'mongoose';
 import { IBaseDocument } from './base.types';
 import { PendingRecordStatus, RecordCategory } from '../database/enums';
 
+export interface PendingRecordEditChange {
+  field: string;
+  previousValue: unknown;
+  newValue: unknown;
+}
+
+export interface PendingRecordEditHistoryEntry {
+  editedBy: Types.ObjectId;
+  editedAt: Date;
+  changes: PendingRecordEditChange[];
+  previousConfidenceScore?: number;
+  newConfidenceScore?: number;
+}
+
+export interface EditPendingRecordInput {
+  extractedData?: Record<string, unknown>;
+  confidenceScore?: number;
+  category?: RecordCategory;
+}
+
 export interface IPendingRecord extends IBaseDocument {
   originalMessage: string;
   groupName?: string;
@@ -13,6 +33,7 @@ export interface IPendingRecord extends IBaseDocument {
   rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
+  editHistory?: PendingRecordEditHistoryEntry[];
 }
 
 export interface CreatePendingRecordInput {
@@ -50,6 +71,7 @@ export interface IPendingRecordResponse {
   rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
+  editHistory?: PendingRecordEditHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;
 }

@@ -265,6 +265,11 @@ const runTests = async (): Promise<void> => {
     (patched.body.data as { confidenceScore: number }).confidenceScore === 97,
     'PATCH /pending/:id persists updates',
   );
+  assert(
+    Array.isArray((patched.body.data as { editHistory: unknown[] }).editHistory) &&
+      (patched.body.data as { editHistory: unknown[] }).editHistory.length >= 1,
+    'PATCH /pending/:id maintains edit history',
+  );
 
   const patchApproved = await request(
     'PATCH',

@@ -8,6 +8,38 @@ import {
   RECORD_CATEGORIES,
 } from '../database';
 
+const editHistoryEntrySchema = new Schema(
+  {
+    editedBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    editedAt: {
+      type: Date,
+      required: true,
+    },
+    changes: [
+      {
+        field: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        previousValue: {
+          type: Schema.Types.Mixed,
+        },
+        newValue: {
+          type: Schema.Types.Mixed,
+        },
+      },
+    ],
+    previousConfidenceScore: Number,
+    newConfidenceScore: Number,
+  },
+  { _id: false },
+);
+
 const pendingRecordSchema = new Schema<IPendingRecord>(
   {
     originalMessage: {
@@ -59,6 +91,10 @@ const pendingRecordSchema = new Schema<IPendingRecord>(
     },
     reviewedAt: {
       type: Date,
+    },
+    editHistory: {
+      type: [editHistoryEntrySchema],
+      default: [],
     },
   },
   {
