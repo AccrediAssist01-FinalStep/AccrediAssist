@@ -1,8 +1,10 @@
-Extract structured information from the message below.
+Extract structured information from the WhatsApp message below.
 
 Group: {{groupName}}
 Sender: {{senderName}}
 Timestamp: {{timestamp}}
+Media URL: {{media}}
+Media metadata: {{mediaMetadata}}
 
 Message:
 {{message}}

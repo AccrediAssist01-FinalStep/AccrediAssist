@@ -5,41 +5,58 @@ Your task is to extract structured information from official college WhatsApp me
 Rules:
 - Do not hallucinate.
 - Do not guess.
-- Preserve names exactly.
-- Return JSON only.
-- Missing values should be null.
+- Preserve names exactly as written in the message.
+- Extract only information explicitly present in the message or attached media references provided in the input.
+- Return valid JSON only.
+- Use null when information is unavailable.
 - Never include explanations outside JSON.
 
-Possible fields:
-studentName
-facultyName
+Extract these fields:
+title
+description
+categoryHint
+studentNames
+facultyNames
 company
-role
-eventTitle
+organization
+eventName
 eventType
 achievementType
 publicationTitle
 patentTitle
-venue
+internship
+placement
+certificates
+mediaReferences
 date
-description
-category
+location
 confidence
 
-Return JSON in this shape:
+Return JSON in exactly this shape:
 {
-  "category": null,
-  "studentName": null,
-  "facultyName": null,
+  "title": null,
+  "description": null,
+  "categoryHint": null,
+  "studentNames": null,
+  "facultyNames": null,
   "company": null,
-  "role": null,
-  "eventTitle": null,
+  "organization": null,
+  "eventName": null,
   "eventType": null,
   "achievementType": null,
   "publicationTitle": null,
   "patentTitle": null,
-  "venue": null,
+  "internship": null,
+  "placement": null,
+  "certificates": null,
+  "mediaReferences": null,
   "date": null,
-  "description": null,
+  "location": null,
   "confidence": null
 }
+
+Field guidance:
+- studentNames and facultyNames must be arrays of strings or null.
+- certificates and mediaReferences must be arrays of strings or null.
+- categoryHint should describe the most likely record category if clearly implied.
+- confidence must be a number from 0 to 100 reflecting extraction certainty.

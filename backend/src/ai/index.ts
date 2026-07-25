@@ -1,6 +1,12 @@
 export { aiService, AiService } from './services/ai.service';
 export { geminiProvider, GeminiProvider } from './providers/gemini.provider';
+export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';
+export {
+  EXTRACTION_RESULT_KEYS,
+  extractionResultSchema,
+  normalizeExtractionResult,
+} from './utils/extraction-result.util';
 export {
   getPromptTemplateMetadata,
   listPromptTemplates,
@@ -29,3 +35,7 @@ export type {
   PromptTemplateName,
   PromptTemplateVariables,
 } from './interfaces/prompt-template.interface';
+export type {
+  ExtractionAgentResponse,
+  ExtractionResult,
+} from './interfaces/extraction.interface';
