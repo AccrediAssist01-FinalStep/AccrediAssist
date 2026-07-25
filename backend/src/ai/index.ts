@@ -1,4 +1,5 @@
 export { aiService, AiService } from './services/ai.service';
+export { aiPipelineService, AiPipelineService } from './services/ai-pipeline.service';
 export { geminiProvider, GeminiProvider } from './providers/gemini.provider';
 export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
@@ -12,6 +13,15 @@ export {
   getDuplicateThreshold,
   toComparableFields,
 } from './utils/duplicate-similarity.util';
+export {
+  calculatePipelineConfidenceScore,
+  getConfidenceThreshold,
+  resolvePendingRecordStatus,
+} from './utils/pipeline-status.util';
+export {
+  isRecordCategory,
+  mapClassificationToRecordCategory,
+} from './utils/category-mapper.util';
 export {
   EXTRACTION_RESULT_KEYS,
   extractionResultSchema,
@@ -85,3 +95,7 @@ export type {
   DuplicateDetectionResult,
   DuplicateRecordCandidate,
 } from './interfaces/duplicate-detection.interface';
+export type {
+  AiPipelineResult,
+  AiPipelineStageResults,
+} from './interfaces/ai-pipeline.interface';

@@ -23,6 +23,7 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
   AI_TEMPLATES_PATH: z.string().default('./src/ai/templates'),
   AI_DUPLICATE_THRESHOLD: z.coerce.number().min(0).max(100).default(80),
+  AI_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(100).default(70),
 
   // Cloudinary (required in later sprints)
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
