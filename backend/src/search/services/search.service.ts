@@ -1,11 +1,19 @@
 import { isGeminiConfigured } from '../../ai/utils/ai-config.util';
-import { BadRequestError } from '../../utils/errors';
+import {
+  BadRequestError,
+  InternalServerError,
+  ValidationError,
+} from '../../utils/errors';
 import { logger } from '../../utils/logger';
 import { smartSearchAgent, SmartSearchAgent } from '../agents/smart-search.agent';
 import {
   DEFAULT_SMART_SEARCH_COLLECTIONS,
   SmartSearchCollection,
 } from '../config/search-collections.config';
+import {
+  GlobalSearchApiData,
+  GlobalSearchRequestOptions,
+} from '../interfaces/global-search.interface';
 import {
   SearchModuleStatus,
 } from '../interfaces/search.interface';
@@ -19,11 +27,22 @@ import {
   searchHistoryService,
   SearchHistoryService,
 } from './search-history.service';
+import {
+  buildGlobalSearchHistoryQuery,
+  mergeSearchFilters,
+  resolveSearchSort,
+  toGlobalSearchApiData,
+} from '../utils/global-search.util';
 import { buildStructuredSearchHistoryQuery } from '../utils/search-history.util';
 import {
   buildSmartSearchApiResponse,
   buildSmartSearchUnderstanding,
 } from '../utils/search-response.util';
+
+const isGeminiAvailabilityError = (error: unknown): boolean => {
+  const message = error instanceof Error ? error.message : String(error);
+  return /404|429|quota|not found|unavailable|not configured/i.test(message);
+};
 
 export class SearchService {
   constructor(
@@ -47,6 +66,82 @@ export class SearchService {
 
   getSupportedCollections(): readonly SmartSearchCollection[] {
     return DEFAULT_SMART_SEARCH_COLLECTIONS;
+  }
+
+  async globalSearch(
+    input: GlobalSearchRequestOptions,
+    userId: string,
+  ): Promise<GlobalSearchApiData> {
+    const query = input.query.trim();
+
+    if (!query) {
+      throw new BadRequestError('Search query is required');
+    }
+
+    if (!isGeminiConfigured()) {
+      throw new BadRequestError('Smart search is unavailable because Gemini is not configured');
+    }
+
+    logger.info('Global search requested', { userId, query });
+
+    let parsed;
+
+    try {
+      parsed = await this.agent.parseQuery({
+        query,
+        department: input.department,
+        collections: input.collection ? [input.collection] : undefined,
+      });
+    } catch (error) {
+      if (error instanceof ValidationError || error instanceof BadRequestError) {
+        throw error;
+      }
+
+      if (error instanceof InternalServerError || isGeminiAvailabilityError(error)) {
+        throw new BadRequestError('Smart search query understanding is temporarily unavailable');
+      }
+
+      throw error;
+    }
+
+    const collection = input.collection ?? parsed.result.collection;
+
+    if (!collection) {
+      throw new ValidationError('Could not determine a search collection for the query');
+    }
+
+    const appliedFilters = mergeSearchFilters(parsed.result.filters, input.filters ?? {});
+    const appliedSort = resolveSearchSort(parsed.result.sort, input.sort);
+
+    const execution = await this.repository.execute({
+      collection,
+      filters: appliedFilters,
+      sort: appliedSort,
+      department: input.department,
+      fields: input.fields,
+      pagination: {
+        page: input.page,
+        limit: input.limit,
+      },
+    });
+
+    const response = toGlobalSearchApiData(
+      query,
+      buildSmartSearchUnderstanding(parsed.result, 'gemini', {
+        model: parsed.model,
+        provider: parsed.provider,
+      }),
+      appliedFilters,
+      execution,
+    );
+
+    await this.historyService.recordSearch(
+      userId,
+      buildGlobalSearchHistoryQuery(query),
+      execution.meta.total,
+    );
+
+    return response;
   }
 
   async executeStructuredSearch(
@@ -96,49 +191,8 @@ export class SearchService {
     return response;
   }
 
-  async search(input: SmartSearchRequestOptions, userId: string): Promise<SmartSearchApiResponse> {
-    const query = input.query.trim();
-
-    if (!query) {
-      throw new BadRequestError('Search query is required');
-    }
-
-    logger.info('Smart search requested', { userId, query });
-
-    const parsed = await this.agent.parseQuery({
-      query,
-      department: input.department,
-      collections: input.collection ? [input.collection] : undefined,
-    });
-
-    if (!parsed.result.collection) {
-      throw new BadRequestError('Could not determine a search collection for the query');
-    }
-
-    const execution = await this.repository.execute({
-      collection: parsed.result.collection,
-      filters: parsed.result.filters,
-      sort: parsed.result.sort,
-      department: input.department,
-      fields: input.fields,
-      pagination: {
-        page: input.page,
-        limit: input.limit,
-      },
-    });
-
-    const response = buildSmartSearchApiResponse({
-      query,
-      understanding: buildSmartSearchUnderstanding(parsed.result, 'gemini', {
-        model: parsed.model,
-        provider: parsed.provider,
-      }),
-      execution,
-    });
-
-    await this.historyService.recordSearch(userId, query, execution.meta.total);
-
-    return response;
+  async search(input: SmartSearchRequestOptions, userId: string): Promise<GlobalSearchApiData> {
+    return this.globalSearch(input, userId);
   }
 }
 

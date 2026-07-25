@@ -19,7 +19,7 @@ import { Patent } from '../models/Patent';
 import { Placement } from '../models/Placement';
 import { Publication } from '../models/Publication';
 import { SmartSearchAgent } from '../search/agents/smart-search.agent';
-import { SmartSearchApiResponse } from '../search/interfaces/smart-search-response.interface';
+import { GlobalSearchApiData } from '../search/interfaces/global-search.interface';
 import { createTestUser, cleanupTestUser } from './test-helpers';
 
 dotenv.config();
@@ -121,13 +121,14 @@ interface ApiResult {
   body: {
     success: boolean;
     message: string;
-    data?: SmartSearchApiResponse;
+    data?: GlobalSearchApiData;
   };
 }
 
 let server: http.Server;
 let baseUrl: string;
 let adminToken: string;
+let adminUserId: string;
 let flowSearchService: import('../search/services/search.service').SearchService;
 let searchRepository: import('../search/repositories/search.repository').SearchRepository;
 let scenarioIndex = 0;
@@ -287,7 +288,7 @@ const seedSampleData = async (): Promise<void> => {
   ]);
 };
 
-const assertStandardizedResponse = (response: SmartSearchApiResponse, scenario: FlowScenario): void => {
+const assertStandardizedResponse = (response: GlobalSearchApiData, scenario: FlowScenario): void => {
   assert(response.query === scenario.query, `${scenario.name}: response includes original query`);
   assert(Boolean(response.understanding), `${scenario.name}: response includes understanding`);
   assert(
@@ -311,18 +312,18 @@ const assertStandardizedResponse = (response: SmartSearchApiResponse, scenario: 
     );
   }
 
-  assert(Array.isArray(response.results.items), `${scenario.name}: results include items array`);
-  assert(Boolean(response.results.meta), `${scenario.name}: results include pagination meta`);
+  assert(Array.isArray(response.results), `${scenario.name}: results include results array`);
+  assert(Boolean(response.meta), `${scenario.name}: response includes pagination meta`);
   assert(
-    response.results.items.length >= scenario.minResults,
+    response.results.length >= scenario.minResults,
     `${scenario.name}: MongoDB returned at least ${scenario.minResults} result(s)`,
   );
   assert(
-    response.results.items.every((item) => item.collection === scenario.expectedCollection),
+    response.results.every((item) => item.collection === scenario.expectedCollection),
     `${scenario.name}: result items reference the expected collection`,
   );
   assert(
-    response.results.items.every((item) => Boolean(item.recordId && item.summary)),
+    response.results.every((item) => Boolean(item.recordId && item.summary)),
     `${scenario.name}: result items include recordId and summary`,
   );
 };
@@ -333,13 +334,13 @@ const testServiceFlow = async (): Promise<void> => {
   for (const [index, scenario] of FLOW_SCENARIOS.entries()) {
     scenarioIndex = index;
 
-    const response = await flowSearchService.search(
+    const response = await flowSearchService.globalSearch(
       {
         query: scenario.query,
         page: 1,
         limit: 20,
       },
-      'flow-test-user',
+      adminUserId,
     );
 
     assertStandardizedResponse(response, scenario);
@@ -352,21 +353,21 @@ const testPaginatedFlow = async (): Promise<void> => {
 
   scenarioIndex = 0;
 
-  const response = await flowSearchService.search(
+  const response = await flowSearchService.globalSearch(
     {
       query: 'Students placed in TCS.',
       page: 1,
       limit: 1,
       fields: ['studentName', 'company'],
     },
-    'flow-test-user',
+    adminUserId,
   );
 
-  assert(response.results.items.length === 1, 'Pagination limit applies in integrated flow');
-  assert(response.results.meta.total === 2, 'Pagination meta total reflects all matches');
-  assert(response.results.meta.totalPages === 2, 'Pagination meta totalPages is calculated');
+  assert(response.results.length === 1, 'Pagination limit applies in integrated flow');
+  assert(response.meta.total === 2, 'Pagination meta total reflects all matches');
+  assert(response.meta.totalPages === 2, 'Pagination meta totalPages is calculated');
   assert(
-    response.results.items.every(
+    response.results.every(
       (item) => item.data && 'studentName' in item.data && !('role' in item.data),
     ),
     'Field projection applies in integrated flow',
@@ -425,7 +426,7 @@ const testApiFlow = async (): Promise<void> => {
     getResult.body.data.understanding.collection === 'publications',
     'GET /search understanding maps to publications',
   );
-  assert(getResult.body.data.results.items.length >= 1, 'GET /search returns MongoDB results');
+  assert(getResult.body.data.results.length >= 1, 'GET /search returns MongoDB results');
 };
 
 const testRepositoryStillIndependent = async (): Promise<void> => {
@@ -447,6 +448,8 @@ const setup = async (): Promise<void> => {
     name: 'Smart Search Flow Admin',
     email: ADMIN_EMAIL,
     role: 'Admin',
+  }).then((user) => {
+    adminUserId = user._id.toString();
   });
 
   await seedSampleData();

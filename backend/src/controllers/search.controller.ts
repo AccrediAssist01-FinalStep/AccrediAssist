@@ -32,15 +32,17 @@ class SearchController extends BaseController {
     });
   });
 
-  search = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  globalSearch = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const body = req.body as SearchRequestBody;
 
-    const result = await searchService.search(
+    const result = await searchService.globalSearch(
       {
         query: body.query,
         department: body.department,
         collection: body.collection,
+        filters: body.filters,
+        sort: body.sort,
         page: body.page,
         limit: body.limit,
         fields: body.fields,
@@ -48,14 +50,14 @@ class SearchController extends BaseController {
       userId,
     );
 
-    this.success(res, 'Search completed successfully', result);
+    this.success(res, 'Global search completed successfully', result);
   });
 
   searchByQuery = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const queryParams = req.query as unknown as SearchListQuery;
 
-    const result = await searchService.search(
+    const result = await searchService.globalSearch(
       {
         query: queryParams.query,
         department: queryParams.department,
@@ -67,7 +69,7 @@ class SearchController extends BaseController {
       userId,
     );
 
-    this.success(res, 'Search completed successfully', result);
+    this.success(res, 'Global search completed successfully', result);
   });
 
   execute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
