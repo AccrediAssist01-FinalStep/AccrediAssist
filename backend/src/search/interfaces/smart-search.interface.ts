@@ -1,4 +1,5 @@
 import { SmartSearchCollection } from '../config/search-collections.config';
+import { SmartSearchSort } from '../config/search-fields.config';
 
 export interface SmartSearchQueryInput {
   query: string;
@@ -9,6 +10,7 @@ export interface SmartSearchQueryInput {
 export interface SmartSearchParsedFilters {
   collection: SmartSearchCollection | '';
   filters: Record<string, unknown>;
+  sort: SmartSearchSort;
   confidence: number | null;
 }
 
@@ -21,5 +23,6 @@ export interface SmartSearchAgentResponse {
 export const SMART_SEARCH_RESULT_KEYS: Array<keyof SmartSearchParsedFilters> = [
   'collection',
   'filters',
+  'sort',
   'confidence',
 ];

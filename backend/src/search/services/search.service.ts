@@ -1,6 +1,7 @@
 import { isGeminiConfigured } from '../../ai/utils/ai-config.util';
 import { BadRequestError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { buildPaginationMeta } from '../../database/utils/queryHelpers';
 import { smartSearchAgent, SmartSearchAgent } from '../agents/smart-search.agent';
 import {
   DEFAULT_SMART_SEARCH_COLLECTIONS,
@@ -19,7 +20,8 @@ export class SearchService {
     const providerStatus = this.agent.getProvider().getStatus();
 
     return {
-      implemented: false,
+      queryUnderstanding: true,
+      databaseSearch: false,
       geminiConfigured: isGeminiConfigured(),
       geminiModel: providerStatus.model,
       supportedCollections: DEFAULT_SMART_SEARCH_COLLECTIONS,
@@ -30,10 +32,30 @@ export class SearchService {
     return DEFAULT_SMART_SEARCH_COLLECTIONS;
   }
 
-  async search(_input: SearchRequest, userId: string): Promise<SearchResponse> {
-    logger.info('Smart search requested', { userId });
+  async search(input: SearchRequest, userId: string): Promise<SearchResponse> {
+    const query = input.query.trim();
 
-    throw new BadRequestError('Smart search is not implemented yet');
+    if (!query) {
+      throw new BadRequestError('Search query is required');
+    }
+
+    logger.info('Smart search requested', { userId, query });
+
+    const parsed = await this.agent.parseQuery({
+      query,
+      department: input.department,
+      collections: input.collection ? [input.collection] : undefined,
+    });
+
+    return {
+      query,
+      collection: parsed.result.collection || undefined,
+      filters: parsed.result.filters,
+      sort: parsed.result.sort || undefined,
+      confidence: parsed.result.confidence,
+      items: [],
+      meta: buildPaginationMeta(0, { page: 1, limit: 20 }),
+    };
   }
 }
 

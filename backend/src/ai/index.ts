@@ -112,6 +112,12 @@ export type {
   SearchModuleStatus,
 } from '../search/interfaces/search.interface';
 export type { SmartSearchCollection } from '../search/config/search-collections.config';
+export type { SmartSearchSort } from '../search/config/search-fields.config';
+export {
+  SMART_SEARCH_SORT_VALUES,
+  SMART_SEARCH_COLLECTION_FIELDS,
+  SMART_SEARCH_COLLECTION_ALIASES,
+} from '../search/config/search-fields.config';
 export {
   SMART_SEARCH_COLLECTIONS,
   DEFAULT_SMART_SEARCH_COLLECTIONS,
@@ -120,5 +126,7 @@ export {
 export {
   smartSearchResultSchema,
   normalizeSmartSearchResult,
+  normalizeSmartSearchCollection,
+  normalizeSmartSearchSort,
 } from '../search/utils/smart-search-result.util';
 export { searchService, SearchService } from '../search/services/search.service';

@@ -1,4 +1,5 @@
 import { SmartSearchCollection } from '../config/search-collections.config';
+import { SmartSearchSort } from '../config/search-fields.config';
 import { PaginationMeta } from '../../types/api.types';
 
 export interface SearchRequest {
@@ -17,14 +18,16 @@ export interface SearchResultItem {
 export interface SearchResponse {
   query: string;
   collection?: SmartSearchCollection;
+  filters?: Record<string, unknown>;
+  sort?: SmartSearchSort;
   items: SearchResultItem[];
   meta: PaginationMeta;
-  parsedFilters?: Record<string, unknown>;
   confidence?: number | null;
 }
 
 export interface SearchModuleStatus {
-  implemented: boolean;
+  queryUnderstanding: boolean;
+  databaseSearch: boolean;
   geminiConfigured: boolean;
   geminiModel: string;
   supportedCollections: readonly SmartSearchCollection[];

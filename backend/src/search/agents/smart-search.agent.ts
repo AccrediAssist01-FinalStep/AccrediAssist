@@ -1,6 +1,6 @@
 import { GeminiProvider, geminiProvider } from '../../ai/providers/gemini.provider';
 import { renderPromptTemplateByName } from '../../ai/utils/prompt-template.util';
-import { BadRequestError } from '../../utils/errors';
+import { BadRequestError, ValidationError } from '../../utils/errors';
 import {
   DEFAULT_SMART_SEARCH_COLLECTIONS,
   formatCollectionsForPrompt,
@@ -9,6 +9,7 @@ import {
   SmartSearchAgentResponse,
   SmartSearchQueryInput,
 } from '../interfaces/smart-search.interface';
+import { normalizeSmartSearchResult } from '../utils/smart-search-result.util';
 
 export class SmartSearchAgent {
   constructor(private readonly provider: GeminiProvider = geminiProvider) {}
@@ -30,8 +31,36 @@ export class SmartSearchAgent {
     });
   }
 
-  async parseQuery(_input: SmartSearchQueryInput): Promise<SmartSearchAgentResponse> {
-    throw new BadRequestError('Smart search query parsing is not implemented yet');
+  async parseQuery(input: SmartSearchQueryInput): Promise<SmartSearchAgentResponse> {
+    const query = input.query.trim();
+
+    if (!query) {
+      throw new BadRequestError('Search query is required');
+    }
+
+    if (!this.provider.isConfigured()) {
+      throw new BadRequestError('Gemini is not configured for smart search');
+    }
+
+    const renderedPrompt = await this.buildPrompt(input);
+
+    const response = await this.provider.generateJSON<Record<string, unknown>>({
+      prompt: renderedPrompt.userPrompt,
+      systemInstruction: renderedPrompt.system,
+      temperature: 0.1,
+    });
+
+    const normalized = normalizeSmartSearchResult(response.data);
+
+    if (!normalized.collection && Object.keys(normalized.filters).length === 0) {
+      throw new ValidationError('Gemini could not interpret the search query');
+    }
+
+    return {
+      result: normalized,
+      model: response.model,
+      provider: 'gemini',
+    };
   }
 }
 

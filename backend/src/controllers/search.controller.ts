@@ -45,7 +45,7 @@ class SearchController extends BaseController {
       userId,
     );
 
-    this.paginated(res, 'Search completed successfully', result.items, result.meta);
+    this.success(res, 'Search completed successfully', result);
   });
 
   private requireUserId(req: Request): string {

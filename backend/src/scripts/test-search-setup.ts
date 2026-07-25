@@ -1,8 +1,8 @@
 /**
  * Smart Search module setup tests.
  *
- * Verifies module structure, Gemini wiring, and that search logic remains unimplemented.
- * Does NOT call Gemini or execute database queries.
+ * Verifies module structure, Gemini wiring, and query parsing scaffolding.
+ * Live Gemini calls are covered by test:smart-search-query.
  *
  * Run: npm run test:search-setup
  */
@@ -12,12 +12,15 @@ import path from 'path';
 import dotenv from 'dotenv';
 import {
   DEFAULT_SMART_SEARCH_COLLECTIONS,
+  normalizeSmartSearchResult,
   searchService,
   smartSearchAgent,
   smartSearchResultSchema,
 } from '../search';
 import { geminiProvider, isGeminiConfigured, renderPromptTemplateByName } from '../ai';
-import { BadRequestError } from '../utils/errors';
+import { GeminiGenerativeClient } from '../ai/interfaces/gemini-client.interface';
+import { GeminiProvider } from '../ai/providers/gemini.provider';
+import { SmartSearchAgent } from '../search/agents/smart-search.agent';
 
 dotenv.config();
 
@@ -28,21 +31,6 @@ const assert = (condition: boolean, message: string): void => {
   console.log(`PASS: ${message}`);
 };
 
-const assertRejects = async (
-  action: () => Promise<unknown>,
-  message: string,
-): Promise<void> => {
-  try {
-    await action();
-    throw new Error(`FAIL: ${message}`);
-  } catch (error) {
-    if (error instanceof Error && error.message.startsWith('FAIL:')) {
-      throw error;
-    }
-    assert(true, message);
-  }
-};
-
 const testModuleStructure = async (): Promise<void> => {
   console.log('\n--- Module structure ---');
 
@@ -51,6 +39,7 @@ const testModuleStructure = async (): Promise<void> => {
     '../search/services/search.service.ts',
     '../search/agents/smart-search.agent.ts',
     '../search/config/search-collections.config.ts',
+    '../search/config/search-fields.config.ts',
     '../search/interfaces/search.interface.ts',
     '../search/interfaces/smart-search.interface.ts',
     '../search/utils/smart-search-result.util.ts',
@@ -99,10 +88,21 @@ const testSearchSchema = (): void => {
   const parsed = smartSearchResultSchema.safeParse({
     collection: 'placements',
     filters: { department: 'CSE' },
+    sort: 'latest',
     confidence: 85,
   });
 
   assert(parsed.success, 'Smart search result schema accepts valid payload');
+
+  const normalized = normalizeSmartSearchResult({
+    collection: 'Placement',
+    filters: { company: 'TCS' },
+    sort: 'newest',
+    confidence: 90,
+  });
+
+  assert(normalized.collection === 'placements', 'Collection aliases normalize to internal names');
+  assert(normalized.sort === 'latest', 'Sort aliases normalize to supported values');
 };
 
 const testModuleStatus = (): void => {
@@ -110,38 +110,35 @@ const testModuleStatus = (): void => {
 
   const status = searchService.getModuleStatus();
 
-  assert(status.implemented === false, 'Search module reports not implemented');
+  assert(status.queryUnderstanding === true, 'Query understanding is enabled');
+  assert(status.databaseSearch === false, 'Database search remains disabled');
   assert(status.geminiConfigured === isGeminiConfigured(), 'Gemini configured flag matches environment');
   assert(status.supportedCollections.length === DEFAULT_SMART_SEARCH_COLLECTIONS.length, 'Supported collections are exposed');
 };
 
-const testUnimplementedLogic = async (): Promise<void> => {
-  console.log('\n--- Unimplemented search logic ---');
+const testMockedParseQuery = async (): Promise<void> => {
+  console.log('\n--- Mocked parseQuery ---');
 
-  await assertRejects(
-    () =>
-      smartSearchAgent.parseQuery({
-        query: 'publications by Dr. Rao',
+  const mockClient: GeminiGenerativeClient = {
+    models: {
+      generateContent: async () => ({
+        text: JSON.stringify({
+          collection: 'internships',
+          filters: { year: 2026 },
+          sort: '',
+          confidence: 88,
+        }),
       }),
-    'SmartSearchAgent.parseQuery remains unimplemented',
-  );
+    },
+  };
 
-  await assertRejects(
-    () =>
-      searchService.search(
-        {
-          query: 'student achievements in 2023',
-        },
-        'test-user-id',
-      ),
-    'SearchService.search remains unimplemented',
-  );
+  const agent = new SmartSearchAgent(new GeminiProvider(mockClient));
+  const response = await agent.parseQuery({
+    query: 'Show all internships completed in 2026.',
+  });
 
-  try {
-    await searchService.search({ query: 'test' }, 'test-user-id');
-  } catch (error) {
-    assert(error instanceof BadRequestError, 'SearchService.search throws BadRequestError');
-  }
+  assert(response.result.collection === 'internships', 'parseQuery returns structured collection');
+  assert(response.result.filters.year === 2026, 'parseQuery returns structured filters');
 };
 
 const runTests = async (): Promise<void> => {
@@ -151,7 +148,7 @@ const runTests = async (): Promise<void> => {
   await testGeminiIntegration();
   testSearchSchema();
   testModuleStatus();
-  await testUnimplementedLogic();
+  await testMockedParseQuery();
 
   console.log('\nAll Smart Search module setup tests passed.');
 };
