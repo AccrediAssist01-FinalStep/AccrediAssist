@@ -17,9 +17,10 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
   JWT_EXPIRES_IN: z.string().default('7d'),
 
-  // AI (required in later sprints)
-  OPENAI_API_KEY: z.string().optional(),
-  OPENAI_API_BASE_URL: z.string().url().default('https://api.openai.com/v1'),
+  // AI (Gemini)
+  AI_PROVIDER: z.enum(['gemini']).default('gemini'),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
 
   // Cloudinary (required in later sprints)
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
