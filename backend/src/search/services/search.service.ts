@@ -8,6 +8,7 @@ import { logger } from '../../utils/logger';
 import { smartSearchAgent, SmartSearchAgent } from '../agents/smart-search.agent';
 import {
   DEFAULT_SMART_SEARCH_COLLECTIONS,
+  SmartSearchCollection,
 } from '../config/search-collections.config';
 import {
   GlobalSearchApiData,
