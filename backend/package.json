@@ -51,6 +51,7 @@
     "test:whatsapp-api": "tsx src/scripts/test-whatsapp-api.ts",
     "test:whatsapp": "npm run test:whatsapp-setup && npm run test:whatsapp-connection-manager && npm run test:whatsapp-group-detection && npm run test:whatsapp-message-listener && npm run test:whatsapp-media-handling && npm run test:whatsapp-cloudinary && npm run test:whatsapp-api",
     "test:ai-setup": "tsx src/scripts/test-ai-setup.ts",
+    "test:search-setup": "tsx src/scripts/test-search-setup.ts",
     "test:gemini-provider": "tsx src/scripts/test-gemini-provider.ts",
     "test:prompt-templates": "tsx src/scripts/test-prompt-templates.ts",
     "test:extraction-agent": "tsx src/scripts/test-extraction-agent.ts",

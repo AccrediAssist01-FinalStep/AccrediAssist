@@ -5,6 +5,7 @@ export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
 export { validationAgent, ValidationAgent } from './agents/validation.agent';
 export { duplicateDetectionAgent, DuplicateDetectionAgent } from './agents/duplicate-detection.agent';
+export { smartSearchAgent, SmartSearchAgent } from '../search/agents/smart-search.agent';
 export { duplicateDetectionRepository, DuplicateDetectionRepository } from './repositories/duplicate-detection.repository';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';
 export {
@@ -99,3 +100,25 @@ export type {
   AiPipelineResult,
   AiPipelineStageResults,
 } from './interfaces/ai-pipeline.interface';
+export type {
+  SmartSearchQueryInput,
+  SmartSearchParsedFilters,
+  SmartSearchAgentResponse,
+} from '../search/interfaces/smart-search.interface';
+export type {
+  SearchRequest,
+  SearchResponse,
+  SearchResultItem,
+  SearchModuleStatus,
+} from '../search/interfaces/search.interface';
+export type { SmartSearchCollection } from '../search/config/search-collections.config';
+export {
+  SMART_SEARCH_COLLECTIONS,
+  DEFAULT_SMART_SEARCH_COLLECTIONS,
+  formatCollectionsForPrompt,
+} from '../search/config/search-collections.config';
+export {
+  smartSearchResultSchema,
+  normalizeSmartSearchResult,
+} from '../search/utils/smart-search-result.util';
+export { searchService, SearchService } from '../search/services/search.service';
