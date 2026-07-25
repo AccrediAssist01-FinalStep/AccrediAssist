@@ -1,12 +1,20 @@
 export { aiService, AiService } from './services/ai.service';
 export { geminiProvider, GeminiProvider } from './providers/gemini.provider';
 export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
+export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';
 export {
   EXTRACTION_RESULT_KEYS,
   extractionResultSchema,
   normalizeExtractionResult,
 } from './utils/extraction-result.util';
+export {
+  CLASSIFICATION_CATEGORIES,
+  CLASSIFICATION_RESULT_KEYS,
+  classificationResultSchema,
+  isClassificationCategory,
+  normalizeClassificationResult,
+} from './utils/classification-result.util';
 export {
   getPromptTemplateMetadata,
   listPromptTemplates,
@@ -39,3 +47,9 @@ export type {
   ExtractionAgentResponse,
   ExtractionResult,
 } from './interfaces/extraction.interface';
+export type {
+  ClassificationAgentResponse,
+  ClassificationCategory,
+  ClassificationInput,
+  ClassificationResult,
+} from './interfaces/classification.interface';

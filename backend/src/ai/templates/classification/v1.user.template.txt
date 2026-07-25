@@ -1,7 +1,10 @@
-Classify the institutional record below into exactly one category.
+Classify the extracted institutional record below into exactly one category.
 
 Extracted data:
 {{extractedData}}
 
 Original message:
 {{message}}
+
+Category hint from extraction:
+{{categoryHint}}

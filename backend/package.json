@@ -54,6 +54,7 @@
     "test:gemini-provider": "tsx src/scripts/test-gemini-provider.ts",
     "test:prompt-templates": "tsx src/scripts/test-prompt-templates.ts",
     "test:extraction-agent": "tsx src/scripts/test-extraction-agent.ts",
+    "test:classification-agent": "tsx src/scripts/test-classification-agent.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {
