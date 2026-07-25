@@ -9,6 +9,7 @@ export interface AuthenticatedUser {
 export type Permission =
   | 'dashboard'
   | 'pending_records_view'
+  | 'pending_records_review'
   | 'pending_records_approve'
   | 'reports'
   | 'search'
@@ -19,6 +20,7 @@ export type Permission =
 export const ROLE_PERMISSIONS: Record<Permission, UserRole[]> = {
   dashboard: ['Admin', 'HOD', 'Faculty', 'AccreditationCommittee'],
   pending_records_view: ['Admin', 'HOD', 'Faculty'],
+  pending_records_review: ['Admin', 'Faculty'],
   pending_records_approve: ['Admin', 'Faculty'],
   reports: ['Admin', 'HOD', 'Faculty', 'AccreditationCommittee'],
   search: ['Admin', 'HOD', 'Faculty', 'AccreditationCommittee'],

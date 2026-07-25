@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { pendingRecordController } from '../controllers/pendingRecord.controller';
+import { pendingReviewController } from '../controllers/pendingReview.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { authorizePermission } from '../middleware/authorize.middleware';
 import { validate, validateParams, validateQuery } from '../middleware/validate.middleware';
@@ -16,16 +17,24 @@ pendingRouter.use(authenticate);
 
 pendingRouter.get(
   '/',
-  authorizePermission('pending_records_view'),
+  authorizePermission('pending_records_review'),
   validateQuery(pendingRecordListQuerySchema),
-  pendingRecordController.list,
+  pendingReviewController.list,
 );
 
 pendingRouter.get(
   '/:id',
-  authorizePermission('pending_records_view'),
+  authorizePermission('pending_records_review'),
   validateParams(idParamSchema),
-  pendingRecordController.getById,
+  pendingReviewController.getById,
+);
+
+pendingRouter.patch(
+  '/:id',
+  authorizePermission('pending_records_review'),
+  validateParams(idParamSchema),
+  validate(updatePendingRecordSchema),
+  pendingReviewController.update,
 );
 
 pendingRouter.put(
@@ -41,14 +50,6 @@ pendingRouter.put(
   validateParams(idParamSchema),
   validate(rejectPendingRecordSchema),
   pendingRecordController.reject,
-);
-
-pendingRouter.put(
-  '/:id',
-  authorizePermission('pending_records_approve'),
-  validateParams(idParamSchema),
-  validate(updatePendingRecordSchema),
-  pendingRecordController.update,
 );
 
 export default pendingRouter;

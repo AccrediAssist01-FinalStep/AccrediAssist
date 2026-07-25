@@ -179,9 +179,9 @@ const runTests = async (): Promise<void> => {
     'GET /pending/:id returns correct record',
   );
 
-  // Test 5: HOD can view
+  // Test 5: HOD cannot access faculty review list
   const hodView = await request('GET', '/api/v1/pending', undefined, hodToken);
-  assert(hodView.status === 200, 'HOD can list pending records');
+  assert(hodView.status === 403, 'HOD cannot list pending records via faculty review API');
 
   // Test 6: HOD cannot approve
   const hodApprove = await request(
@@ -194,7 +194,7 @@ const runTests = async (): Promise<void> => {
 
   // Test 7: Update pending record
   const updated = await request(
-    'PUT',
+    'PATCH',
     `/api/v1/pending/${pendingRecordId}`,
     {
       extractedData: { studentName: 'Rahul Patil', company: 'TCS' },
@@ -202,10 +202,10 @@ const runTests = async (): Promise<void> => {
     },
     adminToken,
   );
-  assert(updated.status === 200, 'PUT /pending/:id updates record');
+  assert(updated.status === 200, 'PATCH /pending/:id updates record');
   assert(
     (updated.body.data as { confidenceScore: number }).confidenceScore === 95,
-    'PUT /pending/:id persists updates',
+    'PATCH /pending/:id persists updates',
   );
 
   // Test 8: Approve pending record
@@ -252,7 +252,7 @@ const runTests = async (): Promise<void> => {
 
   // Test 11: Cannot update approved record
   const updateApproved = await request(
-    'PUT',
+    'PATCH',
     `/api/v1/pending/${approvedRecordId}`,
     { confidenceScore: 50 },
     adminToken,
