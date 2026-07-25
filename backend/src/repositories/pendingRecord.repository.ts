@@ -47,6 +47,10 @@ export class PendingRecordRepository extends BaseRepository<IPendingRecord> {
       ];
     }
 
+    if (filters.title) {
+      query['extractedData.title'] = { $regex: filters.title, $options: 'i' };
+    }
+
     return query;
   }
 

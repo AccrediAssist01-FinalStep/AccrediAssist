@@ -58,6 +58,7 @@
     "test:validation-agent": "tsx src/scripts/test-validation-agent.ts",
     "test:duplicate-detection": "tsx src/scripts/test-duplicate-detection.ts",
     "test:ai-pipeline": "tsx src/scripts/test-ai-pipeline.ts",
+    "test:pending-review-service": "tsx src/scripts/test-pending-review-service.ts",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts"
   },
   "dependencies": {

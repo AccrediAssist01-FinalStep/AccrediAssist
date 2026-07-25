@@ -53,6 +53,7 @@ export interface IPendingRecordResponse {
 
 export interface PendingRecordFilters {
   search?: string;
+  title?: string;
   status?: PendingRecordStatus;
   category?: RecordCategory;
   groupName?: string;

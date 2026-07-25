@@ -4,6 +4,7 @@ import { paginationSchema } from './common.validation';
 
 export const pendingRecordListQuerySchema = paginationSchema.extend({
   search: z.string().trim().optional(),
+  title: z.string().trim().optional(),
   status: z.enum(PENDING_RECORD_STATUSES).optional(),
   category: z.enum(RECORD_CATEGORIES).optional(),
   groupName: z.string().trim().optional(),

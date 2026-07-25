@@ -1,5 +1,5 @@
 import { PendingRecordStatus, RecordCategory } from '../../database/enums';
-import { IPendingRecord } from '../../types/pendingRecord.types';
+import { IPendingRecordResponse } from '../../types/pendingRecord.types';
 import { WhatsAppIncomingMessage } from '../../whatsapp/types';
 import { ClassificationAgentResponse } from '../interfaces/classification.interface';
 import { DuplicateDetectionResponse } from '../interfaces/duplicate-detection.interface';
@@ -14,7 +14,7 @@ export interface AiPipelineStageResults {
 }
 
 export interface AiPipelineResult {
-  pendingRecord: IPendingRecord;
+  pendingRecord: IPendingRecordResponse;
   stages: AiPipelineStageResults;
   recordCategory: RecordCategory;
   pendingStatus: PendingRecordStatus;

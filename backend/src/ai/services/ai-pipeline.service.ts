@@ -1,4 +1,4 @@
-import { pendingRecordRepository, PendingRecordRepository } from '../../repositories/pendingRecord.repository';
+import { pendingReviewService, PendingReviewService } from '../../services/pendingReview.service';
 import { logger } from '../../utils/logger';
 import { WhatsAppIncomingMessage } from '../../whatsapp/types';
 import { ClassificationAgent, classificationAgent } from '../agents/classification.agent';
@@ -39,7 +39,7 @@ export class AiPipelineService {
     private readonly classification: ClassificationAgent = classificationAgent,
     private readonly validation: ValidationAgent = validationAgent,
     private readonly duplicateDetection: DuplicateDetectionAgent = duplicateDetectionAgent,
-    private readonly pendingRecords: PendingRecordRepository = pendingRecordRepository,
+    private readonly pendingReview: PendingReviewService = pendingReviewService,
   ) {}
 
   async processWhatsAppMessage(message: WhatsAppIncomingMessage): Promise<AiPipelineResult> {
@@ -90,7 +90,7 @@ export class AiPipelineService {
       duplicateDetection: duplicateDetectionResponse,
     };
 
-    const pendingRecord = await this.pendingRecords.create({
+    const pendingRecord = await this.pendingReview.createPendingRecord({
       originalMessage: message.message,
       groupName: message.groupName,
       senderName: message.sender,

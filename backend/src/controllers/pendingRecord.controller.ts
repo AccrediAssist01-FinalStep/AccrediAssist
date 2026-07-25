@@ -12,6 +12,7 @@ class PendingRecordController extends BaseController {
     const result = await pendingRecordService.listPendingRecords(
       {
         search: query.search,
+        title: query.title,
         status: query.status,
         category: query.category,
         groupName: query.groupName,
