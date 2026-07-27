@@ -7,6 +7,7 @@ import {
   reportGenerationPlanSchema,
   reportTypeParamSchema,
 } from '../utils/report-generation.validation';
+import { aggregationFiltersSchema } from '../aggregation/utils/aggregation.validation';
 
 const reportGenerationRouter = Router();
 
@@ -41,6 +42,12 @@ reportGenerationRouter.post(
   '/dry-run',
   validate(reportGenerationPlanSchema),
   reportGenerationController.dryRun,
+);
+
+reportGenerationRouter.post(
+  '/aggregate',
+  validate(aggregationFiltersSchema),
+  reportGenerationController.aggregate,
 );
 
 export default reportGenerationRouter;

@@ -1,4 +1,5 @@
 import { GenerationReportType } from '../config/report-types.config';
+import type { ReportAggregationResult } from '../aggregation/interfaces/aggregation.interface';
 import { ReportGenerationFilters } from './report-generation.interface';
 
 /** Normalized dataset collected from MongoDB collections */
@@ -8,6 +9,8 @@ export interface CollectedReportData {
   collectedAt: Date;
   sections: ReportDataSection[];
   totals: ReportDataTotals;
+  /** Full aggregation payload from the data aggregation engine */
+  aggregation?: ReportAggregationResult;
 }
 
 export interface ReportDataSection {

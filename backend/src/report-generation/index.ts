@@ -37,4 +37,12 @@ export type { ReportExportRequest, ReportExportResult } from './interfaces/expor
 
 export { getTemplateDescriptor, listTemplateDescriptors } from './templates/template.registry';
 
+export {
+  aggregationService,
+  AggregationService,
+  AGGREGATION_MODULE_KEYS,
+  type AggregationFilters,
+  type ReportAggregationResult,
+} from './aggregation';
+
 export { default as reportGenerationRouter } from './routes/report-generation.routes';

@@ -3,6 +3,7 @@ import { BaseController } from '../../controllers/base.controller';
 import { asyncHandler } from '../../middleware/asyncHandler';
 import { UnauthorizedError } from '../../utils/errors';
 import { reportGenerationService } from '../services/report-generation.service';
+import { aggregationService } from '../aggregation/services/aggregation.service';
 import { parseGenerationReportType } from '../utils/report-type.util';
 
 class ReportGenerationController extends BaseController {
@@ -70,6 +71,13 @@ class ReportGenerationController extends BaseController {
     });
 
     this.success(res, 'Report generation dry-run completed', result);
+  });
+
+  /** POST /report-generation/aggregate — run data aggregation engine */
+  aggregate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const result = await aggregationService.aggregate(req.body);
+    this.success(res, 'Report data aggregated successfully', result);
   });
 
   private requireUserId(req: Request): string {
