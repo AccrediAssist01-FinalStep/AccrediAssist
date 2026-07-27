@@ -11,7 +11,7 @@ import {
   ScrollText,
   Users,
 } from 'lucide-react';
-import type { BackendReportType, ReportQueryParams } from '@/types/api-models';
+import type { BackendReportType, ReportExportFormat, ReportQueryParams } from '@/types/api-models';
 
 export interface ReportTemplate {
   id: string;
@@ -27,33 +27,46 @@ export interface ReportTemplate {
   };
 }
 
+export const GENERATION_REPORT_TYPES: BackendReportType[] = [
+  'NBA',
+  'NAAC',
+  'AICTE',
+  'Placement',
+  'Internship',
+  'Student Achievement',
+  'Faculty Achievement',
+  'Publication',
+  'Patent',
+  'Completed Event',
+];
+
 export const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     id: 'nba',
     title: 'NBA Report',
     description: 'National Board of Accreditation compliance summary with institutional metrics.',
     icon: Building2,
-    backendReportType: 'Monthly',
+    backendReportType: 'NBA',
     accent: 'from-blue-500/20 to-indigo-500/5',
-    defaultFilters: { academicYear: '2025-26' },
+    defaultFilters: { academicYear: '2025-2026' },
   },
   {
     id: 'naac',
     title: 'NAAC Report',
     description: 'NAAC accreditation documentation with quality indicators and outcomes.',
     icon: FileBadge,
-    backendReportType: 'Monthly',
+    backendReportType: 'NAAC',
     accent: 'from-violet-500/20 to-purple-500/5',
-    defaultFilters: { academicYear: '2025-26' },
+    defaultFilters: { academicYear: '2025-2026' },
   },
   {
     id: 'aicte',
     title: 'AICTE Report',
     description: 'AICTE regulatory report covering programs, faculty, and infrastructure.',
     icon: ScrollText,
-    backendReportType: 'Monthly',
+    backendReportType: 'AICTE',
     accent: 'from-cyan-500/20 to-sky-500/5',
-    defaultFilters: { academicYear: '2025-26' },
+    defaultFilters: { academicYear: '2025-2026' },
   },
   {
     id: 'placement',
@@ -92,7 +105,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     title: 'Publication Report',
     description: 'Faculty publication summary including journals, conferences, and citations.',
     icon: BookOpen,
-    backendReportType: 'Faculty Achievement',
+    backendReportType: 'Publication',
     accent: 'from-sky-500/20 to-blue-500/5',
   },
   {
@@ -100,7 +113,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     title: 'Patent Report',
     description: 'Patent filings, grants, and intellectual property portfolio overview.',
     icon: Lightbulb,
-    backendReportType: 'Faculty Achievement',
+    backendReportType: 'Patent',
     accent: 'from-teal-500/20 to-emerald-500/5',
   },
   {
@@ -116,7 +129,8 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
 export interface ReportsFilterState {
   search: string;
   reportType: BackendReportType | 'all';
-  status: 'all' | 'ready' | 'pending';
+  status: 'all' | 'completed' | 'generating' | 'pending' | 'failed';
+  format: ReportExportFormat | 'all';
   fromDate: string;
   toDate: string;
   page: number;
@@ -129,6 +143,7 @@ export const DEFAULT_REPORTS_FILTERS: ReportsFilterState = {
   search: '',
   reportType: 'all',
   status: 'all',
+  format: 'all',
   fromDate: '',
   toDate: '',
   page: 1,
@@ -137,4 +152,17 @@ export const DEFAULT_REPORTS_FILTERS: ReportsFilterState = {
   sortOrder: 'desc',
 };
 
-export type ReportDisplayStatus = 'ready' | 'pending' | 'processing';
+export type ReportDisplayStatus = 'ready' | 'processing' | 'pending' | 'failed';
+
+export const SECTION_LABELS: Record<string, string> = {
+  cover: 'Cover Page',
+  'table-of-contents': 'Table of Contents',
+  'executive-summary': 'Executive Summary',
+  'key-highlights': 'Key Highlights',
+  charts: 'Charts & Analytics',
+  statistics: 'Statistics',
+  tables: 'Data Tables',
+  images: 'Event Images',
+  recommendations: 'Recommendations',
+  appendix: 'Appendix',
+};

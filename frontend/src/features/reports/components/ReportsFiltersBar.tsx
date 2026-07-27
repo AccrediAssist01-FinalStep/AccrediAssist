@@ -13,15 +13,9 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import type { BackendReportType } from '@/types/api-models';
 import type { ReportsFilterState } from '../types';
+import { GENERATION_REPORT_TYPES } from '../types';
 
-const REPORT_TYPE_OPTIONS: BackendReportType[] = [
-  'Monthly',
-  'Placement',
-  'Internship',
-  'Student Achievement',
-  'Faculty Achievement',
-  'Completed Event',
-];
+const REPORT_TYPE_OPTIONS: BackendReportType[] = [...GENERATION_REPORT_TYPES, 'Monthly'];
 
 interface ReportsFiltersBarProps {
   filters: ReportsFilterState;
@@ -76,8 +70,28 @@ export function ReportsFiltersBar({ filters, onChange }: ReportsFiltersBarProps)
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="ready">Ready</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="generating">Generating</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="failed">Failed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="md:col-span-2">
+          <Select
+            value={filters.format}
+            onValueChange={(value) =>
+              onChange({ format: value as ReportsFilterState['format'], page: 1 })
+            }
+          >
+            <SelectTrigger aria-label="Format filter">
+              <SelectValue placeholder="Format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Formats</SelectItem>
+              <SelectItem value="pdf">PDF</SelectItem>
+              <SelectItem value="docx">DOCX</SelectItem>
             </SelectContent>
           </Select>
         </div>

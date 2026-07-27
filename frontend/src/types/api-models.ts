@@ -271,7 +271,16 @@ export type BackendReportType =
   | 'Internship'
   | 'Student Achievement'
   | 'Faculty Achievement'
-  | 'Completed Event';
+  | 'Completed Event'
+  | 'NBA'
+  | 'NAAC'
+  | 'AICTE'
+  | 'Publication'
+  | 'Patent';
+
+export type ReportExportFormat = 'pdf' | 'docx';
+
+export type ReportStatus = 'pending' | 'generating' | 'completed' | 'failed';
 
 export interface ReportRecord {
   _id: string;
@@ -280,8 +289,16 @@ export interface ReportRecord {
   generatedBy: string;
   generatedDate: string;
   fileUrl?: string;
+  fileName?: string;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
+  fileSizeBytes?: number;
+  pageCount?: number;
+  sectionsIncluded?: string[];
+  errorMessage?: string;
   filtersApplied?: ReportFiltersApplied;
   downloadReady: boolean;
+  downloadUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -293,6 +310,7 @@ export interface ReportListResponse {
 
 export interface GenerateReportPayload {
   reportType: BackendReportType;
+  format?: ReportExportFormat;
   month?: string;
   year?: number;
   academicYear?: string;
@@ -308,20 +326,66 @@ export interface ReportDownloadInfo {
   fileName: string;
   contentType: string;
   status: 'ready';
+  exportFormat?: ReportExportFormat;
+  fileSizeBytes?: number;
 }
 
-export type ReportSortField = 'reportTitle' | 'reportType' | 'generatedDate' | 'createdAt';
+export type ReportSortField =
+  | 'reportTitle'
+  | 'reportType'
+  | 'generatedDate'
+  | 'createdAt'
+  | 'status';
 
 export interface ReportQueryParams {
   page?: number;
   limit?: number;
   search?: string;
   reportType?: BackendReportType;
+  format?: ReportExportFormat;
+  status?: ReportStatus;
   generatedBy?: string;
   fromDate?: string;
   toDate?: string;
   sortBy?: ReportSortField;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface ReportExecutiveSummary {
+  executiveSummary: string;
+  strengths: string[];
+  observations: string[];
+  recommendations: string[];
+  keyHighlights: string[];
+  model?: string;
+  generatedAt?: string;
+  source?: string;
+}
+
+export interface ReportChartDataset {
+  label: string;
+  data: number[];
+  backgroundColor?: string | string[];
+  borderColor?: string | string[];
+}
+
+export interface ReportChartItem {
+  chartType: string;
+  labels: string[];
+  datasets: ReportChartDataset[];
+  metadata?: {
+    title?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface ReportChartsResponse {
+  reportType: string;
+  charts: ReportChartItem[];
+  chartCount: number;
+  generatedAt: string;
+  fromCache?: boolean;
 }
 
 export type PendingRecordSortField =

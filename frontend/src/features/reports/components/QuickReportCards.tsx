@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ReportRecord } from '@/types/api-models';
 import type { ReportTemplate } from '../types';
-import { formatShortReportDate } from '../utils/reports.utils';
+import { formatShortReportDate, getLatestReportForTemplate } from '../utils/reports.utils';
 
 interface QuickReportCardProps {
   template: ReportTemplate;
@@ -97,7 +97,7 @@ export function QuickReportCards({
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
       {templates.map((template, index) => {
-        const latestReport = reports.find((report) => report.reportType === template.backendReportType);
+        const latestReport = getLatestReportForTemplate(template, reports);
         return (
           <QuickReportCard
             key={template.id}

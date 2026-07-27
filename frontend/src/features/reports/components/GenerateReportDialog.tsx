@@ -13,7 +13,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { GenerateReportPayload } from '@/types/api-models';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import type { GenerateReportPayload, ReportExportFormat } from '@/types/api-models';
 import type { ReportTemplate } from '../types';
 
 interface GenerateReportDialogProps {
@@ -25,6 +32,7 @@ interface GenerateReportDialogProps {
 }
 
 interface GenerateFormValues {
+  format: ReportExportFormat;
   academicYear: string;
   month: string;
   year: string;
@@ -42,6 +50,7 @@ export function GenerateReportDialog({
 }: GenerateReportDialogProps) {
   const form = useForm<GenerateFormValues>({
     defaultValues: {
+      format: 'pdf',
       academicYear: '',
       month: '',
       year: String(new Date().getFullYear()),
@@ -54,6 +63,7 @@ export function GenerateReportDialog({
   useEffect(() => {
     if (!template) return;
     form.reset({
+      format: 'pdf',
       academicYear: template.defaultFilters?.academicYear ?? '',
       month: template.defaultFilters?.month ?? '',
       year: String(template.defaultFilters?.year ?? new Date().getFullYear()),
@@ -68,6 +78,7 @@ export function GenerateReportDialog({
 
     onGenerate({
       reportType: template.backendReportType,
+      format: values.format,
       academicYear: values.academicYear || undefined,
       month: values.month || undefined,
       year: values.year ? Number(values.year) : undefined,
@@ -83,15 +94,31 @@ export function GenerateReportDialog({
         <DialogHeader>
           <DialogTitle>Generate {template?.title ?? 'Report'}</DialogTitle>
           <DialogDescription>
-            Configure optional filters. AI report generation will begin immediately.
+            Configure filters and export format. AI summary, charts, and document generation start immediately.
           </DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
+          <div className="space-y-2">
+            <Label htmlFor="format">Export Format</Label>
+            <Select
+              value={form.watch('format')}
+              onValueChange={(value) => form.setValue('format', value as ReportExportFormat)}
+            >
+              <SelectTrigger id="format" aria-label="Export format">
+                <SelectValue placeholder="Select format" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pdf">PDF — Best for preview and sharing</SelectItem>
+                <SelectItem value="docx">DOCX — Editable Word document</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="academicYear">Academic Year</Label>
-              <Input id="academicYear" placeholder="2025-26" {...form.register('academicYear')} />
+              <Input id="academicYear" placeholder="2025-2026" {...form.register('academicYear')} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
