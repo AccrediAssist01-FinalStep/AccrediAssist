@@ -43,6 +43,22 @@ export function NoPendingIllustration({ className }: { className?: string }) {
   );
 }
 
+export function ReportsIllustration({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="36" y="20" width="128" height="120" rx="12" fill="#EFF6FF" stroke="#BFDBFE" strokeWidth="2" />
+      <rect x="52" y="40" width="96" height="8" rx="4" fill="#2563EB" fillOpacity="0.35" />
+      <rect x="52" y="58" width="72" height="6" rx="3" fill="#CBD5E1" />
+      <rect x="52" y="72" width="88" height="6" rx="3" fill="#CBD5E1" />
+      <rect x="52" y="86" width="64" height="6" rx="3" fill="#CBD5E1" />
+      <rect x="52" y="108" width="40" height="18" rx="6" fill="#7C3AED" fillOpacity="0.25" />
+      <rect x="100" y="108" width="48" height="18" rx="6" fill="#2563EB" fillOpacity="0.2" />
+      <path d="M148 36l12 12" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="156" cy="28" r="10" fill="#7C3AED" fillOpacity="0.15" />
+    </svg>
+  );
+}
+
 export function ErrorIllustration({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

@@ -229,6 +229,76 @@ export interface RejectPendingRecordPayload {
   reason: string;
 }
 
+export interface ReportFiltersApplied {
+  startDate?: string;
+  endDate?: string;
+  department?: string;
+  month?: string;
+  year?: number;
+  academicYear?: string;
+  category?: string;
+  [key: string]: unknown;
+}
+
+export type BackendReportType =
+  | 'Monthly'
+  | 'Placement'
+  | 'Internship'
+  | 'Student Achievement'
+  | 'Faculty Achievement'
+  | 'Completed Event';
+
+export interface ReportRecord {
+  _id: string;
+  reportTitle: string;
+  reportType: BackendReportType;
+  generatedBy: string;
+  generatedDate: string;
+  fileUrl?: string;
+  filtersApplied?: ReportFiltersApplied;
+  downloadReady: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReportListResponse {
+  items: ReportRecord[];
+  meta: PaginatedMeta;
+}
+
+export interface GenerateReportPayload {
+  reportType: BackendReportType;
+  month?: string;
+  year?: number;
+  academicYear?: string;
+  department?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface ReportDownloadInfo {
+  reportId: string;
+  reportTitle: string;
+  downloadUrl: string;
+  fileName: string;
+  contentType: string;
+  status: 'ready';
+}
+
+export type ReportSortField = 'reportTitle' | 'reportType' | 'generatedDate' | 'createdAt';
+
+export interface ReportQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  reportType?: BackendReportType;
+  generatedBy?: string;
+  fromDate?: string;
+  toDate?: string;
+  sortBy?: ReportSortField;
+  sortOrder?: 'asc' | 'desc';
+}
+
 export type PendingRecordSortField =
   | 'createdAt'
   | 'status'
