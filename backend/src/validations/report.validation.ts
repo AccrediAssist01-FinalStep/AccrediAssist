@@ -1,10 +1,15 @@
 import { z } from 'zod';
-import { REPORT_TYPES } from '../database/enums';
+import {
+  REPORT_EXPORT_FORMATS,
+  REPORT_STATUSES,
+  REPORT_TYPES,
+} from '../database/enums';
 import { objectIdSchema, paginationSchema } from './common.validation';
 
 export const generateReportSchema = z
   .object({
     reportType: z.enum(REPORT_TYPES, { required_error: 'Report type is required' }),
+    format: z.enum(REPORT_EXPORT_FORMATS).optional(),
     month: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
     academicYear: z.string().trim().optional(),
@@ -28,11 +33,13 @@ export const generateReportSchema = z
 export const reportListQuerySchema = paginationSchema.extend({
   search: z.string().trim().optional(),
   reportType: z.enum(REPORT_TYPES).optional(),
+  format: z.enum(REPORT_EXPORT_FORMATS).optional(),
+  status: z.enum(REPORT_STATUSES).optional(),
   generatedBy: objectIdSchema.optional(),
   fromDate: z.coerce.date().optional(),
   toDate: z.coerce.date().optional(),
   sortBy: z
-    .enum(['reportTitle', 'reportType', 'generatedDate', 'createdAt'])
+    .enum(['reportTitle', 'reportType', 'generatedDate', 'createdAt', 'status'])
     .default('generatedDate'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });

@@ -28,6 +28,18 @@ reportRouter.post(
 );
 
 reportRouter.get(
+  '/download/:id',
+  validateParams(idParamSchema),
+  reportController.downloadFile,
+);
+
+reportRouter.delete(
+  '/:id',
+  validateParams(idParamSchema),
+  reportController.delete,
+);
+
+reportRouter.get(
   '/:id/download',
   validateParams(idParamSchema),
   validateQuery(reportDownloadQuerySchema),

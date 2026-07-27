@@ -183,6 +183,7 @@ const runTests = async (): Promise<void> => {
 
   await Report.findByIdAndUpdate(reportId, {
     fileUrl: 'https://cloudinary.com/reports/monthly-july-2026.pdf',
+    status: 'completed',
   });
 
   const download = await request(
@@ -235,6 +236,63 @@ const runTests = async (): Promise<void> => {
     adminToken,
   );
   assert(notFound.status === 404, 'Non-existent report download returns 404');
+
+  console.log('\nTesting PDF generation and file download...');
+
+  const pdfGenerated = await request(
+    'POST',
+    '/api/v1/reports/generate',
+    {
+      reportType: 'Placement',
+      format: 'pdf',
+      academicYear: '2025-2026',
+    },
+    adminToken,
+  );
+  assert(pdfGenerated.status === 201, 'POST /reports/generate with format=pdf returns 201');
+
+  const pdfData = pdfGenerated.body.data as {
+    _id: string;
+    downloadReady: boolean;
+    exportFormat: string;
+    status: string;
+    fileName?: string;
+  };
+  assert(pdfData.downloadReady === true, 'PDF report is download-ready');
+  assert(pdfData.exportFormat === 'pdf', 'PDF report has exportFormat pdf');
+  assert(pdfData.status === 'completed', 'PDF report status is completed');
+
+  const streamResponse = await fetch(`${baseUrl}/api/v1/reports/download/${pdfData._id}`, {
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  assert(streamResponse.status === 200, 'GET /reports/download/:id streams file');
+  assert(
+    streamResponse.headers.get('content-type') === 'application/pdf',
+    'Stream returns PDF content type',
+  );
+
+  const byFormat = await request('GET', '/api/v1/reports?format=pdf', undefined, adminToken);
+  assert(byFormat.status === 200, 'GET /reports filters by format');
+
+  const monthlyPdf = await request(
+    'POST',
+    '/api/v1/reports/generate',
+    {
+      reportType: 'Monthly',
+      format: 'pdf',
+    },
+    adminToken,
+  );
+  assert(monthlyPdf.status === 400, 'Monthly with format returns 400');
+
+  const deleted = await fetch(`${baseUrl}/api/v1/reports/${reportId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${adminToken}` },
+  });
+  assert(deleted.status === 204, 'DELETE /reports/:id returns 204');
+
+  const deletedGet = await request('GET', `/api/v1/reports/${reportId}`, undefined, adminToken);
+  assert(deletedGet.status === 404, 'Deleted report returns 404');
 
   await teardown();
 

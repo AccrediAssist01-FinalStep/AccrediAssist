@@ -21,6 +21,14 @@ export class ReportRepository extends BaseRepository<IReport> {
       query.reportType = filters.reportType;
     }
 
+    if (filters.exportFormat) {
+      query.exportFormat = filters.exportFormat;
+    }
+
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
     if (filters.generatedBy) {
       query.generatedBy = new Types.ObjectId(filters.generatedBy);
     }

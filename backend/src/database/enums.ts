@@ -63,7 +63,7 @@ export type EventType = (typeof EVENT_TYPES)[number];
 export const PATENT_STATUSES = ['Filed', 'Published', 'Granted'] as const;
 export type PatentStatus = (typeof PATENT_STATUSES)[number];
 
-// Report types
+// Report types (includes accreditation types used by report generation)
 export const REPORT_TYPES = [
   'Monthly',
   'Placement',
@@ -71,7 +71,18 @@ export const REPORT_TYPES = [
   'Student Achievement',
   'Faculty Achievement',
   'Completed Event',
+  'NBA',
+  'NAAC',
+  'AICTE',
+  'Publication',
+  'Patent',
 ] as const;
+
+export const REPORT_EXPORT_FORMATS = ['pdf', 'docx'] as const;
+export type ReportExportFormat = (typeof REPORT_EXPORT_FORMATS)[number];
+
+export const REPORT_STATUSES = ['pending', 'generating', 'completed', 'failed'] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
 export type ReportType = (typeof REPORT_TYPES)[number];
 
 // Notification types

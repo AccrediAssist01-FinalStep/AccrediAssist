@@ -9,7 +9,10 @@ class ReportController extends BaseController {
   generate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const report = await reportService.generateReport(req.body, userId);
-    this.created(res, 'Report generation request accepted', report);
+    const message = report.downloadReady
+      ? 'Report generated successfully'
+      : 'Report generation request accepted';
+    this.created(res, message, report);
   });
 
   list = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -19,6 +22,8 @@ class ReportController extends BaseController {
       {
         search: query.search,
         reportType: query.reportType,
+        exportFormat: query.format,
+        status: query.status,
         generatedBy: query.generatedBy,
         fromDate: query.fromDate,
         toDate: query.toDate,
@@ -45,6 +50,19 @@ class ReportController extends BaseController {
     }
 
     this.success(res, 'Report download details retrieved successfully', downloadInfo);
+  });
+
+  downloadFile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const streamInfo = await reportService.getStreamInfo(req.params.id);
+    res.setHeader('Content-Type', streamInfo.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${streamInfo.fileName}"`);
+    res.download(streamInfo.filePath, streamInfo.fileName);
+  });
+
+  delete = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    await reportService.deleteReport(req.params.id, userId);
+    this.noContent(res);
   });
 
   private requireUserId(req: Request): string {

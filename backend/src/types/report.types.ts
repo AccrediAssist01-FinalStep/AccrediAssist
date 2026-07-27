@@ -1,5 +1,9 @@
 import { Types } from 'mongoose';
-import { ReportType } from '../database/enums';
+import {
+  ReportExportFormat,
+  ReportStatus,
+  ReportType,
+} from '../database/enums';
 import { IBaseDocument } from './base.types';
 
 export interface ReportFiltersApplied {
@@ -7,6 +11,9 @@ export interface ReportFiltersApplied {
   endDate?: Date;
   department?: string;
   category?: string;
+  month?: string;
+  year?: number;
+  academicYear?: string;
   [key: string]: unknown;
 }
 
@@ -16,6 +23,14 @@ export interface IReport extends IBaseDocument {
   generatedBy: Types.ObjectId;
   generatedDate: Date;
   fileUrl?: string;
+  filePath?: string;
+  fileName?: string;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
+  fileSizeBytes?: number;
+  pageCount?: number;
+  sectionsIncluded?: string[];
+  errorMessage?: string;
   filtersApplied?: ReportFiltersApplied;
 }
 
@@ -25,6 +40,14 @@ export interface CreateReportInput {
   generatedBy: Types.ObjectId;
   generatedDate?: Date;
   fileUrl?: string;
+  filePath?: string;
+  fileName?: string;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
+  fileSizeBytes?: number;
+  pageCount?: number;
+  sectionsIncluded?: string[];
+  errorMessage?: string;
   filtersApplied?: ReportFiltersApplied;
 }
 
@@ -34,6 +57,14 @@ export interface UpdateReportInput {
   generatedBy?: Types.ObjectId;
   generatedDate?: Date;
   fileUrl?: string;
+  filePath?: string;
+  fileName?: string;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
+  fileSizeBytes?: number;
+  pageCount?: number;
+  sectionsIncluded?: string[];
+  errorMessage?: string;
   filtersApplied?: ReportFiltersApplied;
 }
 
@@ -44,8 +75,17 @@ export interface IReportResponse {
   generatedBy: Types.ObjectId;
   generatedDate: Date;
   fileUrl?: string;
+  filePath?: string;
+  fileName?: string;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
+  fileSizeBytes?: number;
+  pageCount?: number;
+  sectionsIncluded?: string[];
+  errorMessage?: string;
   filtersApplied?: ReportFiltersApplied;
   downloadReady: boolean;
+  downloadUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,18 +97,28 @@ export interface ReportDownloadResponse {
   fileName: string;
   contentType: string;
   status: 'ready';
+  exportFormat?: ReportExportFormat;
+  fileSizeBytes?: number;
+}
+
+export interface ReportStreamInfo {
+  filePath: string;
+  fileName: string;
+  contentType: string;
 }
 
 export interface ReportFilters {
   search?: string;
   reportType?: ReportType;
+  exportFormat?: ReportExportFormat;
+  status?: ReportStatus;
   generatedBy?: string;
   fromDate?: Date;
   toDate?: Date;
 }
 
 export interface ReportSort {
-  sortBy: 'reportTitle' | 'reportType' | 'generatedDate' | 'createdAt';
+  sortBy: 'reportTitle' | 'reportType' | 'generatedDate' | 'createdAt' | 'status';
   sortOrder: 'asc' | 'desc';
 }
 

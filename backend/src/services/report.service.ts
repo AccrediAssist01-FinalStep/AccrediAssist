@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { reportRepository } from '../repositories/report.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
 import {
@@ -7,16 +9,22 @@ import {
   ReportDownloadResponse,
   ReportFilters,
   ReportSort,
+  ReportStreamInfo,
 } from '../types/report.types';
 import { toReportResponse } from '../utils/report.mapper';
 import { logger } from '../utils/logger';
 import { PaginationOptions } from '../database/utils/queryHelpers';
 import { PaginatedResult } from '../repositories/base.repository';
 import { GenerateReportBody } from '../validations/report.validation';
-import { ReportType } from '../database/enums';
+import { ReportExportFormat, ReportType } from '../database/enums';
 import { BadRequestError, NotFoundError } from '../utils/errors';
+import { isGenerationReportType, parseGenerationReportType } from '../report-generation/utils/report-type.util';
+import { buildReportTitle } from '../report-generation/utils/report-context.util';
+import { reportGenerationOrchestrator } from './report-generation-orchestrator.service';
+import { docxReportService } from '../report-generation/docx/services/docx-report.service';
+import { pdfReportService } from '../report-generation/pdf/services/pdf-report.service';
 
-const buildReportTitle = (reportType: ReportType, filters: GenerateReportFilters): string => {
+const buildLegacyReportTitle = (reportType: ReportType, filters: GenerateReportFilters): string => {
   const parts = [reportType, 'Report'];
 
   if (filters.academicYear) {
@@ -47,9 +55,18 @@ const extractFiltersApplied = (input: GenerateReportBody): GenerateReportFilters
   return filters;
 };
 
-const buildDownloadFileName = (reportTitle: string, fileUrl: string): string => {
-  const extensionMatch = fileUrl.match(/\.(pdf|docx)(?:\?|$)/i);
-  const extension = extensionMatch ? extensionMatch[1].toLowerCase() : 'pdf';
+const buildDownloadFileName = (
+  reportTitle: string,
+  exportFormat?: ReportExportFormat,
+  fileName?: string,
+  fileUrl?: string,
+): string => {
+  if (fileName) {
+    return fileName;
+  }
+
+  const extensionMatch = fileUrl?.match(/\.(pdf|docx)(?:\?|$)/i);
+  const extension = exportFormat ?? (extensionMatch ? extensionMatch[1].toLowerCase() : 'pdf');
   const safeTitle = reportTitle
     .trim()
     .replace(/[^\w\s-]/g, '')
@@ -59,18 +76,57 @@ const buildDownloadFileName = (reportTitle: string, fileUrl: string): string => 
   return `${safeTitle || 'report'}.${extension}`;
 };
 
-const resolveContentType = (fileUrl: string): string => {
-  if (/\.docx(?:\?|$)/i.test(fileUrl)) {
+const resolveContentType = (exportFormat?: ReportExportFormat, fileUrl?: string): string => {
+  if (exportFormat === 'docx' || /\.docx(?:\?|$)/i.test(fileUrl ?? '')) {
     return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
   }
 
   return 'application/pdf';
 };
 
+const resolveReportTitle = (reportType: ReportType, filters: GenerateReportFilters): string => {
+  if (isGenerationReportType(reportType)) {
+    return buildReportTitle(reportType, filters);
+  }
+
+  return buildLegacyReportTitle(reportType, filters);
+};
+
+const resolveLocalFilePath = (report: IReport): string | null => {
+  if (report.filePath && fs.existsSync(report.filePath)) {
+    return report.filePath;
+  }
+
+  if (report.fileName) {
+    const docxPath = docxReportService.resolveExportPath(report.fileName);
+    if (fs.existsSync(docxPath)) {
+      return docxPath;
+    }
+
+    const pdfPath = pdfReportService.resolveExportPath(report.fileName);
+    if (fs.existsSync(pdfPath)) {
+      return pdfPath;
+    }
+  }
+
+  return null;
+};
+
 export class ReportService {
   async generateReport(input: GenerateReportBody, userId: string): Promise<IReportResponse> {
     const filtersApplied = extractFiltersApplied(input);
-    const reportTitle = buildReportTitle(input.reportType, filtersApplied);
+    const reportTitle = resolveReportTitle(input.reportType, filtersApplied);
+    const shouldGenerateFile = Boolean(input.format);
+
+    if (shouldGenerateFile && !isGenerationReportType(input.reportType)) {
+      throw new BadRequestError(
+        `Report type "${input.reportType}" does not support PDF/DOCX generation. Supported types: NBA, NAAC, AICTE, Placement, Internship, Student Achievement, Faculty Achievement, Publication, Patent, Completed Event.`,
+      );
+    }
+
+    if (shouldGenerateFile) {
+      return this.generateReportWithFile(input, userId, filtersApplied, reportTitle);
+    }
 
     logger.info('Report generation requested (placeholder)', {
       reportType: input.reportType,
@@ -85,6 +141,7 @@ export class ReportService {
         generatedBy: userId,
         generatedDate: new Date(),
         filtersApplied,
+        status: 'pending',
       } as Partial<IReport>,
       userId,
     );
@@ -97,6 +154,91 @@ export class ReportService {
     });
 
     return toReportResponse(report);
+  }
+
+  private async generateReportWithFile(
+    input: GenerateReportBody,
+    userId: string,
+    filtersApplied: GenerateReportFilters,
+    reportTitle: string,
+  ): Promise<IReportResponse> {
+    const format = input.format as ReportExportFormat;
+    const generationReportType = parseGenerationReportType(input.reportType);
+
+    logger.info('Report file generation started', {
+      reportType: input.reportType,
+      format,
+      userId,
+      filtersApplied,
+    });
+
+    const report = await reportRepository.create(
+      {
+        reportTitle,
+        reportType: input.reportType,
+        generatedBy: userId,
+        generatedDate: new Date(),
+        filtersApplied,
+        exportFormat: format,
+        status: 'generating',
+      } as Partial<IReport>,
+      userId,
+    );
+
+    try {
+      const generated = await reportGenerationOrchestrator.generateFile(
+        generationReportType,
+        filtersApplied,
+        format,
+      );
+
+      const updated = await reportRepository.update(
+        String(report._id),
+        {
+          status: 'completed',
+          filePath: generated.filePath,
+          fileName: generated.fileName,
+          fileSizeBytes: generated.fileSizeBytes,
+          pageCount: generated.pageCount,
+          sectionsIncluded: generated.sectionsIncluded,
+          errorMessage: undefined,
+        } as Partial<IReport>,
+        userId,
+      );
+
+      if (!updated) {
+        throw new NotFoundError('Report not found after generation');
+      }
+
+      await auditLogRepository.create({
+        userId,
+        action: 'CREATE',
+        module: 'Report',
+        description: `Report generated (${format.toUpperCase()}): ${reportTitle}`,
+      });
+
+      logger.info('Report file generation completed', {
+        reportId: updated._id,
+        format,
+        fileName: generated.fileName,
+        fileSizeBytes: generated.fileSizeBytes,
+      });
+
+      return toReportResponse(updated);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Report generation failed';
+
+      await reportRepository.update(
+        String(report._id),
+        {
+          status: 'failed',
+          errorMessage: message,
+        } as Partial<IReport>,
+        userId,
+      );
+
+      throw error;
+    }
   }
 
   async listReports(
@@ -129,20 +271,104 @@ export class ReportService {
       throw new NotFoundError('Report not found');
     }
 
-    if (!report.fileUrl) {
+    if (report.status === 'generating') {
+      throw new BadRequestError('Report is still being generated. Please try again shortly.');
+    }
+
+    if (report.status === 'failed') {
       throw new BadRequestError(
-        'Report file is not available yet. AI generation has not been completed.',
+        report.errorMessage ?? 'Report generation failed. Please regenerate the report.',
       );
     }
+
+    const localFilePath = resolveLocalFilePath(report);
+    const hasRemoteUrl = Boolean(report.fileUrl);
+
+    if (!localFilePath && !hasRemoteUrl) {
+      throw new BadRequestError(
+        'Report file is not available yet. Generation has not been completed.',
+      );
+    }
+
+    const downloadUrl = localFilePath
+      ? `/api/v1/reports/download/${report._id}`
+      : report.fileUrl!;
 
     return {
       reportId: report._id,
       reportTitle: report.reportTitle,
-      downloadUrl: report.fileUrl,
-      fileName: buildDownloadFileName(report.reportTitle, report.fileUrl),
-      contentType: resolveContentType(report.fileUrl),
+      downloadUrl,
+      fileName: buildDownloadFileName(
+        report.reportTitle,
+        report.exportFormat,
+        report.fileName,
+        report.fileUrl,
+      ),
+      contentType: resolveContentType(report.exportFormat, report.fileUrl),
       status: 'ready',
+      exportFormat: report.exportFormat,
+      fileSizeBytes: report.fileSizeBytes,
     };
+  }
+
+  async getStreamInfo(id: string): Promise<ReportStreamInfo> {
+    const report = await reportRepository.findById(id);
+    if (!report) {
+      throw new NotFoundError('Report not found');
+    }
+
+    if (report.status === 'generating') {
+      throw new BadRequestError('Report is still being generated. Please try again shortly.');
+    }
+
+    if (report.status === 'failed') {
+      throw new BadRequestError(
+        report.errorMessage ?? 'Report generation failed. Please regenerate the report.',
+      );
+    }
+
+    const localFilePath = resolveLocalFilePath(report);
+    if (!localFilePath) {
+      if (report.fileUrl) {
+        throw new BadRequestError(
+          'This report is hosted externally. Use the download metadata endpoint with ?redirect=true.',
+        );
+      }
+
+      throw new BadRequestError('Report file is not available for download.');
+    }
+
+    return {
+      filePath: localFilePath,
+      fileName: buildDownloadFileName(
+        report.reportTitle,
+        report.exportFormat,
+        report.fileName ?? path.basename(localFilePath),
+        report.fileUrl,
+      ),
+      contentType: resolveContentType(
+        report.exportFormat,
+        report.fileName ?? localFilePath,
+      ),
+    };
+  }
+
+  async deleteReport(id: string, userId: string): Promise<void> {
+    const report = await reportRepository.findById(id);
+    if (!report) {
+      throw new NotFoundError('Report not found');
+    }
+
+    await reportRepository.softDelete(id, userId);
+
+    await auditLogRepository.create({
+      userId,
+      action: 'DELETE',
+      module: 'Report',
+      description: `Report deleted: ${report.reportTitle}`,
+    });
+
+    logger.info('Report soft-deleted', { reportId: id, userId });
   }
 }
 

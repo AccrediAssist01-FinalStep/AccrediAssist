@@ -4,6 +4,8 @@ import {
   applyBaseSchema,
   baseSchemaOptions,
   enumField,
+  REPORT_EXPORT_FORMATS,
+  REPORT_STATUSES,
   REPORT_TYPES,
 } from '../database';
 
@@ -40,6 +42,39 @@ const reportSchema = new Schema<IReport>(
       trim: true,
       validate: urlValidator,
     },
+    filePath: {
+      type: String,
+      trim: true,
+    },
+    fileName: {
+      type: String,
+      trim: true,
+    },
+    exportFormat: {
+      type: String,
+      enum: enumField(REPORT_EXPORT_FORMATS, 'export format'),
+    },
+    status: {
+      type: String,
+      enum: enumField(REPORT_STATUSES, 'status'),
+      default: 'pending',
+    },
+    fileSizeBytes: {
+      type: Number,
+      min: 0,
+    },
+    pageCount: {
+      type: Number,
+      min: 0,
+    },
+    sectionsIncluded: {
+      type: [String],
+      default: undefined,
+    },
+    errorMessage: {
+      type: String,
+      trim: true,
+    },
     filtersApplied: {
       type: Schema.Types.Mixed,
       default: undefined,
@@ -56,5 +91,7 @@ applyBaseSchema(reportSchema);
 reportSchema.index({ reportType: 1 });
 reportSchema.index({ generatedDate: -1 });
 reportSchema.index({ generatedBy: 1 });
+reportSchema.index({ exportFormat: 1 });
+reportSchema.index({ status: 1 });
 
 export const Report = mongoose.model<IReport>('Report', reportSchema);
