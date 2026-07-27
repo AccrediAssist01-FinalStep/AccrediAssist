@@ -94,3 +94,140 @@ export interface NotificationItem {
 }
 
 export type ApiResult<T> = ApiResponse<T>;
+
+export type PendingRecordStatus = 'Pending' | 'Approved' | 'Rejected' | 'Needs Review';
+
+export type RecordCategory =
+  | 'Placement'
+  | 'Internship'
+  | 'Workshop'
+  | 'Seminar'
+  | 'Industrial Visit'
+  | 'Student Achievement'
+  | 'Faculty Achievement'
+  | 'Sports'
+  | 'Cultural'
+  | 'Patent'
+  | 'Publication'
+  | 'Certification'
+  | 'Research';
+
+export interface PendingRecordEditChange {
+  field: string;
+  previousValue: unknown;
+  newValue: unknown;
+}
+
+export interface PendingRecordEditHistoryEntry {
+  editedBy: string;
+  editedAt: string;
+  changes: PendingRecordEditChange[];
+  previousConfidenceScore?: number;
+  newConfidenceScore?: number;
+}
+
+export interface PendingRecordAiPipeline {
+  classification?: {
+    category?: string;
+    confidence?: number | null;
+    reasoning?: string | null;
+  };
+  validation?: {
+    validationStatus?: 'valid' | 'invalid';
+    validationErrors?: Array<{
+      code: string;
+      field?: string | null;
+      message: string;
+    }>;
+  };
+  duplicateDetection?: {
+    duplicate?: boolean;
+    similarityScore?: number;
+    matchingRecordId?: string | null;
+  };
+  models?: {
+    extraction?: string;
+    classification?: string;
+    validation?: string;
+  };
+}
+
+export interface PendingRecordExtractedData {
+  title?: string | null;
+  description?: string | null;
+  categoryHint?: string | null;
+  studentNames?: string[] | null;
+  studentName?: string | null;
+  facultyNames?: string[] | null;
+  facultyName?: string | null;
+  company?: string | null;
+  organization?: string | null;
+  eventName?: string | null;
+  eventType?: string | null;
+  achievementType?: string | null;
+  publicationTitle?: string | null;
+  patentTitle?: string | null;
+  internship?: string | null;
+  placement?: string | null;
+  certificates?: string[] | null;
+  mediaReferences?: string[] | null;
+  date?: string | null;
+  location?: string | null;
+  confidence?: number | null;
+  media?: unknown;
+  mediaMetadata?: unknown;
+  aiPipeline?: PendingRecordAiPipeline;
+  [key: string]: unknown;
+}
+
+export interface PendingRecord {
+  _id: string;
+  originalMessage: string;
+  groupName?: string;
+  senderName?: string;
+  category: RecordCategory;
+  extractedData?: PendingRecordExtractedData;
+  confidenceScore: number;
+  status: PendingRecordStatus;
+  rejectionReason?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  editHistory?: PendingRecordEditHistoryEntry[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PendingRecordListResponse {
+  items: PendingRecord[];
+  meta: PaginatedMeta;
+}
+
+export interface EditPendingRecordPayload {
+  extractedData?: Partial<PendingRecordExtractedData>;
+  confidenceScore?: number;
+  category?: RecordCategory;
+}
+
+export interface RejectPendingRecordPayload {
+  reason: string;
+}
+
+export type PendingRecordSortField =
+  | 'createdAt'
+  | 'status'
+  | 'category'
+  | 'senderName'
+  | 'confidenceScore';
+
+export interface PendingRecordQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  title?: string;
+  status?: PendingRecordStatus;
+  category?: RecordCategory;
+  groupName?: string;
+  senderName?: string;
+  sortBy?: PendingRecordSortField;
+  sortOrder?: 'asc' | 'desc';
+}
