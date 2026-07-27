@@ -43,6 +43,7 @@
     "test:charts-analytics": "tsx src/scripts/test-charts-analytics.ts",
     "test:docx-report": "tsx src/scripts/test-docx-report.ts",
     "test:pdf-report": "tsx src/scripts/test-pdf-report.ts",
+    "test:report-templates": "tsx src/scripts/test-report-templates.ts",
     "test:notification-api": "tsx src/scripts/test-notification-api.ts",
     "test:audit-log-api": "tsx src/scripts/test-audit-log-api.ts",
     "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api",

@@ -17,6 +17,7 @@ import type { ReportGenerationFilters } from '../interfaces/report-generation.in
 import fs from 'fs';
 import path from 'path';
 import { NotFoundError } from '../../utils/errors';
+import { templateService } from '../template-system/services/template.service';
 
 class ReportGenerationController extends BaseController {
   /** GET /report-generation/status */
@@ -279,6 +280,35 @@ class ReportGenerationController extends BaseController {
     }
 
     res.download(filePath, fileName);
+  });
+
+  /** GET /report-generation/template-system — list reusable report templates */
+  listTemplateSystem = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+    this.requireUserId(_req);
+    const templates = templateService.listTemplates();
+    this.success(res, 'Report templates retrieved', templates);
+  });
+
+  /** GET /report-generation/template-system/:typeId — get template definition */
+  getTemplateSystem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const reportType = parseGenerationReportType(String(req.params.typeId));
+    const definition = templateService.getTemplateDefinition(reportType);
+    this.success(res, 'Report template definition retrieved', definition);
+  });
+
+  /** POST /report-generation/template-system/resolve — build resolved template with overrides */
+  resolveTemplateSystem = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const reportType = parseGenerationReportType(req.body.reportType);
+
+    const resolved = templateService.resolveWithOverrides(reportType, req.body.overrides, {
+      academicYear: req.body.academicYear,
+      department: req.body.department,
+      reportTitle: req.body.reportTitle,
+    });
+
+    this.success(res, 'Report template resolved successfully', resolved);
   });
 
   private requireUserId(req: Request): string {

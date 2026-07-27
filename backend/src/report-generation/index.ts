@@ -73,4 +73,17 @@ export {
   type PdfGenerationResult,
 } from './pdf';
 
+export {
+  templateService,
+  TemplateService,
+  templateBuilder,
+  TemplateBuilder,
+  REPORT_TEMPLATE_DEFINITIONS,
+  REPORT_TEMPLATE_SECTION_KEYS,
+  INSTITUTIONAL_THEME,
+  type ResolvedReportTemplate,
+  type ReportTemplateDefinition,
+  type ReportTemplateOverrides,
+} from './template-system';
+
 export { default as reportGenerationRouter } from './routes/report-generation.routes';

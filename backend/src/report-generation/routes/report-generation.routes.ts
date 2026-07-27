@@ -7,6 +7,7 @@ import {
   reportGenerationPlanSchema,
   reportTypeParamSchema,
   reportDownloadParamSchema,
+  reportTemplateResolveSchema,
 } from '../utils/report-generation.validation';
 import { aggregationFiltersSchema } from '../aggregation/utils/aggregation.validation';
 
@@ -79,6 +80,20 @@ reportGenerationRouter.get(
   '/downloads/:fileName',
   validateParams(reportDownloadParamSchema),
   reportGenerationController.downloadReport,
+);
+
+reportGenerationRouter.get('/template-system', reportGenerationController.listTemplateSystem);
+
+reportGenerationRouter.get(
+  '/template-system/:typeId',
+  validateParams(reportTypeParamSchema),
+  reportGenerationController.getTemplateSystem,
+);
+
+reportGenerationRouter.post(
+  '/template-system/resolve',
+  validate(reportTemplateResolveSchema),
+  reportGenerationController.resolveTemplateSystem,
 );
 
 export default reportGenerationRouter;
