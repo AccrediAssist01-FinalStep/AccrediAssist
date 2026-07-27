@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { PageTransition } from '@/components/layout/PageLayout';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { NoNotificationsIllustration } from '@/components/illustrations';
@@ -47,7 +47,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-8">
+    <PageTransition>
       <NotificationsHeader unreadCount={unreadCount} />
 
       <NotificationQuickActions
@@ -90,6 +90,6 @@ export default function NotificationsPage() {
           Refreshing notifications...
         </p>
       )}
-    </motion.div>
+    </PageTransition>
   );
 }

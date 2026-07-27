@@ -3,9 +3,45 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 export function PageHeaderSkeleton() {
   return (
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-4 w-72" />
+    <div className="space-y-3">
+      <Skeleton className="h-6 w-32" />
+      <Skeleton className="h-8 w-56" />
+      <Skeleton className="h-4 w-80" />
+    </div>
+  );
+}
+
+export function FilterBarSkeleton() {
+  return (
+    <div className="rounded-xl border border-border p-4">
+      <div className="grid gap-3 md:grid-cols-12">
+        <Skeleton className="h-10 md:col-span-4" />
+        <Skeleton className="h-10 md:col-span-2" />
+        <Skeleton className="h-10 md:col-span-2" />
+        <Skeleton className="h-10 md:col-span-2" />
+        <Skeleton className="h-10 md:col-span-2" />
+      </div>
+    </div>
+  );
+}
+
+export function CardListSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }).map((_, index) => (
+        <Skeleton key={index} className="h-28 w-full rounded-xl" />
+      ))}
+    </div>
+  );
+}
+
+export function PageSkeleton() {
+  return (
+    <div className="space-y-8 pb-8">
+      <PageHeaderSkeleton />
+      <StatCardsSkeleton count={4} />
+      <FilterBarSkeleton />
+      <CardListSkeleton count={5} />
     </div>
   );
 }

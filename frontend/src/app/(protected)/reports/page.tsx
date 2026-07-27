@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { PageTransition } from '@/components/layout/PageLayout';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -100,7 +100,7 @@ export default function ReportsPage() {
   const showEmptyHistory = !historyQuery.isLoading && !historyQuery.isError && reports.length === 0;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-8">
+    <PageTransition>
       <ReportsHeader />
 
       <QuickReportCards
@@ -164,6 +164,6 @@ export default function ReportsPage() {
         onDownload={handleDownload}
         isDownloading={downloadingId === previewReport?._id}
       />
-    </motion.div>
+    </PageTransition>
   );
 }

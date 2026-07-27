@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock3, Sparkles, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { FeaturePageHeader } from '@/components/layout/PageLayout';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PendingReviewHeaderStats } from '../types';
 
@@ -21,19 +22,12 @@ const statConfig = [
 export function PendingReviewHeader({ stats, isLoading }: PendingReviewHeaderProps) {
   return (
     <section className="space-y-6" aria-labelledby="pending-review-heading">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 id="pending-review-heading" className="text-3xl font-bold tracking-tight">
-              Pending Review
-            </h1>
-            <Badge variant="warning">Review Queue</Badge>
-          </div>
-          <p className="max-w-2xl text-muted">
-            Review AI extracted records before approving them into the ERP database.
-          </p>
-        </div>
-      </div>
+      <FeaturePageHeader
+        id="pending-review-heading"
+        title="Pending Review"
+        description="Review AI extracted records before approving them into the ERP database."
+        badge={<Badge variant="warning">Review Queue</Badge>}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statConfig.map((stat, index) => {
@@ -51,7 +45,8 @@ export function PendingReviewHeader({ stats, isLoading }: PendingReviewHeaderPro
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`rounded-xl border border-border bg-gradient-to-br ${stat.accent} p-5 shadow-soft`}
+              whileHover={{ y: -2, transition: { duration: 0.2 } }}
+              className={`rounded-xl border border-border bg-gradient-to-br ${stat.accent} p-5 shadow-soft transition-shadow hover:shadow-elevated`}
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="rounded-lg bg-card/80 p-2 ring-1 ring-border/50">

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Settings } from 'lucide-react';
 import { ErrorState } from '@/components/common/ErrorState';
+import { FeaturePageHeader, PageTransition } from '@/components/layout/PageLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/AuthProvider';
@@ -35,13 +35,14 @@ export default function ProfilePage() {
 
   if (profileQuery.isLoading && !profileUser) {
     return (
-      <div className="space-y-6">
-        <Skeleton className="h-40 w-full rounded-2xl" />
+      <div className="space-y-8 pb-8">
+        <Skeleton className="h-40 w-full rounded-xl" />
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="h-48 rounded-xl" />
           ))}
         </div>
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     );
   }
@@ -57,19 +58,20 @@ export default function ProfilePage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
-          <p className="text-sm text-muted">Your institutional identity and account overview</p>
-        </div>
-        <Button variant="outline" asChild className="gap-2">
-          <Link href="/settings">
-            <Settings className="size-4" />
-            Account Settings
-          </Link>
-        </Button>
-      </div>
+    <PageTransition>
+      <FeaturePageHeader
+        id="profile-heading"
+        title="Profile"
+        description="Your institutional identity and account overview."
+        action={
+          <Button variant="outline" asChild className="gap-2">
+            <Link href="/settings">
+              <Settings className="size-4" aria-hidden="true" />
+              Account Settings
+            </Link>
+          </Button>
+        }
+      />
 
       <ProfileHeader user={profileUser} onEditProfile={() => setEditOpen(true)} />
       <ProfileInfoCards user={profileUser} />
@@ -80,6 +82,6 @@ export default function ProfilePage() {
       />
 
       <EditProfileDialog user={profileUser} open={editOpen} onOpenChange={setEditOpen} />
-    </motion.div>
+    </PageTransition>
   );
 }

@@ -1,22 +1,31 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useDashboardData } from '@/features/dashboard/hooks/use-dashboard-data';
 import { DashboardHero } from '@/features/dashboard/components/DashboardHero';
 import { StatsGrid } from '@/features/dashboard/components/StatsGrid';
 import { AIInsightsPanel } from '@/features/dashboard/components/AIInsightsPanel';
-import { DashboardCharts } from '@/features/dashboard/components/DashboardCharts';
 import { RecentActivityTimeline } from '@/features/dashboard/components/RecentActivityTimeline';
 import { QuickActions } from '@/features/dashboard/components/QuickActions';
+import { PageTransition } from '@/components/layout/PageLayout';
 import { ChartSkeleton, StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
 import { ErrorState } from '@/components/common/ErrorState';
+
+const DashboardCharts = dynamic(
+  () =>
+    import('@/features/dashboard/components/DashboardCharts').then((module) => ({
+      default: module.DashboardCharts,
+    })),
+  { loading: () => <ChartSkeleton /> },
+);
 
 export default function DashboardPage() {
   const { data, isLoading, isError, refetch, isFetching } = useDashboardData();
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
-        <div className="h-48 animate-pulse rounded-2xl bg-accent" />
+      <div className="space-y-8 pb-8">
+        <div className="h-48 animate-pulse rounded-xl bg-accent" />
         <StatCardsSkeleton count={8} />
         <ChartSkeleton />
         <ChartSkeleton />
@@ -29,7 +38,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-8 pb-4">
+    <PageTransition>
       <DashboardHero />
 
       <StatsGrid stats={data.stats} />
@@ -54,6 +63,6 @@ export default function DashboardPage() {
           Refreshing dashboard data...
         </p>
       )}
-    </div>
+    </PageTransition>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   DEFAULT_FILTERS,
   PendingRecordDrawer,
@@ -13,6 +12,7 @@ import {
   usePendingReviewStats,
   type PendingReviewFilters,
 } from '@/features/pending-review';
+import { PageTransition } from '@/components/layout/PageLayout';
 import type { PendingRecord } from '@/types/api-models';
 
 export default function PendingReviewsPage() {
@@ -63,12 +63,7 @@ export default function PendingReviewsPage() {
   const meta = listQuery.data?.meta;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.25 }}
-      className="space-y-8 pb-6"
-    >
+    <PageTransition>
       <PendingReviewHeader stats={statsQuery.data} isLoading={statsQuery.isLoading} />
 
       <PendingReviewFiltersBar
@@ -105,6 +100,6 @@ export default function PendingReviewsPage() {
           Refreshing review queue...
         </p>
       )}
-    </motion.div>
+    </PageTransition>
   );
 }

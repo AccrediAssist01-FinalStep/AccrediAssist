@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { PageTransition } from '@/components/layout/PageLayout';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { TableSkeleton } from '@/components/common/LoadingSkeletons';
@@ -124,11 +125,7 @@ export default function SearchPage() {
   const showLanding = !results && !isSearching && !isError;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-8 pb-8"
-    >
+    <PageTransition>
       <SmartSearchHeader
         geminiConfigured={statusQuery.data?.geminiConfigured}
         model={statusQuery.data?.geminiModel}
@@ -225,6 +222,6 @@ export default function SearchPage() {
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
-    </motion.div>
+    </PageTransition>
   );
 }

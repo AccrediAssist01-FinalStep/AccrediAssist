@@ -38,12 +38,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow-elevated"
+          >
+            Skip to main content
+          </a>
           <TopNav />
           <motion.main
+            id="main-content"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
             className="flex-1 p-4 md:p-6 lg:p-8"
+            tabIndex={-1}
           >
             <div className="mx-auto max-w-7xl">{children}</div>
           </motion.main>
@@ -58,18 +66,21 @@ export function PageHeader({
   title,
   description,
   action,
+  badge,
   className,
 }: {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  badge?: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={cn('mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between', className)}>
-      <div>
+    <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between', className)}>
+      <div className="space-y-2">
+        {badge && <div className="flex flex-wrap items-center gap-2">{badge}</div>}
         <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">{title}</h1>
-        {description && <p className="mt-1 text-muted">{description}</p>}
+        {description && <p className="max-w-3xl text-muted">{description}</p>}
       </div>
       {action}
     </div>

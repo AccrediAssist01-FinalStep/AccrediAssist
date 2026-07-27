@@ -1,20 +1,20 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { PageHeader } from '@/components/layout/AppShell';
-import { ChartSkeleton, StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
+import { FeaturePageHeader, PageTransition, SectionCard } from '@/components/layout/PageLayout';
+import { ChartSkeleton, PageHeaderSkeleton, StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
 import { ErrorState } from '@/components/common/ErrorState';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardDescription } from '@/components/ui/card';
 import { dashboardService } from '@/services/dashboard.service';
+
+const AnalyticsCategoryChart = dynamic(
+  () =>
+    import('@/features/analytics/components/AnalyticsCategoryChart').then((module) => ({
+      default: module.AnalyticsCategoryChart,
+    })),
+  { loading: () => <ChartSkeleton /> },
+);
 
 export default function AnalyticsPage() {
   const year = new Date().getFullYear();
@@ -42,7 +42,8 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-8 pb-8">
+        <PageHeaderSkeleton />
         <StatCardsSkeleton count={4} />
         <ChartSkeleton />
       </div>
@@ -50,57 +51,50 @@ export default function AnalyticsPage() {
   }
 
   if (isError) {
-    return <ErrorState onRetry={() => refetch()} />;
+    return (
+      <ErrorState
+        title="Analytics unavailable"
+        message="We couldn't load analytics data. Please try again."
+        onRetry={() => refetch()}
+      />
+    );
   }
 
+  const stats = [
+    { label: 'Total Students', value: summary?.totalStudents },
+    { label: 'Placements', value: summary?.totalPlacements },
+    { label: 'Publications', value: summary?.totalPublications },
+    { label: 'Pending Reviews', value: summary?.pendingReviews },
+  ];
+
   return (
-    <div className="space-y-8">
-      <PageHeader
+    <PageTransition>
+      <FeaturePageHeader
+        id="analytics-heading"
         title="Analytics"
         description="Deep insights into accreditation metrics and institutional performance."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Total Students', value: summary?.totalStudents },
-          { label: 'Placements', value: summary?.totalPlacements },
-          { label: 'Publications', value: summary?.totalPublications },
-          { label: 'Pending Reviews', value: summary?.pendingReviews },
-        ].map((stat) => (
-          <Card key={stat.label}>
-            <CardHeader className="pb-2">
-              <CardDescription>{stat.label}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{stat.value?.toLocaleString() ?? 0}</p>
-            </CardContent>
-          </Card>
+        {stats.map((stat) => (
+          <SectionCard key={stat.label} contentClassName="py-5">
+            <CardDescription className="text-sm">{stat.label}</CardDescription>
+            <p className="mt-2 text-3xl font-bold tracking-tight">{stat.value?.toLocaleString() ?? 0}</p>
+          </SectionCard>
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Category Distribution</CardTitle>
-          <CardDescription>Current month record distribution across categories</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563EB" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="category" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Area type="monotone" dataKey="count" stroke="#2563EB" fill="url(#colorCount)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
+      <SectionCard
+        title="Category Distribution"
+        description="Current month record distribution across categories"
+        contentClassName="pt-0"
+      >
+        {trendData.length > 0 ? (
+          <AnalyticsCategoryChart data={trendData} />
+        ) : (
+          <ChartSkeleton />
+        )}
+      </SectionCard>
+    </PageTransition>
   );
 }
