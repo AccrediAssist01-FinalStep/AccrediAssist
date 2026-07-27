@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,19 +13,27 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import { notificationService } from '@/services/notification.service';
+import {
+  useNotificationMutations,
+  useNotifications,
+  useUnreadNotificationCount,
+} from '@/features/notifications';
+import { DEFAULT_NOTIFICATION_FILTERS } from '@/features/notifications';
+import { formatNotificationTime } from '@/features/notifications/utils/notifications.utils';
 
 export function NotificationDropdown() {
   const router = useRouter();
+  const { markReadMutation } = useNotificationMutations();
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['notifications-preview'],
-    queryFn: () => notificationService.getNotifications(1, 5),
-    staleTime: 30_000,
-    retry: 1,
+  const unreadQuery = useUnreadNotificationCount();
+  const unreadCount = unreadQuery.data ?? 0;
+  const { data, isLoading, isError } = useNotifications({
+    ...DEFAULT_NOTIFICATION_FILTERS,
+    limit: 5,
+    page: 1,
   });
 
-  const unreadCount = data?.items.filter((item) => !item.isRead).length ?? 0;
+  const previewItems = data?.items ?? [];
 
   return (
     <DropdownMenu>
@@ -44,7 +51,14 @@ export function NotificationDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex items-center justify-between gap-2">
+          Notifications
+          {unreadCount > 0 && (
+            <Badge variant="destructive" className="text-[10px]">
+              {unreadCount} unread
+            </Badge>
+          )}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {isLoading && (
           <div className="space-y-2 p-2">
@@ -55,15 +69,28 @@ export function NotificationDropdown() {
         {isError && (
           <p className="px-2 py-3 text-sm text-muted">Unable to load notifications.</p>
         )}
-        {!isLoading && !isError && data?.items.length === 0 && (
-          <p className="px-2 py-3 text-sm text-muted">You&apos;re all caught up.</p>
+        {!isLoading && !isError && previewItems.length === 0 && (
+          <p className="px-2 py-3 text-sm text-muted">No notifications available.</p>
         )}
         {!isLoading &&
           !isError &&
-          data?.items.map((item) => (
-            <DropdownMenuItem key={item._id} className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">{item.title}</span>
+          previewItems.map((item) => (
+            <DropdownMenuItem
+              key={item._id}
+              className="flex flex-col items-start gap-1 py-3"
+              onClick={() => {
+                if (!item.isRead) {
+                  void markReadMutation.mutateAsync(item._id);
+                }
+                router.push('/notifications');
+              }}
+            >
+              <div className="flex w-full items-center justify-between gap-2">
+                <span className="font-medium">{item.title}</span>
+                {!item.isRead && <span className="size-2 rounded-full bg-primary" />}
+              </div>
               <span className="line-clamp-2 text-xs text-muted">{item.message}</span>
+              <span className="text-[10px] text-muted">{formatNotificationTime(item.createdAt)}</span>
             </DropdownMenuItem>
           ))}
         <DropdownMenuSeparator />

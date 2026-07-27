@@ -101,13 +101,38 @@ export interface SearchHistoryItem {
   searchedAt: string;
 }
 
+export type NotificationType = 'Approval' | 'AI' | 'Report' | 'System';
+
 export interface NotificationItem {
   _id: string;
   title: string;
   message: string;
-  type: string;
+  type: NotificationType;
   isRead: boolean;
+  userId?: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface NotificationListMeta extends PaginatedMeta {
+  unreadCount: number;
+}
+
+export interface NotificationListResponse {
+  items: NotificationItem[];
+  meta: NotificationListMeta;
+}
+
+export type NotificationSortField = 'createdAt' | 'title' | 'type';
+
+export interface NotificationQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  isRead?: boolean;
+  type?: NotificationType;
+  sortBy?: NotificationSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export type ApiResult<T> = ApiResponse<T>;
