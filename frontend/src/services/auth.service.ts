@@ -21,7 +21,8 @@ export const authService = {
   },
 
   logout: async (): Promise<void> => {
-    await apiClient.post('/auth/logout');
+    // Client-side logout only — backend has no /auth/logout endpoint
+    return Promise.resolve();
   },
 
   getProfile: async (): Promise<User> => {

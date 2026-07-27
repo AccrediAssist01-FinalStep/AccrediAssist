@@ -2,15 +2,16 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { useAuthStore } from '@/store/auth.store';
+import { useAuth } from '@/providers/AuthProvider';
+import { StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, token, fetchProfile, isLoading } = useAuthStore();
+  const { isAuthenticated, token, fetchProfile, isLoading } = useAuth();
 
   useEffect(() => {
     if (token && !isAuthenticated) {
-      fetchProfile();
+      void fetchProfile();
     }
   }, [token, isAuthenticated, fetchProfile]);
 
@@ -20,12 +21,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, token, isLoading, router]);
 
-  if (!isAuthenticated && !token) {
+  if (!isAuthenticated && (isLoading || token)) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted">Redirecting to login...</p>
+      <div className="flex min-h-screen flex-col gap-6 bg-background p-8">
+        <StatCardsSkeleton count={3} />
       </div>
     );
+  }
+
+  if (!isAuthenticated && !token) {
+    return null;
   }
 
   return <>{children}</>;
