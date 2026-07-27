@@ -3,30 +3,26 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
-import { StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
+import { LoginPageSkeleton } from '@/components/auth/LoginPageSkeleton';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, token, fetchProfile, isLoading } = useAuth();
+  const { isAuthenticated, token, fetchProfile, isLoading, isInitializing } = useAuth();
 
   useEffect(() => {
-    if (token && !isAuthenticated) {
+    if (token && !isAuthenticated && !isLoading) {
       void fetchProfile();
     }
-  }, [token, isAuthenticated, fetchProfile]);
+  }, [token, isAuthenticated, isLoading, fetchProfile]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && !token) {
+    if (!isInitializing && !isLoading && !isAuthenticated && !token) {
       router.replace('/login');
     }
-  }, [isAuthenticated, token, isLoading, router]);
+  }, [isAuthenticated, token, isLoading, isInitializing, router]);
 
-  if (!isAuthenticated && (isLoading || token)) {
-    return (
-      <div className="flex min-h-screen flex-col gap-6 bg-background p-8">
-        <StatCardsSkeleton count={3} />
-      </div>
-    );
+  if (isInitializing || (!isAuthenticated && (isLoading || token))) {
+    return <LoginPageSkeleton />;
   }
 
   if (!isAuthenticated && !token) {

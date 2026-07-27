@@ -10,7 +10,8 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:auth-flow": "tsx src/scripts/test-auth-flow.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
