@@ -75,7 +75,6 @@ export interface IReportResponse {
   generatedBy: Types.ObjectId;
   generatedDate: Date;
   fileUrl?: string;
-  filePath?: string;
   fileName?: string;
   exportFormat?: ReportExportFormat;
   status?: ReportStatus;

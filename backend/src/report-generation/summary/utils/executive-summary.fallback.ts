@@ -58,9 +58,6 @@ export const buildFallbackExecutiveSummary = (
         `${stats.label}: highest departmental contribution from ${stats.departmentWiseCount[0].label} (${stats.departmentWiseCount[0].count} records).`,
       );
     }
-    if (stats.totalCount === 0) {
-      recommendations.push(`Review data capture processes for ${stats.label} to ensure complete institutional reporting.`);
-    }
   }
 
   aggregation.summary.topDepartments.slice(0, 3).forEach((dept) => {

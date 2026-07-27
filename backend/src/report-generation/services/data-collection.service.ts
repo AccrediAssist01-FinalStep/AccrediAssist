@@ -10,13 +10,7 @@ import {
   ReportPipelineContext,
 } from '../interfaces/report-data.interface';
 import { ReportGenerationFilters } from '../interfaces/report-generation.interface';
-
-const mapToAggregationFilters = (filters: ReportGenerationFilters): AggregationFilters => ({
-  department: filters.department,
-  academicYear: filters.academicYear,
-  startDate: filters.startDate,
-  endDate: filters.endDate,
-});
+import { mapToAggregationFilters } from '../utils/filter-mapper.util';
 
 /** Maps report-generation filters to aggregation module keys from type definition */
 const resolveModulesForReportType = (reportType: GenerationReportType) => {

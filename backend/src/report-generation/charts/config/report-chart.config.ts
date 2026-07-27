@@ -39,7 +39,11 @@ export const getChartIdsForReportType = (reportType: GenerationReportType): Char
     .map((module) => MODULE_CHART_MAP[module])
     .filter((chartId): chartId is ChartDefinitionId => !!chartId);
 
-  return [...new Set([...moduleCharts, ...INSTITUTIONAL_CHARTS])];
+  const institutionalCharts = modules.includes('pendingReviews')
+    ? INSTITUTIONAL_CHARTS
+    : INSTITUTIONAL_CHARTS.filter((id) => id !== 'pending-vs-approved-records');
+
+  return [...new Set([...moduleCharts, ...institutionalCharts])];
 };
 
 export const getChartDefinitionsForReportType = (reportType: GenerationReportType) => {

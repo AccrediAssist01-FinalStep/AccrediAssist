@@ -6,6 +6,7 @@ import { headerFooterService } from '../utils/header-footer.util';
 
 type PdfDoc = InstanceType<typeof PDFDocument>;
 
+const DATASET_COLORS = ['#2E75B6', '#70AD47', '#FFC000', '#ED7D31', '#5B9BD5', '#A5A5A5'];
 const CHART_HEIGHT = 180;
 const CHART_PADDING = 20;
 
@@ -25,8 +26,8 @@ export class ChartRenderer {
 
     state.y += 22;
 
-    const dataset = chart.datasets[0];
-    if (!dataset || chart.labels.length === 0) {
+    const datasets = chart.datasets.filter((dataset) => dataset.data.length > 0);
+    if (datasets.length === 0 || chart.labels.length === 0) {
       doc.font('Helvetica').fontSize(10).fillColor(PDF_COLORS.secondary)
         .text('No chart data available.', PDF_LAYOUT.margin, state.y);
       state.y += 24;
@@ -38,26 +39,30 @@ export class ChartRenderer {
     const chartWidth = getContentWidth() - CHART_PADDING * 2;
     const chartInnerHeight = CHART_HEIGHT - CHART_PADDING * 2;
 
-    const maxValue = Math.max(...dataset.data, 1);
+    const allValues = datasets.flatMap((dataset) => dataset.data);
+    const maxValue = Math.max(...allValues, 1);
 
     if (chart.chartType === 'pie' || chart.chartType === 'doughnut') {
       this.renderPieChart(doc, chart, chartLeft, chartTop, chartWidth, chartInnerHeight);
     } else if (chart.chartType === 'line' || chart.chartType === 'area') {
-      this.renderLineChart(
-        doc,
-        chart.labels,
-        dataset.data,
-        chartLeft,
-        chartTop,
-        chartWidth,
-        chartInnerHeight,
-        chart.chartType === 'area',
-      );
+      datasets.forEach((dataset, index) => {
+        this.renderLineChart(
+          doc,
+          chart.labels,
+          dataset.data,
+          chartLeft,
+          chartTop,
+          chartWidth,
+          chartInnerHeight,
+          chart.chartType === 'area' && index === 0,
+          index,
+        );
+      });
     } else {
-      this.renderBarChart(
+      this.renderGroupedBarChart(
         doc,
         chart.labels,
-        dataset.data,
+        datasets,
         chartLeft,
         chartTop,
         chartWidth,
@@ -74,6 +79,47 @@ export class ChartRenderer {
       .fillColor(PDF_COLORS.secondary)
       .text(`Chart type: ${chart.chartType.toUpperCase()} | Source: aggregated institutional data`, PDF_LAYOUT.margin, state.y);
     state.y += 20;
+  }
+
+  private renderGroupedBarChart(
+    doc: PdfDoc,
+    labels: string[],
+    datasets: PreparedChart['datasets'],
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+    maxValue: number,
+  ): void {
+    this.drawGrid(doc, left, top, width, height);
+
+    const barCount = labels.length;
+    const groupGap = 8;
+    const groupWidth = (width - groupGap * (barCount + 1)) / Math.max(barCount, 1);
+    const barWidth = groupWidth / Math.max(datasets.length, 1) - 2;
+
+    labels.forEach((label, labelIndex) => {
+      datasets.forEach((dataset, datasetIndex) => {
+        const value = dataset.data[labelIndex] ?? 0;
+        const barHeight = (value / maxValue) * (height - 20);
+        const groupLeft = left + groupGap + labelIndex * (groupWidth + groupGap);
+        const x = groupLeft + datasetIndex * (barWidth + 2);
+        const y = top + height - barHeight - 10;
+
+        doc.rect(x, y, barWidth, barHeight).fill(DATASET_COLORS[datasetIndex % DATASET_COLORS.length]);
+      });
+
+      const groupLeft = left + groupGap + labelIndex * (groupWidth + groupGap);
+      doc
+        .font('Helvetica')
+        .fontSize(7)
+        .fillColor(PDF_COLORS.secondary)
+        .text(label.slice(0, 12), groupLeft - 2, top + height - 4, {
+          width: groupWidth + 4,
+          align: 'center',
+          lineBreak: false,
+        });
+    });
   }
 
   private renderBarChart(
@@ -121,10 +167,14 @@ export class ChartRenderer {
     width: number,
     height: number,
     fillArea: boolean,
+    datasetIndex = 0,
   ): void {
-    this.drawGrid(doc, left, top, width, height);
+    if (datasetIndex === 0) {
+      this.drawGrid(doc, left, top, width, height);
+    }
 
     const maxValue = Math.max(...data, 1);
+    const color = DATASET_COLORS[datasetIndex % DATASET_COLORS.length];
     const points = data.map((value, index) => {
       const x = left + (index / Math.max(data.length - 1, 1)) * width;
       const y = top + height - 10 - (value / maxValue) * (height - 20);
@@ -136,22 +186,24 @@ export class ChartRenderer {
       points.forEach((point) => doc.lineTo(point.x, point.y));
       doc.lineTo(points[points.length - 1].x, top + height - 10).closePath()
         .fillOpacity(0.15)
-        .fill(PDF_COLORS.chartLine)
+        .fill(color)
         .fillOpacity(1);
     }
 
     if (points.length > 0) {
       doc.moveTo(points[0].x, points[0].y);
       points.slice(1).forEach((point) => doc.lineTo(point.x, point.y));
-      doc.lineWidth(2).strokeColor(PDF_COLORS.chartLine).stroke();
+      doc.lineWidth(2).strokeColor(color).stroke();
     }
 
-    labels.forEach((label, index) => {
-      if (index % Math.ceil(labels.length / 6) !== 0 && index !== labels.length - 1) return;
-      const x = left + (index / Math.max(labels.length - 1, 1)) * width;
-      doc.font('Helvetica').fontSize(7).fillColor(PDF_COLORS.secondary)
-        .text(label.slice(0, 10), x - 15, top + height - 2, { width: 30, align: 'center', lineBreak: false });
-    });
+    if (datasetIndex === 0) {
+      labels.forEach((label, index) => {
+        if (index % Math.ceil(labels.length / 6) !== 0 && index !== labels.length - 1) return;
+        const x = left + (index / Math.max(labels.length - 1, 1)) * width;
+        doc.font('Helvetica').fontSize(7).fillColor(PDF_COLORS.secondary)
+          .text(label.slice(0, 10), x - 15, top + height - 2, { width: 30, align: 'center', lineBreak: false });
+      });
+    }
   }
 
   private renderPieChart(

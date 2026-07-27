@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { reportRepository } from '../repositories/report.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
@@ -23,6 +23,7 @@ import { buildReportTitle } from '../report-generation/utils/report-context.util
 import { reportGenerationOrchestrator } from './report-generation-orchestrator.service';
 import { docxReportService } from '../report-generation/docx/services/docx-report.service';
 import { pdfReportService } from '../report-generation/pdf/services/pdf-report.service';
+import { isAllowedExternalDownloadUrl } from '../report-generation/utils/filter-mapper.util';
 
 const buildLegacyReportTitle = (reportType: ReportType, filters: GenerateReportFilters): string => {
   const parts = [reportType, 'Report'];
@@ -92,24 +93,51 @@ const resolveReportTitle = (reportType: ReportType, filters: GenerateReportFilte
   return buildLegacyReportTitle(reportType, filters);
 };
 
-const resolveLocalFilePath = (report: IReport): string | null => {
-  if (report.filePath && fs.existsSync(report.filePath)) {
-    return report.filePath;
+const resolveLocalFilePath = async (report: IReport): Promise<string | null> => {
+  if (report.filePath) {
+    try {
+      await fs.access(report.filePath);
+      return report.filePath;
+    } catch {
+      // fall through to fileName lookup
+    }
   }
 
   if (report.fileName) {
     const docxPath = docxReportService.resolveExportPath(report.fileName);
-    if (fs.existsSync(docxPath)) {
+    try {
+      await fs.access(docxPath);
       return docxPath;
+    } catch {
+      // continue
     }
 
     const pdfPath = pdfReportService.resolveExportPath(report.fileName);
-    if (fs.existsSync(pdfPath)) {
+    try {
+      await fs.access(pdfPath);
       return pdfPath;
+    } catch {
+      return null;
     }
   }
 
   return null;
+};
+
+const deleteLocalReportFile = async (report: IReport): Promise<void> => {
+  const localPath = await resolveLocalFilePath(report);
+  if (!localPath) return;
+
+  try {
+    await fs.unlink(localPath);
+    logger.info('Report export file deleted', { reportId: report._id, localPath });
+  } catch (error) {
+    logger.warn('Failed to delete report export file', {
+      reportId: report._id,
+      localPath,
+      reason: error instanceof Error ? error.message : 'unknown',
+    });
+  }
 };
 
 export class ReportService {
@@ -281,7 +309,7 @@ export class ReportService {
       );
     }
 
-    const localFilePath = resolveLocalFilePath(report);
+    const localFilePath = await resolveLocalFilePath(report);
     const hasRemoteUrl = Boolean(report.fileUrl);
 
     if (!localFilePath && !hasRemoteUrl) {
@@ -293,6 +321,12 @@ export class ReportService {
     const downloadUrl = localFilePath
       ? `/api/v1/reports/download/${report._id}`
       : report.fileUrl!;
+
+    if (!localFilePath && report.fileUrl && !isAllowedExternalDownloadUrl(report.fileUrl)) {
+      throw new BadRequestError(
+        'External download URL is not from a trusted provider. Contact an administrator.',
+      );
+    }
 
     return {
       reportId: report._id,
@@ -327,7 +361,7 @@ export class ReportService {
       );
     }
 
-    const localFilePath = resolveLocalFilePath(report);
+    const localFilePath = await resolveLocalFilePath(report);
     if (!localFilePath) {
       if (report.fileUrl) {
         throw new BadRequestError(
@@ -360,6 +394,7 @@ export class ReportService {
     }
 
     await reportRepository.softDelete(id, userId);
+    await deleteLocalReportFile(report);
 
     await auditLogRepository.create({
       userId,

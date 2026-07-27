@@ -8,6 +8,7 @@ import {
   reportTypeParamSchema,
   reportDownloadParamSchema,
   reportTemplateResolveSchema,
+  reportChartsRequestSchema,
 } from '../utils/report-generation.validation';
 import { aggregationFiltersSchema } from '../aggregation/utils/aggregation.validation';
 
@@ -60,7 +61,7 @@ reportGenerationRouter.post(
 
 reportGenerationRouter.post(
   '/charts',
-  validate(reportGenerationPlanSchema),
+  validate(reportChartsRequestSchema),
   reportGenerationController.generateCharts,
 );
 

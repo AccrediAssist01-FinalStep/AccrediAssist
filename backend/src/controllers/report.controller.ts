@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { BaseController } from './base.controller';
 import { reportService } from '../services/report.service';
 import { asyncHandler } from '../middleware/asyncHandler';
-import { UnauthorizedError } from '../utils/errors';
+import { BadRequestError, UnauthorizedError } from '../utils/errors';
+import { isAllowedExternalDownloadUrl } from '../report-generation/utils/filter-mapper.util';
 import { ReportDownloadQuery, ReportListQuery } from '../validations/report.validation';
 
 class ReportController extends BaseController {
@@ -45,6 +46,11 @@ class ReportController extends BaseController {
     const downloadInfo = await reportService.getDownloadInfo(req.params.id);
 
     if (query.redirect) {
+      if (!isAllowedExternalDownloadUrl(downloadInfo.downloadUrl)) {
+        throw new BadRequestError(
+          'External redirect is not permitted. Download the file via the authenticated download endpoint.',
+        );
+      }
       res.redirect(302, downloadInfo.downloadUrl);
       return;
     }

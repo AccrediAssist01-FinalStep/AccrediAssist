@@ -53,6 +53,7 @@ export interface EventImageAsset {
   eventTitle: string;
   url: string;
   buffer?: Buffer;
+  imageType?: 'png' | 'jpg' | 'gif' | 'bmp';
   width?: number;
   height?: number;
 }

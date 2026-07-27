@@ -1,4 +1,5 @@
 import type { AggregationFilters, ResolvedDateRange } from '../interfaces/aggregation.interface';
+import { BadRequestError } from '../../../utils/errors';
 
 const MONTH_LABELS = [
   'Jan',
@@ -42,7 +43,9 @@ export const resolveAcademicYearRange = (academicYear: string): { start: Date; e
     };
   }
 
-  throw new Error(`Invalid academic year format: ${academicYear}`);
+  throw new BadRequestError(
+    `Invalid academic year format: "${academicYear}". Use "YYYY-YYYY" or a four-digit year.`,
+  );
 };
 
 /** Semester within academic year: 1 = Jun–Nov, 2 = Dec–May */

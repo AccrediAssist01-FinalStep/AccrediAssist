@@ -62,12 +62,28 @@ export const reportGenerationFiltersSchema = z
     month: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
   })
+  .refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return data.endDate >= data.startDate;
+      }
+      return true;
+    },
+    {
+      message: 'End date must be on or after start date',
+      path: ['endDate'],
+    },
+  )
   .optional();
 
 export const reportGenerationPlanSchema = z.object({
   reportType: z.enum(GENERATION_REPORT_TYPES),
   title: z.string().trim().min(3).max(200).optional(),
   filters: reportGenerationFiltersSchema,
+});
+
+export const reportChartsRequestSchema = reportGenerationPlanSchema.extend({
+  exportFormat: z.enum(['pdf', 'docx', 'frontend']).optional(),
 });
 
 export const reportTypeParamSchema = z.object({

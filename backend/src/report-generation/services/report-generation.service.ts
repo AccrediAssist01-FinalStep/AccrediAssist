@@ -118,6 +118,7 @@ export class ReportGenerationService {
       document: context.documentDraft!,
       format: 'pdf',
       fileName: `${plan.title}.pdf`,
+      pipelineContext: context,
     });
 
     return {

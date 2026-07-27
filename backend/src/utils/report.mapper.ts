@@ -21,7 +21,6 @@ export const toReportResponse = (record: IReport): IReportResponse => {
     generatedBy: record.generatedBy,
     generatedDate: record.generatedDate,
     fileUrl: record.fileUrl,
-    filePath: record.filePath,
     fileName: record.fileName,
     exportFormat: record.exportFormat,
     status: record.status,
