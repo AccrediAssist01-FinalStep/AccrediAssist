@@ -1,65 +1,85 @@
 'use client';
 
-import { PageHeader } from '@/components/layout/AppShell';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Settings } from 'lucide-react';
+import { ErrorState } from '@/components/common/ErrorState';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/AuthProvider';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  EditProfileDialog,
+  ProfileActivityTimeline,
+  ProfileHeader,
+  ProfileInfoCards,
+  ProfileSecuritySection,
+  useProfileData,
+} from '@/features/profile';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [editOpen, setEditOpen] = useState(false);
+  const profileQuery = useProfileData(user?._id);
 
-  const initials = user?.name
-    ?.split(' ')
-    .map((part) => part[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const profileUser = profileQuery.data?.profile ?? user;
+
+  if (!user) {
+    return (
+      <ErrorState
+        title="Profile unavailable"
+        message="Sign in to view your profile information."
+      />
+    );
+  }
+
+  if (profileQuery.isLoading && !profileUser) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-40 w-full rounded-2xl" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-48 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (profileQuery.isError || !profileUser) {
+    return (
+      <ErrorState
+        title="Unable to load profile"
+        message="We couldn't fetch your profile from the server."
+        onRetry={() => profileQuery.refetch()}
+      />
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      <PageHeader title="Profile" description="Manage your account information and preferences." />
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardContent className="flex flex-col items-center pt-8">
-            <Avatar className="size-24">
-              <AvatarImage src={user?.profileImage} alt={user?.name} />
-              <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
-            </Avatar>
-            <h2 className="mt-4 text-xl font-semibold">{user?.name}</h2>
-            <p className="text-sm text-muted">{user?.email}</p>
-            <Badge className="mt-3">{user?.role}</Badge>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Account Details</CardTitle>
-            <CardDescription>Your profile information from the institution directory</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Full Name</Label>
-              <Input value={user?.name ?? ''} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input value={user?.email ?? ''} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Department</Label>
-              <Input value={user?.department ?? '—'} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label>Designation</Label>
-              <Input value={user?.designation ?? '—'} readOnly />
-            </div>
-          </CardContent>
-        </Card>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Profile</h1>
+          <p className="text-sm text-muted">Your institutional identity and account overview</p>
+        </div>
+        <Button variant="outline" asChild className="gap-2">
+          <Link href="/settings">
+            <Settings className="size-4" />
+            Account Settings
+          </Link>
+        </Button>
       </div>
-    </div>
+
+      <ProfileHeader user={profileUser} onEditProfile={() => setEditOpen(true)} />
+      <ProfileInfoCards user={profileUser} />
+      <ProfileSecuritySection user={profileUser} hasActiveSession={Boolean(token)} />
+      <ProfileActivityTimeline
+        activities={profileQuery.data?.activities ?? []}
+        isLoading={profileQuery.isLoading}
+      />
+
+      <EditProfileDialog user={profileUser} open={editOpen} onOpenChange={setEditOpen} />
+    </motion.div>
   );
 }
