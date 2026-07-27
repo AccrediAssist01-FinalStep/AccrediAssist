@@ -6,6 +6,7 @@ import { reportGenerationController } from '../controllers/report-generation.con
 import {
   reportGenerationPlanSchema,
   reportTypeParamSchema,
+  reportDownloadParamSchema,
 } from '../utils/report-generation.validation';
 import { aggregationFiltersSchema } from '../aggregation/utils/aggregation.validation';
 
@@ -60,6 +61,18 @@ reportGenerationRouter.post(
   '/charts',
   validate(reportGenerationPlanSchema),
   reportGenerationController.generateCharts,
+);
+
+reportGenerationRouter.post(
+  '/docx',
+  validate(reportGenerationPlanSchema),
+  reportGenerationController.generateDocx,
+);
+
+reportGenerationRouter.get(
+  '/downloads/:fileName',
+  validateParams(reportDownloadParamSchema),
+  reportGenerationController.downloadDocx,
 );
 
 export default reportGenerationRouter;

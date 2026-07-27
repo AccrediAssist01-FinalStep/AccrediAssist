@@ -61,4 +61,10 @@ export {
   type ChartDefinitionId,
 } from './charts';
 
+export {
+  docxReportService,
+  DocxReportService,
+  type DocxGenerationResult,
+} from './docx';
+
 export { default as reportGenerationRouter } from './routes/report-generation.routes';

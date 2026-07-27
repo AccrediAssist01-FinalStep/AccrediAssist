@@ -6,9 +6,16 @@ import { reportGenerationService } from '../services/report-generation.service';
 import { dataCollectionService } from '../services/data-collection.service';
 import { executiveSummaryService } from '../summary/services/executive-summary.service';
 import { chartService } from '../charts/services/chart.service';
+import { docxReportService } from '../docx/services/docx-report.service';
+import { aiSummaryService } from '../services/ai-summary.service';
+import { chartPreparationService } from '../services/chart-preparation.service';
 import { aggregationService } from '../aggregation/services/aggregation.service';
 import { parseGenerationReportType } from '../utils/report-type.util';
+import { createPipelineContext } from '../utils/report-context.util';
 import type { ReportGenerationFilters } from '../interfaces/report-generation.interface';
+import fs from 'fs';
+import path from 'path';
+import { NotFoundError } from '../../utils/errors';
 
 class ReportGenerationController extends BaseController {
   /** GET /report-generation/status */
@@ -174,6 +181,60 @@ class ReportGenerationController extends BaseController {
     }
 
     this.success(res, 'Report charts generated successfully', response);
+  });
+
+  /**
+   * POST /report-generation/docx
+   * Generates a professional DOCX report from aggregated data, AI summary, and charts.
+   * Pass ?stream=true to receive the file directly.
+   */
+  generateDocx = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const reportType = parseGenerationReportType(req.body.reportType);
+    const filters = (req.body.filters ?? {}) as ReportGenerationFilters;
+
+    let context = createPipelineContext(reportType, filters);
+    context = await dataCollectionService.collectForContext(context);
+    context = await aiSummaryService.summarizeForContext(context);
+    context = await chartPreparationService.prepareForContext(context);
+
+    const result = await docxReportService.generateFromContext(context);
+
+    if (req.query.stream === 'true') {
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      );
+      res.setHeader('Content-Disposition', `attachment; filename="${result.fileName}"`);
+      res.send(result.buffer);
+      return;
+    }
+
+    this.success(res, 'DOCX report generated successfully', {
+      reportType,
+      fileName: result.fileName,
+      downloadUrl: result.downloadUrl,
+      fileSizeBytes: result.fileSizeBytes,
+      sectionsIncluded: result.sectionsIncluded,
+      generatedAt: result.generatedAt,
+    });
+  });
+
+  /** GET /report-generation/downloads/:fileName */
+  downloadDocx = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const fileName = path.basename(String(req.params.fileName));
+    const filePath = docxReportService.resolveExportPath(fileName);
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundError('Report file not found');
+    }
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    );
+    res.download(filePath, fileName);
   });
 
   private requireUserId(req: Request): string {

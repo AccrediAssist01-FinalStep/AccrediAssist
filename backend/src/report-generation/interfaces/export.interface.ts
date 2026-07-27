@@ -1,17 +1,24 @@
 import { ReportExportFormat } from './report-generation.interface';
-import { ReportDocumentDraft } from './report-data.interface';
+import { ReportDocumentDraft, ReportPipelineContext } from './report-data.interface';
 
-/** Future export request — no binary generation implemented */
+export type ReportExportStatus = 'not_implemented' | 'completed' | 'failed';
+
+/** Export request — DOCX generation uses pipelineContext when provided */
 export interface ReportExportRequest {
   document: ReportDocumentDraft;
   format: ReportExportFormat;
   fileName?: string;
+  pipelineContext?: ReportPipelineContext;
 }
 
-/** Placeholder export result */
 export interface ReportExportResult {
   format: ReportExportFormat;
-  status: 'not_implemented';
+  status: ReportExportStatus;
   message: string;
   plannedFileName?: string;
+  fileName?: string;
+  downloadUrl?: string;
+  filePath?: string;
+  fileSizeBytes?: number;
+  sectionsIncluded?: string[];
 }

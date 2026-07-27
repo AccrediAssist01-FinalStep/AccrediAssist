@@ -22,4 +22,11 @@ export const reportTypeParamSchema = z.object({
   typeId: z.enum(GENERATION_REPORT_TYPES),
 });
 
+export const reportDownloadParamSchema = z.object({
+  fileName: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9._-]+\.docx$/, 'Invalid report file name'),
+});
+
 export type ReportGenerationPlanBody = z.infer<typeof reportGenerationPlanSchema>;
