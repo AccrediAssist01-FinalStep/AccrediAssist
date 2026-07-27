@@ -26,7 +26,7 @@ export const reportDownloadParamSchema = z.object({
   fileName: z
     .string()
     .trim()
-    .regex(/^[a-zA-Z0-9._-]+\.docx$/, 'Invalid report file name'),
+    .regex(/^[a-zA-Z0-9._-]+\.(docx|pdf)$/, 'Invalid report file name'),
 });
 
 export type ReportGenerationPlanBody = z.infer<typeof reportGenerationPlanSchema>;

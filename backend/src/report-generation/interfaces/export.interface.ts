@@ -21,4 +21,5 @@ export interface ReportExportResult {
   filePath?: string;
   fileSizeBytes?: number;
   sectionsIncluded?: string[];
+  pageCount?: number;
 }

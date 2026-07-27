@@ -67,4 +67,10 @@ export {
   type DocxGenerationResult,
 } from './docx';
 
+export {
+  pdfReportService,
+  PdfReportService,
+  type PdfGenerationResult,
+} from './pdf';
+
 export { default as reportGenerationRouter } from './routes/report-generation.routes';

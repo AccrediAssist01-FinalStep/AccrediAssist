@@ -1,10 +1,10 @@
 import { logger } from '../../utils/logger';
 import { docxReportService } from '../docx/services/docx-report.service';
+import { pdfReportService } from '../pdf/services/pdf-report.service';
 import { ReportExportRequest, ReportExportResult } from '../interfaces/export.interface';
 
 /**
- * Handles PDF/DOCX export.
- * DOCX generation is implemented via the DOCX Report Generator module.
+ * Handles PDF/DOCX export via dedicated report generator modules.
  */
 export class ExportService {
   getSupportedFormats(): Array<'pdf' | 'docx'> {
@@ -12,35 +12,17 @@ export class ExportService {
   }
 
   async export(request: ReportExportRequest): Promise<ReportExportResult> {
-    if (request.format === 'docx' && request.pipelineContext) {
-      try {
-        const result = await docxReportService.generateFromContext(request.pipelineContext);
-
-        return {
-          format: 'docx',
-          status: 'completed',
-          message: 'DOCX report generated successfully.',
-          fileName: result.fileName,
-          downloadUrl: result.downloadUrl,
-          filePath: result.filePath,
-          fileSizeBytes: result.fileSizeBytes,
-          sectionsIncluded: result.sectionsIncluded,
-        };
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : 'DOCX export failed';
-        logger.error('DOCX export failed', { reason });
-
-        return {
-          format: 'docx',
-          status: 'failed',
-          message: reason,
-          plannedFileName: request.fileName,
-        };
+    if (request.pipelineContext) {
+      if (request.format === 'docx') {
+        return this.exportDocx(request);
+      }
+      if (request.format === 'pdf') {
+        return this.exportPdf(request);
       }
     }
 
-    if (request.format === 'docx') {
-      logger.warn('DOCX export requested without pipeline context');
+    if (request.format === 'docx' || request.format === 'pdf') {
+      logger.warn(`${request.format.toUpperCase()} export requested without pipeline context`);
     } else {
       logger.info('Report export planned (not yet implemented)', { format: request.format });
     }
@@ -48,12 +30,64 @@ export class ExportService {
     return {
       format: request.format,
       status: 'not_implemented',
-      message:
-        request.format === 'docx'
-          ? 'Provide pipelineContext to generate DOCX exports.'
-          : 'PDF export will be implemented in a future sprint.',
+      message: `Provide pipelineContext to generate ${request.format.toUpperCase()} exports.`,
       plannedFileName: request.fileName,
     };
+  }
+
+  private async exportDocx(request: ReportExportRequest): Promise<ReportExportResult> {
+    try {
+      const result = await docxReportService.generateFromContext(request.pipelineContext!);
+
+      return {
+        format: 'docx',
+        status: 'completed',
+        message: 'DOCX report generated successfully.',
+        fileName: result.fileName,
+        downloadUrl: result.downloadUrl,
+        filePath: result.filePath,
+        fileSizeBytes: result.fileSizeBytes,
+        sectionsIncluded: result.sectionsIncluded,
+      };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'DOCX export failed';
+      logger.error('DOCX export failed', { reason });
+
+      return {
+        format: 'docx',
+        status: 'failed',
+        message: reason,
+        plannedFileName: request.fileName,
+      };
+    }
+  }
+
+  private async exportPdf(request: ReportExportRequest): Promise<ReportExportResult> {
+    try {
+      const result = await pdfReportService.generateFromContext(request.pipelineContext!);
+
+      return {
+        format: 'pdf',
+        status: 'completed',
+        message: 'PDF report generated successfully.',
+        fileName: result.fileName,
+        downloadUrl: result.downloadUrl,
+        filePath: result.filePath,
+        fileSizeBytes: result.fileSizeBytes,
+        sectionsIncluded: result.sectionsIncluded,
+        pageCount: result.pageCount,
+      };
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : 'PDF export failed';
+      logger.error('PDF export failed', { reason });
+
+      return {
+        format: 'pdf',
+        status: 'failed',
+        message: reason,
+        plannedFileName: request.fileName,
+      };
+    }
   }
 }
 

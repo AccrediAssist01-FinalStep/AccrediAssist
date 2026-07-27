@@ -69,10 +69,16 @@ reportGenerationRouter.post(
   reportGenerationController.generateDocx,
 );
 
+reportGenerationRouter.post(
+  '/pdf',
+  validate(reportGenerationPlanSchema),
+  reportGenerationController.generatePdf,
+);
+
 reportGenerationRouter.get(
   '/downloads/:fileName',
   validateParams(reportDownloadParamSchema),
-  reportGenerationController.downloadDocx,
+  reportGenerationController.downloadReport,
 );
 
 export default reportGenerationRouter;
