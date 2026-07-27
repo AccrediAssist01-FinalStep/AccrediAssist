@@ -63,18 +63,35 @@ export interface SearchResultItem {
   data?: Record<string, unknown>;
 }
 
+export interface SearchUnderstanding {
+  collection: string;
+  filters: Record<string, unknown>;
+  sort: string;
+  confidence: number | null;
+  source: string;
+  model?: string;
+  provider?: string;
+}
+
 export interface GlobalSearchResponse {
   query: string;
-  understanding: {
-    collection: string;
-    filters: Record<string, unknown>;
-    sort: string;
-    confidence: number | null;
-    source: string;
-  };
+  understanding: SearchUnderstanding;
   filters: Record<string, unknown>;
   results: SearchResultItem[];
   meta: PaginatedMeta;
+}
+
+export interface SearchStatusResponse {
+  queryUnderstanding: boolean;
+  databaseSearch: boolean;
+  integrated: boolean;
+  geminiConfigured: boolean;
+  geminiModel?: string;
+  supportedCollections: string[];
+}
+
+export interface SearchCollectionsResponse {
+  collections: string[];
 }
 
 export interface SearchHistoryItem {

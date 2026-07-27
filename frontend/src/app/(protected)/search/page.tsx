@@ -1,148 +1,230 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { PageHeader } from '@/components/layout/AppShell';
-import { SearchBox } from '@/components/common/SearchBox';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
-import { Pagination } from '@/components/common/Pagination';
+import { TableSkeleton } from '@/components/common/LoadingSkeletons';
 import { EmptySearchIllustration } from '@/components/illustrations';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
-import { searchService } from '@/services/search.service';
-import type { GlobalSearchResponse } from '@/types/api-models';
+import {
+  AISearchBar,
+  DEFAULT_SEARCH_STATE,
+  RecentSearches,
+  SearchFiltersBar,
+  SearchResultDrawer,
+  SearchResultsTable,
+  SearchSuggestionChips,
+  SearchUnderstandingBanner,
+  SmartSearchHeader,
+  exportResultsToCsv,
+  filterResults,
+  sortResultsClient,
+  toSearchRequest,
+  useSearchHistory,
+  useSmartSearch,
+  type SmartSearchState,
+} from '@/features/smart-search';
+import type { SearchResultItem } from '@/types/api-models';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<GlobalSearchResponse | null>(null);
-  const [page, setPage] = useState(1);
+  const [state, setState] = useState<SmartSearchState>(DEFAULT_SEARCH_STATE);
+  const [selectedItem, setSelectedItem] = useState<SearchResultItem | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const searchMutation = useMutation({
-    mutationFn: (searchQuery: string) =>
-      searchService.globalSearch({ query: searchQuery, page, limit: 10 }),
-    onSuccess: (data) => {
-      setResults(data);
-      if (data.results.length === 0) {
-        toast.info('No results found for your query');
+  const { statusQuery, results, isSearching, isError, searchAsync } = useSmartSearch();
+  const { items: historyItems, isLoading: historyLoading, clearAll, isClearing, dismiss } =
+    useSearchHistory();
+
+  const updateState = useCallback((patch: Partial<SmartSearchState>) => {
+    setState((current) => ({ ...current, ...patch }));
+  }, []);
+
+  const runSearch = useCallback(
+    async (override?: Partial<SmartSearchState>) => {
+      const nextState = { ...state, ...override };
+      const query = nextState.query.trim();
+
+      if (!query) {
+        toast.error('Please enter a search query');
+        return;
       }
-    },
-    onError: () => toast.error('Search failed. Please try again.'),
-  });
 
-  const handleSearch = () => {
-    if (!query.trim()) {
-      toast.error('Please enter a search query');
-      return;
+      setState(nextState);
+      await searchAsync(toSearchRequest(nextState));
+    },
+    [searchAsync, state],
+  );
+
+  const handleFiltersChange = useCallback(
+    (patch: Partial<SmartSearchState>) => {
+      const nextState = { ...state, ...patch };
+
+      if (patch.tableFilter !== undefined) {
+        setState(nextState);
+        return;
+      }
+
+      if (patch.sort !== undefined || patch.collection !== undefined) {
+        void runSearch({ ...patch, page: 1 });
+        return;
+      }
+
+      setState(nextState);
+    },
+    [runSearch, state],
+  );
+
+  const displayedResults = useMemo(() => {
+    if (!results) return [];
+    let items = results.results;
+
+    if (state.tableFilter) {
+      items = filterResults(items, state.tableFilter);
     }
-    searchMutation.mutate(query);
-  };
+
+    if (state.collection !== 'all') {
+      items = items.filter((item) => item.collection === state.collection);
+    }
+
+    return sortResultsClient(items, state.sort);
+  }, [results, state.collection, state.sort, state.tableFilter]);
 
   useEffect(() => {
     const q = searchParams.get('q')?.trim();
     if (q) {
-      setQuery(q);
-      searchMutation.mutate(q);
+      void searchAsync(toSearchRequest({ ...DEFAULT_SEARCH_STATE, query: q, page: 1 }));
+      setState((current) => ({ ...current, query: q, page: 1 }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when URL query is present
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial URL query only
   }, [searchParams]);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        document.querySelector<HTMLInputElement>('[aria-label="Search query"]')?.focus();
+      }
+      if (event.key === 'Escape' && drawerOpen) {
+        setDrawerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [drawerOpen]);
+
+  const handlePageChange = (page: number) => {
+    updateState({ page });
+    void runSearch({ page });
+  };
+
+  const showLanding = !results && !isSearching && !isError;
+
   return (
-    <div className="space-y-8">
-      <PageHeader
-        title="Smart Search"
-        description="Search across all accreditation records using natural language powered by Gemini AI."
-        action={
-          <Badge variant="secondary" className="gap-1">
-            <Sparkles className="size-3" />
-            AI-Powered
-          </Badge>
-        }
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-8 pb-8"
+    >
+      <SmartSearchHeader
+        geminiConfigured={statusQuery.data?.geminiConfigured}
+        model={statusQuery.data?.geminiModel}
       />
 
-      <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <SearchBox
-              value={query}
-              onChange={setQuery}
-              onSubmit={handleSearch}
-              placeholder='Try "Students placed in TCS" or "Faculty publications on AI"'
-              className="flex-1"
-            />
-            <Button onClick={handleSearch} isLoading={searchMutation.isPending} size="lg">
-              Search
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <AISearchBar
+        value={state.query}
+        onChange={(query) => updateState({ query })}
+        onSubmit={() => runSearch({ page: 1 })}
+        isLoading={isSearching}
+      />
 
-      {searchMutation.isPending && <StatCardsSkeleton count={3} />}
-
-      {searchMutation.isError && <ErrorState onRetry={handleSearch} />}
-
-      {results && !searchMutation.isPending && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge>{results.understanding.collection}</Badge>
-            {results.understanding.confidence && (
-              <Badge variant="success">{results.understanding.confidence}% confidence</Badge>
-            )}
-            <span className="text-sm text-muted">{results.meta.total} results found</span>
-          </div>
-
-          {results.results.length === 0 ? (
-            <EmptyState
-              illustration={<EmptySearchIllustration className="size-32" />}
-              title="No results found"
-              description="Try rephrasing your query or using different keywords."
-            />
-          ) : (
-            <div className="grid gap-4">
-              {results.results.map((item, index) => (
-                <motion.div
-                  key={item.recordId}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03 }}
-                >
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{item.summary}</CardTitle>
-                        <Badge variant="outline">{item.collection}</Badge>
-                      </div>
-                    </CardHeader>
-                  </Card>
-                </motion.div>
-              ))}
-              <Pagination
-                page={results.meta.page}
-                totalPages={results.meta.totalPages}
-                onPageChange={(newPage) => {
-                  setPage(newPage);
-                  searchMutation.mutate(query);
-                }}
-              />
-            </div>
-          )}
-        </motion.div>
+      {showLanding && (
+        <div className="mx-auto max-w-4xl space-y-8">
+          <SearchSuggestionChips onSelect={(query) => runSearch({ query, page: 1 })} />
+          <RecentSearches
+            items={historyItems}
+            isLoading={historyLoading}
+            onReuse={(query) => runSearch({ query, page: 1 })}
+            onDismiss={dismiss}
+            onClearAll={clearAll}
+            isClearing={isClearing}
+          />
+          <EmptyState
+            illustration={<EmptySearchIllustration className="mx-auto size-40" />}
+            title="Ask AccrediAssist anything"
+            description="Search placements, internships, achievements, publications, patents, and event reports using natural language."
+          />
+        </div>
       )}
 
-      {!results && !searchMutation.isPending && (
-        <EmptyState
-          illustration={<EmptySearchIllustration className="size-40" />}
-          title="Start searching"
-          description="Use natural language to find placements, internships, achievements, publications, and more."
+      {isSearching && <TableSkeleton rows={6} cols={5} />}
+
+      {isError && (
+        <ErrorState
+          title="Search unavailable"
+          message="We couldn't complete your search. Check your connection and try again."
+          onRetry={() => runSearch()}
         />
       )}
-    </div>
+
+      <AnimatePresence>
+        {results && !isSearching && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="space-y-6"
+          >
+            <SearchUnderstandingBanner response={results} />
+
+            <SearchFiltersBar
+              state={state}
+              onChange={handleFiltersChange}
+              onExport={() => exportResultsToCsv(displayedResults)}
+              canExport={displayedResults.length > 0}
+            />
+
+            {displayedResults.length === 0 ? (
+              <EmptyState
+                illustration={<EmptySearchIllustration className="size-32" />}
+                title="No results found"
+                description="Try rephrasing your query, removing filters, or using one of the suggested searches."
+              />
+            ) : (
+              <SearchResultsTable
+                items={displayedResults}
+                page={results.meta.page}
+                totalPages={results.meta.totalPages}
+                onPageChange={handlePageChange}
+                onSelect={(item) => {
+                  setSelectedItem(item);
+                  setDrawerOpen(true);
+                }}
+                selectedId={selectedItem?.recordId}
+              />
+            )}
+
+            <RecentSearches
+              items={historyItems}
+              isLoading={historyLoading}
+              onReuse={(query) => runSearch({ query, page: 1 })}
+              onDismiss={dismiss}
+              onClearAll={clearAll}
+              isClearing={isClearing}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <SearchResultDrawer
+        item={selectedItem}
+        response={results}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
+    </motion.div>
   );
 }
