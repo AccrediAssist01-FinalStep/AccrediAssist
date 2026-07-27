@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
@@ -19,6 +20,7 @@ import { searchService } from '@/services/search.service';
 import type { GlobalSearchResponse } from '@/types/api-models';
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GlobalSearchResponse | null>(null);
   const [page, setPage] = useState(1);
@@ -42,6 +44,15 @@ export default function SearchPage() {
     }
     searchMutation.mutate(query);
   };
+
+  useEffect(() => {
+    const q = searchParams.get('q')?.trim();
+    if (q) {
+      setQuery(q);
+      searchMutation.mutate(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once when URL query is present
+  }, [searchParams]);
 
   return (
     <div className="space-y-8">

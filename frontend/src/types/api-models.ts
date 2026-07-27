@@ -23,6 +23,22 @@ export interface DashboardMonthlyStatistics {
   eventReports: number;
 }
 
+export interface DashboardYearlyStatistics {
+  year: number;
+  placements: number;
+  internships: number;
+  studentAchievements: number;
+  facultyAchievements: number;
+  publications: number;
+  patents: number;
+  pendingReviews: number;
+  eventReports: number;
+  monthlyBreakdown: Array<{
+    month: number;
+    total: number;
+  }>;
+}
+
 export interface DashboardRecentActivity {
   id: string;
   action: string;

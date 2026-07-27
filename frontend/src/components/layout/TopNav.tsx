@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Search, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -14,8 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
 import { Breadcrumbs } from '@/components/layout/Sidebar';
+import { DashboardSearchBar } from '@/components/layout/DashboardSearchBar';
+import { NotificationDropdown } from '@/components/layout/NotificationDropdown';
 import { useAuth } from '@/providers/AuthProvider';
 import { useSidebarStore } from '@/hooks/use-sidebar';
 import { useIsMobile } from '@/hooks/use-media-query';
@@ -41,17 +42,26 @@ export function TopNav() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-card/80 px-4 backdrop-blur-xl md:px-6">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur-xl md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         {isMobile && (
-          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
+          <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <Menu className="size-5" />
           </Button>
         )}
-        <Breadcrumbs />
+        <div className="hidden min-w-0 sm:block">
+          <Breadcrumbs />
+        </div>
+        <DashboardSearchBar />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {isMobile && (
+          <Button variant="ghost" size="icon" onClick={() => router.push('/search')} aria-label="Search">
+            <Search className="size-[18px]" />
+          </Button>
+        )}
+
         <Button
           variant="ghost"
           size="icon"
@@ -62,12 +72,7 @@ export function TopNav() {
           <Moon className="absolute size-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
 
-        <Button variant="ghost" size="icon" className="relative" onClick={() => router.push('/notifications')}>
-          <Bell className="size-[18px]" />
-          <Badge variant="destructive" className="absolute -right-0.5 -top-0.5 size-4 justify-center p-0 text-[10px]">
-            3
-          </Badge>
-        </Button>
+        <NotificationDropdown />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
