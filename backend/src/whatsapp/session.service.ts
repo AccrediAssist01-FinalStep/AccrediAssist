@@ -33,6 +33,22 @@ export class SessionService {
     const sessionPath = await this.ensureSessionDirectory();
     return baileys.useMultiFileAuthState(sessionPath);
   }
+
+  async clearStoredSession(): Promise<void> {
+    const sessionPath = this.getSessionDirectory();
+
+    try {
+      const entries = await fs.readdir(sessionPath);
+      await Promise.all(
+        entries.map((entry) => fs.rm(path.join(sessionPath, entry), { recursive: true, force: true })),
+      );
+      logger.info('WhatsApp stored session cleared', { sessionPath });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
 }
 
 export const sessionService = new SessionService();

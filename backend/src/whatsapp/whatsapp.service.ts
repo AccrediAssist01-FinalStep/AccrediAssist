@@ -37,6 +37,7 @@ export class WhatsAppService {
   private intentionalDisconnect = false;
   private connectionGeneration = 0;
   private requiresQrAuthenticationFlag = false;
+  private staleSessionRetryAttempted = false;
   private onConnectedCallback?: () => void;
   private onDisconnectedCallback?: () => void;
 
@@ -274,6 +275,7 @@ export class WhatsAppService {
       this.status = WhatsAppConnectionStatus.CONNECTED;
       this.qrCode = null;
       this.requiresQrAuthenticationFlag = false;
+      this.staleSessionRetryAttempted = false;
       reconnectService.reset();
       this.onConnectedCallback?.();
       logger.info('WhatsApp connected successfully');
@@ -289,6 +291,7 @@ export class WhatsAppService {
       const statusCode = (lastDisconnect?.error as Boom | undefined)?.output?.statusCode;
       const isLoggedOut = statusCode === baileys.DisconnectReason.loggedOut;
       const isConnectionReplaced = statusCode === baileys.DisconnectReason.connectionReplaced;
+      const isRestartRequired = statusCode === baileys.DisconnectReason.restartRequired;
       const shouldReconnect = !isLoggedOut && !isConnectionReplaced;
 
       messageListener.stop();
@@ -302,6 +305,42 @@ export class WhatsAppService {
 
       logger.warn('WhatsApp connection closed', { statusCode, shouldReconnect, wasConnected });
 
+      this.socket = null;
+
+      // After a successful QR scan Baileys closes with restartRequired (515) and expects
+      // a fresh socket using the credentials saved during pairing.
+      if (
+        !wasConnected &&
+        isRestartRequired &&
+        shouldReconnect &&
+        !this.intentionalDisconnect
+      ) {
+        this.status = WhatsAppConnectionStatus.RECONNECTING;
+        logger.info(
+          'WhatsApp pairing restart required after QR scan; reconnecting with saved credentials',
+        );
+        void this.createSocket(options);
+        return;
+      }
+
+      // Saved credentials can be invalid after a partial pairing or device unlink (401).
+      if (
+        !wasConnected &&
+        (isLoggedOut || isConnectionReplaced) &&
+        !this.intentionalDisconnect &&
+        !this.staleSessionRetryAttempted
+      ) {
+        this.staleSessionRetryAttempted = true;
+        this.status = WhatsAppConnectionStatus.AWAITING_QR;
+        logger.info(
+          'Stored WhatsApp session is invalid; clearing credentials and requesting a new QR scan',
+        );
+        void sessionService.clearStoredSession().then(() => {
+          void this.createSocket(options);
+        });
+        return;
+      }
+
       if (!wasConnected) {
         this.rejectConnectionWait(
           new Error(
@@ -312,7 +351,6 @@ export class WhatsAppService {
         );
       }
 
-      this.socket = null;
       this.status = WhatsAppConnectionStatus.DISCONNECTED;
 
       if (

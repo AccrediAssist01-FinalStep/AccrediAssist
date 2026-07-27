@@ -39,16 +39,52 @@ export class PendingReviewWorkflowService {
       sender: message.sender,
     });
 
-    const result = await this.aiPipeline.processWhatsAppMessage(message);
+    try {
+      const result = await this.aiPipeline.processWhatsAppMessage(message);
 
-    logger.info('Pending review workflow created pending record from WhatsApp message', {
-      pendingRecordId: result.pendingRecord._id,
-      category: result.recordCategory,
-      status: result.pendingStatus,
-      confidenceScore: result.confidenceScore,
-    });
+      logger.info('Pending review workflow created pending record from WhatsApp message', {
+        pendingRecordId: result.pendingRecord._id,
+        category: result.recordCategory,
+        status: result.pendingStatus,
+        confidenceScore: result.confidenceScore,
+      });
 
-    return result;
+      return result;
+    } catch (error) {
+      logger.warn('AI pipeline failed; saving raw WhatsApp message for manual review', {
+        groupName: message.groupName,
+        sender: message.sender,
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      const pendingRecord = await pendingReviewService.createPendingRecord({
+        originalMessage: message.message,
+        groupName: message.groupName,
+        senderName: message.sender,
+        category: 'Research',
+        extractedData: {
+          message: message.message,
+          media: message.media,
+          mediaMetadata: message.mediaMetadata ?? null,
+          aiProcessingFailed: true,
+          aiProcessingError: error instanceof Error ? error.message : String(error),
+        },
+        confidenceScore: 0,
+        status: 'Needs Review',
+      });
+
+      logger.info('Pending review workflow saved raw WhatsApp message after AI failure', {
+        pendingRecordId: pendingRecord._id,
+      });
+
+      return {
+        pendingRecord,
+        stages: {} as AiPipelineResult['stages'],
+        recordCategory: 'Research',
+        pendingStatus: 'Needs Review',
+        confidenceScore: 0,
+      };
+    }
   }
 
   async editPendingRecord(

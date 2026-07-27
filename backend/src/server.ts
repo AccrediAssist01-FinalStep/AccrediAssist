@@ -2,6 +2,8 @@ import app from './app';
 import { connectDatabase, disconnectDatabase } from './database/connection';
 import { env } from './config/env';
 import { logger } from './utils/logger';
+import { whatsappConnectionManager } from './whatsapp/connection.manager';
+import { sessionService } from './whatsapp/session.service';
 
 let server: ReturnType<typeof app.listen> | undefined;
 
@@ -10,11 +12,32 @@ const startServer = async (): Promise<void> => {
 
   server = app.listen(env.PORT, () => {
     logger.info(`Server running on port ${env.PORT}`, { environment: env.NODE_ENV });
+    void startWhatsAppIfConfigured();
   });
+};
+
+const startWhatsAppIfConfigured = async (): Promise<void> => {
+  try {
+    const hasStoredSession = await sessionService.hasStoredSession();
+    if (!hasStoredSession) {
+      return;
+    }
+
+    await whatsappConnectionManager.start();
+    logger.info('WhatsApp auto-connected using saved session');
+  } catch (error) {
+    logger.warn('WhatsApp auto-connect skipped or failed', { error });
+  }
 };
 
 const shutdown = async (signal: string): Promise<void> => {
   logger.info(`Received ${signal}. Shutting down gracefully...`);
+
+  try {
+    await whatsappConnectionManager.stop();
+  } catch (error) {
+    logger.warn('WhatsApp shutdown encountered an error', { error });
+  }
 
   if (server) {
     server.close(async () => {
