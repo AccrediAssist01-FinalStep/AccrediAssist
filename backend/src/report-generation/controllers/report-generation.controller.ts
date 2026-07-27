@@ -3,8 +3,12 @@ import { BaseController } from '../../controllers/base.controller';
 import { asyncHandler } from '../../middleware/asyncHandler';
 import { UnauthorizedError } from '../../utils/errors';
 import { reportGenerationService } from '../services/report-generation.service';
+import { dataCollectionService } from '../services/data-collection.service';
+import { executiveSummaryService } from '../summary/services/executive-summary.service';
+import { chartService } from '../charts/services/chart.service';
 import { aggregationService } from '../aggregation/services/aggregation.service';
 import { parseGenerationReportType } from '../utils/report-type.util';
+import type { ReportGenerationFilters } from '../interfaces/report-generation.interface';
 
 class ReportGenerationController extends BaseController {
   /** GET /report-generation/status */
@@ -78,6 +82,98 @@ class ReportGenerationController extends BaseController {
     this.requireUserId(req);
     const result = await aggregationService.aggregate(req.body);
     this.success(res, 'Report data aggregated successfully', result);
+  });
+
+  /**
+   * POST /report-generation/summary
+   * Generates a validated AI executive summary from aggregated institutional data.
+   * Raw Gemini responses are never exposed.
+   */
+  generateSummary = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const reportType = parseGenerationReportType(req.body.reportType);
+    const filters = (req.body.filters ?? {}) as ReportGenerationFilters;
+
+    const collected = await dataCollectionService.collect(reportType, filters);
+    const aggregation = collected.aggregation;
+
+    if (!aggregation) {
+      this.success(res, 'Executive summary generated with fallback', {
+        reportType,
+        summary: {
+          executiveSummary:
+            'Executive summary could not be generated because aggregated report data is unavailable.',
+          strengths: [],
+          observations: [],
+          recommendations: [],
+          keyHighlights: [],
+          generatedAt: new Date(),
+          source: 'fallback' as const,
+        },
+      });
+      return;
+    }
+
+    const { summary } = await executiveSummaryService.generate(reportType, aggregation);
+
+    this.success(res, 'Executive summary generated successfully', {
+      reportType,
+      summary: {
+        executiveSummary: summary.executiveSummary,
+        strengths: summary.strengths,
+        observations: summary.observations,
+        recommendations: summary.recommendations,
+        keyHighlights: summary.keyHighlights,
+        model: summary.model,
+        generatedAt: summary.generatedAt,
+        source: summary.source,
+      },
+    });
+  });
+
+  /**
+   * POST /report-generation/charts
+   * Generates standardized chart JSON from aggregated MongoDB data.
+   */
+  generateCharts = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const reportType = parseGenerationReportType(req.body.reportType);
+    const filters = (req.body.filters ?? {}) as ReportGenerationFilters;
+    const exportFormat = req.body.exportFormat as 'pdf' | 'docx' | 'frontend' | undefined;
+
+    const collected = await dataCollectionService.collect(reportType, filters);
+    const aggregation = collected.aggregation;
+
+    if (!aggregation) {
+      this.success(res, 'No aggregated data available for chart generation', {
+        reportType,
+        charts: [],
+        generatedAt: new Date(),
+      });
+      return;
+    }
+
+    const result = chartService.generateForReportType(reportType, aggregation);
+    const charts = result.charts.map((chart) => ({
+      chartType: chart.chartType,
+      labels: chart.labels,
+      datasets: chart.datasets,
+      metadata: chart.metadata,
+    }));
+
+    const response: Record<string, unknown> = {
+      reportType,
+      charts,
+      chartCount: charts.length,
+      generatedAt: result.generatedAt,
+      fromCache: result.fromCache,
+    };
+
+    if (exportFormat) {
+      response.exports = chartService.toExportFormat(result.charts, exportFormat);
+    }
+
+    this.success(res, 'Report charts generated successfully', response);
   });
 
   private requireUserId(req: Request): string {

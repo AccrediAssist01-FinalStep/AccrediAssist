@@ -44,18 +44,32 @@ export interface ReportPipelineContext {
 
 export interface ReportAiSummary {
   executiveSummary: string;
-  keyHighlights: string[];
+  strengths: string[];
+  observations: string[];
   recommendations: string[];
+  keyHighlights: string[];
   model?: string;
   generatedAt: Date;
+  source: 'gemini' | 'fallback';
 }
 
 export interface PreparedChart {
   id: string;
   title: string;
-  chartType: 'bar' | 'line' | 'pie' | 'area' | 'table';
+  chartType: 'bar' | 'line' | 'pie' | 'doughnut' | 'area' | 'table';
   labels: string[];
   datasets: Array<{ label: string; data: number[] }>;
+  metadata?: {
+    id: string;
+    title: string;
+    module?: string;
+    source: 'aggregation';
+    filters?: Record<string, unknown>;
+    period?: string;
+    exportFormats: Array<'pdf' | 'docx' | 'frontend'>;
+    generatedAt: string;
+    totalRecords?: number;
+  };
 }
 
 /** In-memory document structure — not persisted as PDF/DOCX yet */

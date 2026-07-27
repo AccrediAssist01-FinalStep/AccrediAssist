@@ -1,0 +1,13 @@
+Generate an executive summary for the institutional report described below.
+
+Use ONLY the aggregated data provided. Do not assume or fabricate any metrics.
+
+Report: {{reportLabel}} ({{reportType}})
+Category: {{reportCategory}}
+Reporting period: {{periodLabel}}
+
+=== AGGREGATED INSTITUTIONAL DATA (JSON) ===
+{{aggregatedData}}
+=== END DATA ===
+
+Respond with the required JSON schema only.

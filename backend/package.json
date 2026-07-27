@@ -39,6 +39,8 @@
     "test:patent-api": "tsx src/scripts/test-patent-api.ts",
     "test:report-api": "tsx src/scripts/test-report-api.ts",
     "test:report-aggregation": "tsx src/scripts/test-report-aggregation.ts",
+    "test:executive-summary": "tsx src/scripts/test-executive-summary.ts",
+    "test:charts-analytics": "tsx src/scripts/test-charts-analytics.ts",
     "test:notification-api": "tsx src/scripts/test-notification-api.ts",
     "test:audit-log-api": "tsx src/scripts/test-audit-log-api.ts",
     "test:apis": "npm run test:crud-infrastructure && npm run test:pending-api && npm run test:student-achievement-api && npm run test:faculty-achievement-api && npm run test:placement-api && npm run test:internship-api && npm run test:event-report-api && npm run test:publication-api && npm run test:patent-api && npm run test:report-api && npm run test:notification-api && npm run test:audit-log-api",

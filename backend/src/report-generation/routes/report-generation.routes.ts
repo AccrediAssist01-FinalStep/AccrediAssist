@@ -50,4 +50,16 @@ reportGenerationRouter.post(
   reportGenerationController.aggregate,
 );
 
+reportGenerationRouter.post(
+  '/summary',
+  validate(reportGenerationPlanSchema),
+  reportGenerationController.generateSummary,
+);
+
+reportGenerationRouter.post(
+  '/charts',
+  validate(reportGenerationPlanSchema),
+  reportGenerationController.generateCharts,
+);
+
 export default reportGenerationRouter;

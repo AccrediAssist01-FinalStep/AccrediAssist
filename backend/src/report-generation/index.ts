@@ -45,4 +45,20 @@ export {
   type ReportAggregationResult,
 } from './aggregation';
 
+export {
+  executiveSummaryService,
+  ExecutiveSummaryService,
+  type ValidatedExecutiveSummary,
+  type ExecutiveSummaryResponse,
+} from './summary';
+
+export {
+  chartService,
+  ChartService,
+  chartFactory,
+  CHART_DEFINITION_IDS,
+  type StandardChart,
+  type ChartDefinitionId,
+} from './charts';
+
 export { default as reportGenerationRouter } from './routes/report-generation.routes';
