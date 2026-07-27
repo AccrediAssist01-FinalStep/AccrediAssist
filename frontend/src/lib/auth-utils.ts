@@ -60,10 +60,16 @@ export const setRememberedEmail = (email: string | null): void => {
 };
 
 export const parseAuthError = (error: unknown): ParsedAuthError => {
-  if (typeof error === 'object' && error !== null && 'code' in error) {
-    const code = (error as { code: AuthErrorCode }).code;
-    const message = (error as { message?: string }).message ?? ERROR_TITLES[code];
-    return { code, message, title: ERROR_TITLES[code] };
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    'title' in error &&
+    'message' in error &&
+    typeof (error as ParsedAuthError).code === 'string' &&
+    (error as ParsedAuthError).code in ERROR_TITLES
+  ) {
+    return error as ParsedAuthError;
   }
 
   const axiosError = error as {

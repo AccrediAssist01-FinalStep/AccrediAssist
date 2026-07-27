@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ChevronRight, Loader2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from '@/components/branding/Logo';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,6 +18,7 @@ import {
 } from '@/config/navigation';
 import { canAccessRoute } from '@/lib/permissions';
 import { useAuth } from '@/providers/AuthProvider';
+import { useNavigationStore } from '@/hooks/use-navigation-store';
 import { useSidebarStore } from '@/hooks/use-sidebar';
 
 interface SidebarProps {
@@ -27,26 +29,48 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const { isCollapsed, toggleCollapsed } = useSidebarStore();
+  const setPendingPath = useNavigationStore((state) => state.setPendingPath);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+    setPendingPath(null);
+  }, [pathname, setPendingPath]);
 
   const renderNavItem = (item: NavItem) => {
     if (!canAccessRoute(user?.role, item.permission)) return null;
 
     const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    const isLoading = pendingHref === item.href && pathname !== item.href;
     const Icon = item.icon;
 
     const link = (
       <Link
         href={item.href}
-        onClick={onNavigate}
+        prefetch
+        onClick={() => {
+          if (pathname !== item.href) {
+            setPendingHref(item.href);
+            setPendingPath(item.href);
+          }
+          onNavigate?.();
+        }}
+        aria-current={isActive ? 'page' : undefined}
+        aria-busy={isLoading || undefined}
         className={cn(
           'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
           isActive
             ? 'gradient-primary text-white shadow-soft'
             : 'text-muted hover:bg-accent hover:text-foreground',
           isCollapsed && 'justify-center px-2',
+          isLoading && 'opacity-80',
         )}
       >
-        <Icon className={cn('size-[18px] shrink-0', isActive && 'text-white')} />
+        {isLoading ? (
+          <Loader2 className={cn('size-[18px] shrink-0 animate-spin', isActive && 'text-white')} />
+        ) : (
+          <Icon className={cn('size-[18px] shrink-0', isActive && 'text-white')} />
+        )}
         {!isCollapsed && <span>{item.label}</span>}
       </Link>
     );

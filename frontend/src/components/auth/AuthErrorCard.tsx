@@ -29,7 +29,8 @@ interface AuthErrorCardProps {
 }
 
 export function AuthErrorCard({ code, title, message, className }: AuthErrorCardProps) {
-  const Icon = ERROR_ICONS[code];
+  const Icon = ERROR_ICONS[code] ?? AlertCircle;
+  const style = ERROR_STYLES[code] ?? ERROR_STYLES.unknown;
 
   return (
     <motion.div
@@ -37,11 +38,7 @@ export function AuthErrorCard({ code, title, message, className }: AuthErrorCard
       initial={{ opacity: 0, y: -8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8 }}
-      className={cn(
-        'flex gap-3 rounded-xl border p-4',
-        ERROR_STYLES[code],
-        className,
-      )}
+      className={cn('flex gap-3 rounded-xl border p-4', style, className)}
     >
       <Icon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
       <div>

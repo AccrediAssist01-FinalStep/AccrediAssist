@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { AuthGuard } from '@/components/common/AuthGuard';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { NavigationProgress } from '@/components/layout/NavigationProgress';
 import { Footer, TopNav } from '@/components/layout/TopNav';
 import { cn } from '@/lib/utils';
 import { useSidebarStore } from '@/hooks/use-sidebar';
@@ -14,6 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthGuard>
+      <NavigationProgress />
       <div className="flex min-h-screen bg-background">
         <div className="hidden md:block">
           <Sidebar />

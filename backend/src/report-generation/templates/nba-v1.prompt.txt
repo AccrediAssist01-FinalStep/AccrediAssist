@@ -1,0 +1,2 @@
+# Placeholder prompt template for NBA report generation (v1).
+# Actual Gemini prompts will be implemented in a future sprint.

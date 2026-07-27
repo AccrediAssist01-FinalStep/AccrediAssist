@@ -21,12 +21,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, token, isLoading, isInitializing, router]);
 
-  if (isInitializing || (!isAuthenticated && (isLoading || token))) {
+  if (isInitializing) {
     return <LoginPageSkeleton />;
   }
 
   if (!isAuthenticated && !token) {
     return null;
+  }
+
+  if (!isAuthenticated && (isLoading || token)) {
+    return <LoginPageSkeleton />;
   }
 
   return <>{children}</>;
