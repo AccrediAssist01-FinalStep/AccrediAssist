@@ -3,11 +3,16 @@ export const CLASSIFICATION_CATEGORIES = [
   'Faculty Achievement',
   'Placement',
   'Internship',
+  'Publication',
+  'Patent',
+  'Completed Event Report',
+] as const;
+
+/** @deprecated Legacy categories mapped during normalization */
+export const LEGACY_CLASSIFICATION_CATEGORIES = [
   'Workshop',
   'Seminar',
   'Industrial Visit',
-  'Publication',
-  'Patent',
   'Other',
 ] as const;
 

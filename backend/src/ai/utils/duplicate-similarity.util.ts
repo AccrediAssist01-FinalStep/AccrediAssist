@@ -127,6 +127,13 @@ const CATEGORY_FIELD_WEIGHTS: Record<string, Record<string, number>> = {
     location: 20,
     date: 10,
   },
+  'Completed Event Report': {
+    eventName: 35,
+    title: 25,
+    eventType: 15,
+    location: 15,
+    date: 10,
+  },
   Publication: {
     facultyNames: 25,
     publicationTitle: 45,

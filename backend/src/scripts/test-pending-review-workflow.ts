@@ -423,12 +423,12 @@ const testWhatsAppListenerIntegration = async (
     groupFetchAllParticipating: async () => ({
       '120363012345678901@g.us': {
         id: '120363012345678901@g.us',
-        subject: 'Computer Department',
+        subject: 'Final Step',
       },
     }),
     groupMetadata: async () => ({
       id: '120363012345678901@g.us',
-      subject: 'Computer Department',
+      subject: 'Final Step',
     }),
   };
 

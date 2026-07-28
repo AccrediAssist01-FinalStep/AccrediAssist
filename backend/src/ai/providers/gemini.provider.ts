@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import { BadRequestError, InternalServerError, ValidationError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
+import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
 import { AiModuleStatus } from '../interfaces/ai-config.interface';
 import { AiProvider } from '../interfaces/ai-provider.interface';
 import {
@@ -147,12 +148,26 @@ export class GeminiProvider implements AiProvider {
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
       try {
+        logPipelineStage(PIPELINE_STAGES.GEMINI_REQUEST, {
+          attempt,
+          model: config.model,
+          responseMimeType: options.responseMimeType,
+          promptLength: options.prompt.length,
+        });
+
         const response = await this.client!.models.generateContent(requestParams);
         const text = response.text?.trim();
 
         if (!text) {
           throw new InternalServerError('Gemini response did not include text content');
         }
+
+        logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
+          attempt,
+          model: config.model,
+          responseLength: text.length,
+          responsePreview: text.slice(0, 180),
+        });
 
         return {
           text,

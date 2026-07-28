@@ -77,7 +77,7 @@ const testAiConfiguration = (): void => {
 
   const config = getAiConfig();
   assert(config.provider === 'gemini', 'AI provider defaults to gemini');
-  assert(config.model === 'gemini-2.5-flash', 'Default Gemini model is gemini-2.5-flash');
+  assert(config.model === 'gemini-3.1-flash-lite', 'Default Gemini model is gemini-3.1-flash-lite');
   assert(typeof isGeminiConfigured() === 'boolean', 'Gemini configuration check is available');
 };
 

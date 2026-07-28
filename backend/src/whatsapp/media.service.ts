@@ -3,6 +3,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { logger } from '../utils/logger';
+import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
 import { BadRequestError } from '../utils/errors';
 import {
   CloudinaryUploadHandler,
@@ -109,9 +110,21 @@ export class MediaService {
   }
 
   async processIncomingMedia(input: DownloadMediaInput): Promise<ProcessedWhatsAppMedia> {
+    logPipelineStage(PIPELINE_STAGES.MEDIA_PROCESSING, {
+      mediaType: input.mediaInfo.mediaType,
+      mimeType: input.mediaInfo.mimeType,
+      fileName: input.mediaInfo.fileName,
+    });
+
     const tempMetadata = await this.downloadAndSave(input);
 
     try {
+      logPipelineStage(PIPELINE_STAGES.CLOUDINARY_UPLOAD, {
+        mediaType: tempMetadata.mediaType,
+        fileName: tempMetadata.fileName,
+        fileSize: tempMetadata.fileSize,
+      });
+
       const uploadResult = await this.uploadToCloudinary({
         filePath: tempMetadata.localPath!,
         fileName: tempMetadata.fileName,
@@ -136,6 +149,12 @@ export class MediaService {
       logger.info('WhatsApp media uploaded to Cloudinary', {
         mediaType: metadata.mediaType,
         fileName: metadata.fileName,
+        secureUrl: metadata.secureUrl,
+        publicId: metadata.publicId,
+      });
+
+      logPipelineStage(PIPELINE_STAGES.CLOUDINARY_UPLOAD, {
+        success: true,
         secureUrl: metadata.secureUrl,
         publicId: metadata.publicId,
       });

@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger';
+import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
 import { loadBaileys } from './baileys.loader';
 import { groupFilter } from './group.filter';
 import {

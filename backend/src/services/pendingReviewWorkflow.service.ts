@@ -1,5 +1,10 @@
 import { aiPipelineService, AiPipelineService } from '../ai/services/ai-pipeline.service';
 import { AiPipelineResult } from '../ai/interfaces/ai-pipeline.interface';
+import {
+  getMessageValidationReason,
+  isNonInstitutionalMessage,
+} from '../ai/utils/message-validation.util';
+import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
 import { pendingRecordApprovalService } from './pendingRecordApproval.service';
 import { pendingRecordEditService } from './pendingRecordEdit.service';
 import { pendingRecordRejectionService } from './pendingRecordRejection.service';
@@ -33,10 +38,27 @@ export class PendingReviewWorkflowService {
 
   async processIncomingWhatsAppMessage(
     message: WhatsAppIncomingMessage,
-  ): Promise<AiPipelineResult> {
-    logger.info('Pending review workflow started for WhatsApp message', {
+  ): Promise<AiPipelineResult | null> {
+    logPipelineStage(PIPELINE_STAGES.MESSAGE_RECEIVED, {
       groupName: message.groupName,
       sender: message.sender,
+      hasMedia: Boolean(message.media),
+    });
+
+    const validationReason = getMessageValidationReason(message);
+    if (isNonInstitutionalMessage(message)) {
+      logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+        ignored: true,
+        reason: validationReason,
+        messagePreview: message.message.slice(0, 80),
+      });
+      return null;
+    }
+
+    logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+      ignored: false,
+      hasMedia: Boolean(message.media),
+      hasText: Boolean(message.message.trim()),
     });
 
     try {
@@ -45,6 +67,7 @@ export class PendingReviewWorkflowService {
       logger.info('Pending review workflow created pending record from WhatsApp message', {
         pendingRecordId: result.pendingRecord._id,
         category: result.recordCategory,
+        detectedCategory: result.stages.classification.result.category,
         status: result.pendingStatus,
         confidenceScore: result.confidenceScore,
       });
@@ -73,8 +96,10 @@ export class PendingReviewWorkflowService {
         status: 'Needs Review',
       });
 
-      logger.info('Pending review workflow saved raw WhatsApp message after AI failure', {
+      logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
         pendingRecordId: pendingRecord._id,
+        fallback: true,
+        status: 'Needs Review',
       });
 
       return {

@@ -205,12 +205,12 @@ const testListenerCloudinaryIntegration = async (): Promise<void> => {
       groupFetchAllParticipating: async () => ({
         [groupJid]: {
           id: groupJid,
-          subject: 'Computer Department',
+          subject: 'Final Step',
         },
       }),
       groupMetadata: async () => ({
         id: groupJid,
-        subject: 'Computer Department',
+        subject: 'Final Step',
       }),
     };
 

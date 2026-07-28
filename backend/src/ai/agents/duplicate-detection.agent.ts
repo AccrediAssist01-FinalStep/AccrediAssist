@@ -11,7 +11,19 @@ import {
   calculateSimilarityScore,
   getDuplicateThreshold,
   toComparableFields,
+  toStringValue,
 } from '../utils/duplicate-similarity.util';
+
+const resolveDuplicateScoringCategory = (
+  category: string,
+  extractedData: Record<string, unknown>,
+): string => {
+  if (category === 'Completed Event Report') {
+    return toStringValue(extractedData.eventType) ?? 'Workshop';
+  }
+
+  return category;
+};
 
 export class DuplicateDetectionAgent {
   constructor(private readonly repository: DuplicateDetectionRepository = duplicateDetectionRepository) {}
@@ -20,6 +32,7 @@ export class DuplicateDetectionAgent {
     const sourceFields = toComparableFields(input.extractedData);
     const candidates = await this.repository.findCandidates(input.category, input.extractedData);
     const threshold = getDuplicateThreshold();
+    const scoringCategory = resolveDuplicateScoringCategory(input.category, input.extractedData);
 
     let bestScore = 0;
     let matchingRecordId: string | null = null;
@@ -27,7 +40,7 @@ export class DuplicateDetectionAgent {
 
     for (const candidate of candidates) {
       const score = calculateSimilarityScore(
-        input.category,
+        scoringCategory,
         sourceFields,
         candidate.fields,
       );

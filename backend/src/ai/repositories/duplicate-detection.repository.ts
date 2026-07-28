@@ -83,6 +83,7 @@ export class DuplicateDetectionRepository {
       case 'Workshop':
       case 'Seminar':
       case 'Industrial Visit':
+      case 'Completed Event Report':
         return this.findEventCandidates(extractedData);
       case 'Publication':
         return this.findPublicationCandidates(extractedData);

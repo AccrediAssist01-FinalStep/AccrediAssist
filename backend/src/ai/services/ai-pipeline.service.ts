@@ -12,15 +12,18 @@ import {
   calculatePipelineConfidenceScore,
   resolvePendingRecordStatus,
 } from '../utils/pipeline-status.util';
+import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
 
 const buildPendingExtractedData = (
   message: WhatsAppIncomingMessage,
   extraction: ExtractionResult,
   stages: AiPipelineStageResults,
+  detectedCategory: string,
 ): Record<string, unknown> => ({
   ...extraction,
   media: message.media,
   mediaMetadata: message.mediaMetadata ?? null,
+  detectedCategory,
   aiPipeline: {
     classification: stages.classification.result,
     validation: stages.validation.result,
@@ -43,17 +46,31 @@ export class AiPipelineService {
   ) {}
 
   async processWhatsAppMessage(message: WhatsAppIncomingMessage): Promise<AiPipelineResult> {
-    logger.info('AI pipeline started for WhatsApp message', {
+    logPipelineStage(PIPELINE_STAGES.MESSAGE_RECEIVED, {
       groupName: message.groupName,
       sender: message.sender,
+      hasMedia: Boolean(message.media),
+      messagePreview: message.message.slice(0, 120),
     });
 
     const extractionResponse = await this.extraction.extract(message);
     const extractedData = extractionResponse.result;
 
+    logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
+      stage: 'extraction',
+      model: extractionResponse.model,
+      confidence: extractedData.confidence,
+    });
+
     const classificationResponse = await this.classification.classify({
       extractedData,
       originalMessage: message.message,
+    });
+
+    logPipelineStage(PIPELINE_STAGES.CLASSIFICATION, {
+      category: classificationResponse.result.category,
+      confidence: classificationResponse.result.confidence,
+      model: classificationResponse.model,
     });
 
     const validationResponse = await this.validation.validate({
@@ -70,6 +87,7 @@ export class AiPipelineService {
     const confidenceScore = calculatePipelineConfidenceScore(
       extractedData,
       classificationResponse.result,
+      validationResponse.result,
     );
 
     const pendingStatus = resolvePendingRecordStatus({
@@ -95,14 +113,20 @@ export class AiPipelineService {
       groupName: message.groupName,
       senderName: message.sender,
       category: recordCategory,
-      extractedData: buildPendingExtractedData(message, extractedData, stages),
+      extractedData: buildPendingExtractedData(
+        message,
+        extractedData,
+        stages,
+        classificationResponse.result.category,
+      ),
       confidenceScore,
       status: pendingStatus,
     });
 
-    logger.info('AI pipeline created pending record', {
+    logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
       pendingRecordId: pendingRecord._id,
-      category: recordCategory,
+      recordCategory,
+      detectedCategory: classificationResponse.result.category,
       status: pendingStatus,
       confidenceScore,
       duplicate: duplicateDetectionResponse.result.duplicate,

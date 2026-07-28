@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { pendingRecordRepository } from '../repositories/pendingRecord.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
+import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
 import { StudentAchievement } from '../models/StudentAchievement';
 import { FacultyAchievement } from '../models/FacultyAchievement';
 import { Placement } from '../models/Placement';
@@ -58,6 +59,15 @@ export class PendingRecordApprovalService {
       targetModule,
     });
 
+    logPipelineStage(PIPELINE_STAGES.FACULTY_APPROVAL, {
+      pendingRecordId: id,
+      userId,
+      category: existing.category,
+      targetModule,
+      detectedCategory:
+        (existing.extractedData as Record<string, unknown> | undefined)?.detectedCategory ?? null,
+    });
+
     const approvalResult = await this.createTargetRecord(targetModule, payload, userId);
 
     const approved = await pendingRecordRepository.updateStatus(id, 'Approved', userId);
@@ -108,6 +118,17 @@ export class PendingRecordApprovalService {
   ): Promise<PendingApprovalResult> {
     const approvedBy = new mongoose.Types.ObjectId(userId);
 
+    const storeRecord = async (
+      module: PendingApprovalTargetModule,
+      createdRecordId: string,
+    ): PendingApprovalResult => {
+      logPipelineStage(PIPELINE_STAGES.FINAL_DATABASE_STORAGE, {
+        targetModule: module,
+        createdRecordId,
+      });
+      return { targetModule: module, createdRecordId };
+    };
+
     try {
       switch (targetModule) {
         case 'StudentAchievement': {
@@ -115,43 +136,43 @@ export class PendingRecordApprovalService {
             ...payload,
             approvedBy,
           });
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'FacultyAchievement': {
           const created = await FacultyAchievement.create({
             ...payload,
             approvedBy,
           });
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'Placement': {
           const created = await Placement.create({
             ...payload,
             approvedBy,
           });
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'Internship': {
           const created = await Internship.create({
             ...payload,
             approvedBy,
           });
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'Publication': {
           const created = await Publication.create(payload);
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'Patent': {
           const created = await Patent.create(payload);
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         case 'CompletedEventReport': {
           const created = await CompletedEventReport.create({
             ...payload,
             approvedBy,
           });
-          return { targetModule, createdRecordId: created._id.toString() };
+          return storeRecord(targetModule, created._id.toString());
         }
         default:
           throw new BadRequestError('Cannot approve pending record: unsupported target collection');

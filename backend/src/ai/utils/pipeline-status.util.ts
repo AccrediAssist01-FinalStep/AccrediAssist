@@ -10,6 +10,7 @@ export const getConfidenceThreshold = (): number => env.AI_CONFIDENCE_THRESHOLD;
 export const calculatePipelineConfidenceScore = (
   extraction: ExtractionResult,
   classification: ClassificationResult,
+  validation?: ValidationResult,
 ): number => {
   const extractionConfidence = extraction.confidence ?? 0;
   const classificationConfidence = classification.confidence ?? 0;
@@ -19,7 +20,29 @@ export const calculatePipelineConfidenceScore = (
     return 0;
   }
 
-  return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+  let score = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+
+  if (validation?.validationStatus === 'invalid') {
+    score = Math.min(score, Math.max(getConfidenceThreshold() - 5, 0));
+  }
+
+  if (classification.confidence !== null && classification.confidence < 50) {
+    score = Math.min(score, classification.confidence);
+  }
+
+  const hasNamedEntity =
+    Boolean(extraction.studentNames?.length) ||
+    Boolean(extraction.facultyNames?.length) ||
+    Boolean(extraction.company) ||
+    Boolean(extraction.publicationTitle) ||
+    Boolean(extraction.patentTitle) ||
+    Boolean(extraction.eventName);
+
+  if (!hasNamedEntity) {
+    score = Math.min(score, 45);
+  }
+
+  return Math.max(0, score);
 };
 
 export const resolvePendingRecordStatus = (input: {

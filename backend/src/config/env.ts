@@ -20,7 +20,7 @@ const envSchema = z.object({
   // AI (Gemini)
   AI_PROVIDER: z.enum(['gemini']).default('gemini'),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.1-flash-lite'),
   AI_TEMPLATES_PATH: z.string().default('./src/ai/templates'),
   AI_DUPLICATE_THRESHOLD: z.coerce.number().min(0).max(100).default(80),
   AI_CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(100).default(70),
