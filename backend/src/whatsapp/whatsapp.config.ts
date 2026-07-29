@@ -12,7 +12,6 @@ export const whatsappConfig = {
 } as const;
 
 export const baileysConfig = {
-  browser: ['AccrediAssist', 'Chrome', '1.0.0'] as [string, string, string],
   printQRInTerminal: false,
   syncFullHistory: false,
   markOnlineOnConnect: false,

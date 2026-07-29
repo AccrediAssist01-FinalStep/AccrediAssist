@@ -212,6 +212,9 @@ export class WhatsAppService {
     const { state, saveCreds } = await sessionService.loadAuthState();
     const hasStoredSession = await sessionService.hasStoredSession();
 
+    const { version, isLatest } = await baileys.fetchLatestWaWebVersion();
+    const browser = baileys.Browsers.macOS('Chrome');
+
     this.status = hasStoredSession
       ? WhatsAppConnectionStatus.CONNECTING
       : WhatsAppConnectionStatus.AWAITING_QR;
@@ -220,12 +223,16 @@ export class WhatsAppService {
     logger.info('Starting WhatsApp connection', {
       hasStoredSession,
       sessionPath: sessionService.getSessionDirectory(),
+      waVersion: version.join('.'),
+      waVersionIsLatest: isLatest,
+      browser,
     });
 
     const socket = baileys.default({
       auth: state,
       logger: baileysLogger,
-      browser: baileysConfig.browser,
+      version,
+      browser,
       syncFullHistory: baileysConfig.syncFullHistory,
       markOnlineOnConnect: baileysConfig.markOnlineOnConnect,
       printQRInTerminal: false,
@@ -292,6 +299,7 @@ export class WhatsAppService {
       const isLoggedOut = statusCode === baileys.DisconnectReason.loggedOut;
       const isConnectionReplaced = statusCode === baileys.DisconnectReason.connectionReplaced;
       const isRestartRequired = statusCode === baileys.DisconnectReason.restartRequired;
+      const isStaleSessionError = isLoggedOut || isConnectionReplaced;
       const shouldReconnect = !isLoggedOut && !isConnectionReplaced;
 
       messageListener.stop();
@@ -323,10 +331,10 @@ export class WhatsAppService {
         return;
       }
 
-      // Saved credentials can be invalid after a partial pairing or device unlink (401).
+      // Saved credentials can be invalid after a partial pairing or device unlink (401/440).
       if (
         !wasConnected &&
-        (isLoggedOut || isConnectionReplaced) &&
+        isStaleSessionError &&
         !this.intentionalDisconnect &&
         !this.staleSessionRetryAttempted
       ) {
@@ -334,10 +342,21 @@ export class WhatsAppService {
         this.status = WhatsAppConnectionStatus.AWAITING_QR;
         logger.info(
           'Stored WhatsApp session is invalid; clearing credentials and requesting a new QR scan',
+          { statusCode },
         );
         void sessionService.clearStoredSession().then(() => {
           void this.createSocket(options);
         });
+        return;
+      }
+
+      if (!wasConnected && statusCode === 405) {
+        this.rejectConnectionWait(
+          new Error(
+            'WhatsApp rejected the connection (405). Stop the backend server (npm run dev) before running whatsapp:connect — only one process can pair at a time.',
+          ),
+        );
+        this.status = WhatsAppConnectionStatus.DISCONNECTED;
         return;
       }
 
@@ -354,11 +373,13 @@ export class WhatsAppService {
       this.status = WhatsAppConnectionStatus.DISCONNECTED;
 
       if (
-        wasConnected &&
         shouldReconnect &&
         this.autoReconnectEnabled &&
         !this.intentionalDisconnect
       ) {
+        if (!wasConnected) {
+          this.status = WhatsAppConnectionStatus.RECONNECTING;
+        }
         reconnectService.scheduleReconnect();
       }
     }
