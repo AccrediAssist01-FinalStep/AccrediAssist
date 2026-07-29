@@ -38,9 +38,7 @@ export class SmartSearchAgent {
       throw new BadRequestError('Search query is required');
     }
 
-    if (!this.provider.isConfigured()) {
-      throw new BadRequestError('Gemini is not configured for smart search');
-    }
+    await this.provider.initialize();
 
     const renderedPrompt = await this.buildPrompt(input);
 

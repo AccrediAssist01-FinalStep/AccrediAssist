@@ -108,10 +108,13 @@ export class WhatsAppService {
 
     if (
       this.status === WhatsAppConnectionStatus.CONNECTING ||
-      this.status === WhatsAppConnectionStatus.RECONNECTING ||
       this.status === WhatsAppConnectionStatus.AWAITING_QR
     ) {
       return this.getModuleStatus();
+    }
+
+    if (this.status === WhatsAppConnectionStatus.RECONNECTING) {
+      this.status = WhatsAppConnectionStatus.DISCONNECTED;
     }
 
     await this.createSocket(options);

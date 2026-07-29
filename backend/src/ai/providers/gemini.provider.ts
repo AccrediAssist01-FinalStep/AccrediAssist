@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, createPartFromUri, createUserContent } from '@google/genai';
 import { BadRequestError, InternalServerError, ValidationError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
@@ -13,6 +13,7 @@ import {
 import {
   GeminiGenerateContentParams,
   GeminiGenerativeClient,
+  GeminiMediaPart,
 } from '../interfaces/gemini-client.interface';
 import { getAiConfig, isGeminiConfigured } from '../utils/ai-config.util';
 
@@ -30,7 +31,21 @@ interface GeminiInvokeOptions {
   systemInstruction?: string;
   temperature?: number;
   responseMimeType: 'application/json' | 'text/plain';
+  mediaParts?: GeminiMediaPart[];
 }
+
+const buildGeminiContents = (options: GeminiInvokeOptions): string | unknown => {
+  if (!options.mediaParts?.length) {
+    return options.prompt;
+  }
+
+  const parts = [
+    ...options.mediaParts.map((part) => createPartFromUri(part.url, part.mimeType)),
+    options.prompt,
+  ];
+
+  return createUserContent(parts);
+};
 
 export class GeminiProvider implements AiProvider {
   readonly providerName = 'gemini' as const;
@@ -92,6 +107,7 @@ export class GeminiProvider implements AiProvider {
       systemInstruction: options.systemInstruction,
       temperature: options.temperature,
       responseMimeType: 'text/plain',
+      mediaParts: options.mediaParts,
     });
 
     return {
@@ -110,6 +126,7 @@ export class GeminiProvider implements AiProvider {
       systemInstruction: options.systemInstruction,
       temperature: options.temperature,
       responseMimeType: 'application/json',
+      mediaParts: options.mediaParts,
     });
 
     let data: T;
@@ -136,7 +153,7 @@ export class GeminiProvider implements AiProvider {
     const config = getAiConfig();
     const requestParams: GeminiGenerateContentParams = {
       model: config.model,
-      contents: options.prompt,
+      contents: buildGeminiContents(options),
       config: {
         systemInstruction: options.systemInstruction,
         temperature: options.temperature,
@@ -153,6 +170,7 @@ export class GeminiProvider implements AiProvider {
           model: config.model,
           responseMimeType: options.responseMimeType,
           promptLength: options.prompt.length,
+          mediaPartCount: options.mediaParts?.length ?? 0,
         });
 
         const response = await this.client!.models.generateContent(requestParams);

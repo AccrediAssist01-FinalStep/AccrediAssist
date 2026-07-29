@@ -3,12 +3,17 @@
 import dynamic from 'next/dynamic';
 import { useDashboardData } from '@/features/dashboard/hooks/use-dashboard-data';
 import { DashboardHero } from '@/features/dashboard/components/DashboardHero';
-import { StatsGrid } from '@/features/dashboard/components/StatsGrid';
+import { ErpModuleOverview } from '@/features/dashboard/components/ErpModuleOverview';
+import {
+  AccreditationProgressPanel,
+  KeyMetricsRow,
+  PendingReviewsHighlight,
+  WhatsAppActivityPanel,
+} from '@/features/dashboard/components/ErpDashboardPanels';
 import { AIInsightsPanel } from '@/features/dashboard/components/AIInsightsPanel';
 import { RecentActivityTimeline } from '@/features/dashboard/components/RecentActivityTimeline';
-import { QuickActions } from '@/features/dashboard/components/QuickActions';
-import { PageTransition } from '@/components/layout/PageLayout';
-import { ChartSkeleton, StatCardsSkeleton } from '@/components/common/LoadingSkeletons';
+import { PageTransition, SectionCard } from '@/components/layout/PageLayout';
+import { ChartSkeleton, PageHeaderSkeleton } from '@/components/common/LoadingSkeletons';
 import { ErrorState } from '@/components/common/ErrorState';
 
 const DashboardCharts = dynamic(
@@ -25,9 +30,12 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-8 pb-8">
-        <div className="h-48 animate-pulse rounded-xl bg-accent" />
-        <StatCardsSkeleton count={8} />
-        <ChartSkeleton />
+        <PageHeaderSkeleton />
+        <div className="grid gap-4 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="h-48 animate-pulse rounded-2xl bg-accent" />
+          ))}
+        </div>
         <ChartSkeleton />
       </div>
     );
@@ -41,20 +49,31 @@ export default function DashboardPage() {
     <PageTransition>
       <DashboardHero />
 
-      <StatsGrid stats={data.stats} />
+      <ErpModuleOverview
+        summary={data.summary}
+        yearly={data.yearly}
+        pendingReviews={data.summary.pendingReviews}
+      />
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2">
+        <div className="space-y-6 xl:col-span-2">
+          <PendingReviewsHighlight summary={data.summary} />
+          <KeyMetricsRow summary={data.summary} />
+          <SectionCard title="Monthly Analytics" description="Activity trends across all ERP modules">
+            <DashboardCharts monthlyTrend={data.monthlyTrend} currentMonth={data.currentMonth} />
+          </SectionCard>
+        </div>
+
+        <div className="space-y-6">
           <AIInsightsPanel
             summary={data.summary}
             currentMonth={data.currentMonth}
             activities={data.activities}
           />
+          <AccreditationProgressPanel />
+          <WhatsAppActivityPanel activities={data.activities} />
         </div>
-        <QuickActions />
       </div>
-
-      <DashboardCharts monthlyTrend={data.monthlyTrend} currentMonth={data.currentMonth} />
 
       <RecentActivityTimeline activities={data.activities} />
 

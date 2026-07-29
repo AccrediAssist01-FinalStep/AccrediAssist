@@ -1,6 +1,8 @@
 import { EVENT_TYPES, EventType, RECORD_CATEGORIES, RecordCategory } from '../../database/enums';
 import { ClassificationCategory } from '../interfaces/classification.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
+import { enrichExtractionAchievementType, inferAchievementTypeFromText } from './achievement-inference.util';
+import { isIndustrialVisitContext } from './event-inference.util';
 
 const DIRECT_CATEGORY_MAP: Record<ClassificationCategory, RecordCategory> = {
   'Student Achievement': 'Student Achievement',
@@ -14,6 +16,16 @@ const DIRECT_CATEGORY_MAP: Record<ClassificationCategory, RecordCategory> = {
 
 const EVENT_TYPE_SET = new Set<string>(EVENT_TYPES);
 
+const ACHIEVEMENT_TYPE_MAP: Record<string, RecordCategory> = {
+  Sports: 'Sports',
+  Cultural: 'Cultural',
+  Certification: 'Certification',
+  Research: 'Research',
+  Technical: 'Student Achievement',
+  Hackathon: 'Student Achievement',
+  Award: 'Faculty Achievement',
+};
+
 const resolveCompletedEventCategory = (extraction: ExtractionResult): RecordCategory => {
   const eventType = extraction.eventType?.trim();
   if (eventType && EVENT_TYPE_SET.has(eventType)) {
@@ -24,21 +36,36 @@ const resolveCompletedEventCategory = (extraction: ExtractionResult): RecordCate
   if (categoryHint === 'Seminar') {
     return 'Seminar';
   }
-  if (categoryHint === 'Industrial Visit') {
+  if (
+    categoryHint === 'Industrial Visit' ||
+    extraction.eventType?.trim() === 'Industrial Visit' ||
+    isIndustrialVisitContext('', extraction)
+  ) {
     return 'Industrial Visit';
   }
 
   return 'Workshop';
 };
 
-const ACHIEVEMENT_TYPE_MAP: Record<string, RecordCategory> = {
-  Sports: 'Sports',
-  Cultural: 'Cultural',
-  Certification: 'Certification',
-  Research: 'Research',
-  Technical: 'Student Achievement',
-  Hackathon: 'Student Achievement',
-  Award: 'Faculty Achievement',
+const resolveAchievementCategory = (extraction: ExtractionResult): RecordCategory | null => {
+  const enriched = enrichExtractionAchievementType(extraction);
+
+  const categoryHint = enriched.categoryHint?.trim();
+  if (categoryHint && isRecordCategory(categoryHint)) {
+    return categoryHint;
+  }
+
+  const achievementType = enriched.achievementType?.trim();
+  if (achievementType && ACHIEVEMENT_TYPE_MAP[achievementType]) {
+    return ACHIEVEMENT_TYPE_MAP[achievementType];
+  }
+
+  const inferred = inferAchievementTypeFromText(enriched);
+  if (inferred && ACHIEVEMENT_TYPE_MAP[inferred]) {
+    return ACHIEVEMENT_TYPE_MAP[inferred];
+  }
+
+  return null;
 };
 
 export const isRecordCategory = (value: string): value is RecordCategory =>
@@ -52,19 +79,28 @@ export const mapClassificationToRecordCategory = (
     return resolveCompletedEventCategory(extraction);
   }
 
+  if (
+    classificationCategory === 'Student Achievement' ||
+    classificationCategory === 'Faculty Achievement'
+  ) {
+    const resolved = resolveAchievementCategory(extraction);
+    if (resolved) {
+      return resolved;
+    }
+  }
+
   const direct = DIRECT_CATEGORY_MAP[classificationCategory];
   if (direct) {
     return direct;
   }
 
-  const categoryHint = extraction.categoryHint?.trim();
-  if (categoryHint && isRecordCategory(categoryHint)) {
-    return categoryHint;
+  const fallback = resolveAchievementCategory(extraction);
+  if (fallback) {
+    return fallback;
   }
 
-  const achievementType = extraction.achievementType?.trim();
-  if (achievementType && ACHIEVEMENT_TYPE_MAP[achievementType]) {
-    return ACHIEVEMENT_TYPE_MAP[achievementType];
+  if (isIndustrialVisitContext('', extraction)) {
+    return 'Industrial Visit';
   }
 
   return 'Research';

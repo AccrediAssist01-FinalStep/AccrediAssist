@@ -54,12 +54,12 @@ export class SearchService {
 
   getModuleStatus(): SearchModuleStatus {
     const providerStatus = this.agent.getProvider().getStatus();
-    const geminiConfigured = isGeminiConfigured();
+    const geminiConfigured = this.agent.getProvider().isConfigured();
 
     return {
       queryUnderstanding: geminiConfigured,
       databaseSearch: true,
-      integrated: geminiConfigured,
+      integrated: geminiConfigured && isGeminiConfigured(),
       geminiConfigured,
       geminiModel: providerStatus.model,
       supportedCollections: DEFAULT_SMART_SEARCH_COLLECTIONS,

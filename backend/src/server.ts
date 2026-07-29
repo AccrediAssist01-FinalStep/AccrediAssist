@@ -1,4 +1,5 @@
 import app from './app';
+import { aiService } from './ai/services/ai.service';
 import { connectDatabase, disconnectDatabase } from './database/connection';
 import { env } from './config/env';
 import { logger } from './utils/logger';
@@ -9,6 +10,13 @@ let server: ReturnType<typeof app.listen> | undefined;
 
 const startServer = async (): Promise<void> => {
   await connectDatabase();
+
+  try {
+    await aiService.initialize();
+    logger.info('AI provider initialized');
+  } catch (error) {
+    logger.warn('AI provider initialization skipped or failed', { error });
+  }
 
   server = app.listen(env.PORT, () => {
     logger.info(`Server running on port ${env.PORT}`, { environment: env.NODE_ENV });

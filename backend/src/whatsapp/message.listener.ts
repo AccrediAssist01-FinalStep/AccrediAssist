@@ -13,6 +13,7 @@ import {
   toStandardMessageJson,
 } from './message.mapper';
 import { mediaService } from './media.service';
+import { resolveIncomingMessageText } from './message-text.util';
 import { WhatsAppIncomingMessage } from './types';
 
 type WASocket = import('@whiskeysockets/baileys').WASocket;
@@ -159,10 +160,18 @@ export class MessageListener {
       }
     }
 
+    const sender = resolveSenderLabel(message);
+    const resolvedText = resolveIncomingMessageText({
+      message: text ?? caption ?? '',
+      media: mediaUrl,
+      mediaMetadata,
+      sender,
+    });
+
     const standardMessage = toStandardMessage({
       groupName,
-      sender: resolveSenderLabel(message),
-      text: text ?? caption ?? '',
+      sender,
+      text: resolvedText,
       timestamp: resolveMessageTimestamp(message),
       media: mediaUrl,
       mediaMetadata,

@@ -43,7 +43,7 @@ export function PendingRecordTimeline({ record }: PendingRecordTimelineProps) {
       ? [
           {
             id: 'approved',
-            title: 'Approved into ERP',
+            title: 'Auto-Approved into ERP',
             description: 'Record approved and mapped to target collection',
             timestamp: record.reviewedAt,
             icon: UserCheck,
@@ -55,8 +55,10 @@ export function PendingRecordTimeline({ record }: PendingRecordTimelineProps) {
       ? [
           {
             id: 'rejected',
-            title: 'Rejected',
-            description: record.rejectionReason || 'Record rejected by reviewer',
+            title: record.rejectionReason?.startsWith('Auto-rejected')
+              ? 'Auto-Rejected'
+              : 'Rejected',
+            description: record.rejectionReason || 'Record rejected automatically',
             timestamp: record.reviewedAt,
             icon: XCircle,
             tone: 'danger' as const,

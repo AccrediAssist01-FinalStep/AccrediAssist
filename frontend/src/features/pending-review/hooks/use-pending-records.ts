@@ -90,7 +90,8 @@ async function fetchServerList(filters: PendingReviewFilters): Promise<PendingRe
     limit: filters.limit,
     search: filters.search || undefined,
     category: filters.category === 'all' ? undefined : filters.category,
-    status: filters.status === 'active' ? undefined : filters.status,
+    status:
+      filters.status === 'active' || filters.status === 'all' ? undefined : filters.status,
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder,
   });

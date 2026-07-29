@@ -1,6 +1,11 @@
+export interface GeminiMediaPart {
+  url: string;
+  mimeType: string;
+}
+
 export interface GeminiGenerateContentParams {
   model: string;
-  contents: string;
+  contents: string | unknown;
   config?: {
     systemInstruction?: string;
     temperature?: number;

@@ -22,9 +22,9 @@ Category required field guidance:
 - Faculty Achievement: facultyNames, title or description, date
 - Workshop: eventName or title, date, location or description
 - Seminar: eventName or title, date
-- Industrial Visit: company or organization, date, location
+- Industrial Visit: company or organization, date, location (date and location are optional for department industry/industrial visit report completion announcements when title and description are present)
 - Publication: facultyNames, publicationTitle, date
-- Patent: patentTitle, facultyNames or description, date
+- Patent: patentTitle or title, facultyNames or description (date optional for announcement messages)
 - Other: title or description
 
 Return JSON in exactly this shape:

@@ -88,8 +88,14 @@ export class ReconnectService {
 
     try {
       await this.reconnectHandler();
+      if (!this.shouldReconnect) {
+        return;
+      }
     } catch (error) {
       logger.warn('WhatsApp reconnect attempt failed', { error, attempt: this.attempts });
+    }
+
+    if (this.shouldReconnect) {
       this.scheduleReconnect();
     }
   }

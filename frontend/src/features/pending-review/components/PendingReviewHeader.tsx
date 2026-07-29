@@ -13,9 +13,9 @@ interface PendingReviewHeaderProps {
 }
 
 const statConfig = [
-  { key: 'totalPending' as const, label: 'Total Pending', icon: Clock3, accent: 'from-amber-500/20 to-orange-500/5' },
-  { key: 'approvedToday' as const, label: 'Approved Today', icon: CheckCircle2, accent: 'from-emerald-500/20 to-green-500/5' },
-  { key: 'rejectedToday' as const, label: 'Rejected Today', icon: XCircle, accent: 'from-red-500/20 to-rose-500/5' },
+  { key: 'totalPending' as const, label: 'Awaiting Review', icon: Clock3, accent: 'from-amber-500/20 to-orange-500/5' },
+  { key: 'approvedToday' as const, label: 'Auto-Approved Today', icon: CheckCircle2, accent: 'from-emerald-500/20 to-green-500/5' },
+  { key: 'rejectedToday' as const, label: 'Auto-Rejected Today', icon: XCircle, accent: 'from-red-500/20 to-rose-500/5' },
   { key: 'averageConfidence' as const, label: 'Average AI Confidence', icon: Sparkles, accent: 'from-violet-500/20 to-purple-500/5' },
 ];
 
@@ -24,9 +24,9 @@ export function PendingReviewHeader({ stats, isLoading }: PendingReviewHeaderPro
     <section className="space-y-6" aria-labelledby="pending-review-heading">
       <FeaturePageHeader
         id="pending-review-heading"
-        title="Pending Review"
-        description="Review AI extracted records before approving them into the ERP database."
-        badge={<Badge variant="warning">Review Queue</Badge>}
+        title="WhatsApp Intake"
+        description="Messages are auto-approved when AI confidence is 50% or higher, and auto-rejected when below 50%."
+        badge={<Badge variant="secondary">Auto Review</Badge>}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

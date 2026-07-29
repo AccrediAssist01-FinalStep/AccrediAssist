@@ -23,7 +23,21 @@ export const calculatePipelineConfidenceScore = (
   let score = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 
   if (validation?.validationStatus === 'invalid') {
-    score = Math.min(score, Math.max(getConfidenceThreshold() - 5, 0));
+    const hasRecoverableContent =
+      Boolean(extraction.title?.trim()) ||
+      Boolean(extraction.patentTitle?.trim()) ||
+      Boolean(extraction.publicationTitle?.trim()) ||
+      Boolean(extraction.eventName?.trim()) ||
+      Boolean(extraction.facultyNames?.length) ||
+      Boolean(extraction.organization?.trim());
+
+    if (classification.confidence >= 85 && hasRecoverableContent) {
+      score = Math.max(score - 5, getConfidenceThreshold());
+    } else if (hasRecoverableContent && classification.confidence >= 70) {
+      score = Math.max(score - 10, getConfidenceThreshold() - 5);
+    } else {
+      score = Math.min(score, Math.max(getConfidenceThreshold() - 5, 0));
+    }
   }
 
   if (classification.confidence !== null && classification.confidence < 50) {
@@ -31,9 +45,12 @@ export const calculatePipelineConfidenceScore = (
   }
 
   const hasNamedEntity =
+    Boolean(extraction.title?.trim()) ||
+    Boolean(extraction.description?.trim()) ||
     Boolean(extraction.studentNames?.length) ||
     Boolean(extraction.facultyNames?.length) ||
     Boolean(extraction.company) ||
+    Boolean(extraction.organization?.trim()) ||
     Boolean(extraction.publicationTitle) ||
     Boolean(extraction.patentTitle) ||
     Boolean(extraction.eventName);
@@ -50,17 +67,6 @@ export const resolvePendingRecordStatus = (input: {
   duplicateDetection: DuplicateDetectionResult;
   confidenceScore: number;
 }): PendingRecordStatus => {
-  if (input.validation.validationStatus === 'invalid') {
-    return 'Needs Review';
-  }
-
-  if (input.duplicateDetection.duplicate) {
-    return 'Needs Review';
-  }
-
-  if (input.confidenceScore < getConfidenceThreshold()) {
-    return 'Needs Review';
-  }
-
+  void input;
   return 'Pending';
 };

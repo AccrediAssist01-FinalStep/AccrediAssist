@@ -5,6 +5,7 @@ import {
   isNonInstitutionalMessage,
 } from '../ai/utils/message-validation.util';
 import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
+import { pendingRecordAutoReviewService } from './pendingRecordAutoReview.service';
 import { pendingRecordApprovalService } from './pendingRecordApproval.service';
 import { pendingRecordEditService } from './pendingRecordEdit.service';
 import { pendingRecordRejectionService } from './pendingRecordRejection.service';
@@ -15,6 +16,7 @@ import {
   RejectPendingRecordInput,
 } from '../types/pendingRecord.types';
 import { messageListener } from '../whatsapp/message.listener';
+import { resolveIncomingMessageText } from '../whatsapp/message-text.util';
 import { WhatsAppIncomingMessage } from '../whatsapp/types';
 import { logger } from '../utils/logger';
 
@@ -64,15 +66,26 @@ export class PendingReviewWorkflowService {
     try {
       const result = await this.aiPipeline.processWhatsAppMessage(message);
 
-      logger.info('Pending review workflow created pending record from WhatsApp message', {
-        pendingRecordId: result.pendingRecord._id,
+      const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
+        result.pendingRecord._id,
+        result.confidenceScore,
+      );
+
+      logger.info('Pending review workflow auto-resolved WhatsApp message', {
+        pendingRecordId: autoReview.record._id,
         category: result.recordCategory,
         detectedCategory: result.stages.classification.result.category,
-        status: result.pendingStatus,
+        action: autoReview.action,
+        status: autoReview.record.status,
         confidenceScore: result.confidenceScore,
+        threshold: autoReview.threshold,
       });
 
-      return result;
+      return {
+        ...result,
+        pendingRecord: autoReview.record,
+        pendingStatus: autoReview.record.status,
+      };
     } catch (error) {
       logger.warn('AI pipeline failed; saving raw WhatsApp message for manual review', {
         groupName: message.groupName,
@@ -80,33 +93,46 @@ export class PendingReviewWorkflowService {
         error: error instanceof Error ? error.message : String(error),
       });
 
+      const fallbackMessage = resolveIncomingMessageText({
+        message: message.message,
+        media: message.media,
+        mediaMetadata: message.mediaMetadata,
+        sender: message.sender,
+      });
+
       const pendingRecord = await pendingReviewService.createPendingRecord({
-        originalMessage: message.message,
+        originalMessage: fallbackMessage,
         groupName: message.groupName,
         senderName: message.sender,
         category: 'Research',
         extractedData: {
-          message: message.message,
+          message: fallbackMessage,
           media: message.media,
           mediaMetadata: message.mediaMetadata ?? null,
           aiProcessingFailed: true,
           aiProcessingError: error instanceof Error ? error.message : String(error),
         },
         confidenceScore: 0,
-        status: 'Needs Review',
+        status: 'Pending',
       });
+
+      const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
+        pendingRecord._id,
+        0,
+      );
 
       logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
         pendingRecordId: pendingRecord._id,
         fallback: true,
-        status: 'Needs Review',
+        autoReview: autoReview.action,
+        status: autoReview.record.status,
       });
 
       return {
-        pendingRecord,
+        pendingRecord: autoReview.record,
         stages: {} as AiPipelineResult['stages'],
         recordCategory: 'Research',
-        pendingStatus: 'Needs Review',
+        pendingStatus: autoReview.record.status,
         confidenceScore: 0,
       };
     }

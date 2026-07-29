@@ -4,6 +4,25 @@ import { GeminiProvider, geminiProvider } from '../providers/gemini.provider';
 import { normalizeExtractionResult } from '../utils/extraction-result.util';
 import { renderPromptTemplateByName } from '../utils/prompt-template.util';
 
+const buildVisionMediaParts = (
+  message: WhatsAppIncomingMessage,
+): { url: string; mimeType: string }[] => {
+  const mediaUrl = message.media ?? message.mediaMetadata?.secureUrl;
+  if (!mediaUrl) {
+    return [];
+  }
+
+  const mimeType = message.mediaMetadata?.mimeType?.toLowerCase() ?? '';
+  const isImage = mimeType.startsWith('image/');
+  const isPdf = mimeType === 'application/pdf';
+
+  if (!isImage && !isPdf) {
+    return [];
+  }
+
+  return [{ url: mediaUrl, mimeType: message.mediaMetadata?.mimeType ?? 'image/jpeg' }];
+};
+
 const buildMediaMetadataSummary = (message: WhatsAppIncomingMessage): string => {
   if (!message.mediaMetadata) {
     return 'none';
@@ -51,10 +70,13 @@ export class ExtractionAgent {
       mediaMetadata: buildMediaMetadataSummary(message),
     });
 
+    const mediaParts = buildVisionMediaParts(message);
+
     const response = await this.provider.generateJSON<Record<string, unknown>>({
       prompt: renderedPrompt.userPrompt,
       systemInstruction: renderedPrompt.system,
       temperature: 0.1,
+      mediaParts: mediaParts.length > 0 ? mediaParts : undefined,
     });
 
     const normalized = normalizeExtractionResult(response.data);

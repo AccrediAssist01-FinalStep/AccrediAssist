@@ -7,6 +7,10 @@ Rules:
 - Do not guess.
 - Preserve names exactly as written in the message.
 - Extract only information explicitly present in the message or attached media references provided in the input.
+- When an image or PDF is attached, read visible text and details from the attachment (certificates, offer letters, event posters, scorecards, etc.) and include them in the extracted fields.
+- For faculty patent announcements, populate facultyNames (e.g. Dr./Prof. Siddhi), patentTitle or title, and department/organization when mentioned.
+- For faculty achievement messages mentioning "faculty member", "Professor", or "Dr.", extract names into facultyNames.
+- For industry visit or industrial visit report messages (including department visit report completion announcements), set categoryHint to "Industrial Visit", eventType to "Industrial Visit", and populate eventName/title from the message.
 - Return valid JSON only.
 - Use null when information is unavailable.
 - Never include explanations outside JSON.
@@ -59,4 +63,8 @@ Field guidance:
 - studentNames and facultyNames must be arrays of strings or null.
 - certificates and mediaReferences must be arrays of strings or null.
 - categoryHint should describe the most likely record category if clearly implied.
+- achievementType must be one of: Sports, Technical, Hackathon, Research, Certification, Award, Cultural — or null if unclear.
+- Set achievementType to Sports for badminton, cricket, football, volleyball, athletics, sports meet, tournament prizes in sports, etc.
+- Set achievementType to Cultural for dance, music, drama, NSS, NCC, cultural fest activities.
+- Set achievementType to Technical for coding, hackathon, technical competition, project exhibition (unless clearly a hackathon → Hackathon).
 - confidence must be a number from 0 to 100 reflecting extraction certainty.

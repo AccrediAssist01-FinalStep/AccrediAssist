@@ -144,6 +144,7 @@ export class MediaService {
         uploadedAt: new Date(),
         secureUrl: uploadResult.secureUrl,
         publicId: uploadResult.publicId,
+        caption: input.mediaInfo.caption?.trim() || undefined,
       };
 
       logger.info('WhatsApp media uploaded to Cloudinary', {

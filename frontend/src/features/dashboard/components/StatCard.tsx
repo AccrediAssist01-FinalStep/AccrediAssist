@@ -1,9 +1,21 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { TrendingDown, TrendingUp, Minus, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardStatItem } from '../types';
+
+const STAT_ROUTES: Record<string, string> = {
+  pendingReviews: '/pending-reviews',
+  studentAchievements: '/student-activities/technical',
+  facultyAchievements: '/faculty-activities/awards',
+  placements: '/student-activities/placement',
+  internships: '/student-activities/internship',
+  publications: '/faculty-activities/publications',
+  patents: '/faculty-activities/patents',
+  eventReports: '/department-activities/events',
+};
 
 const STAT_GRADIENTS: Record<string, string> = {
   pendingReviews: 'from-amber-500/20 to-orange-500/5',
@@ -23,6 +35,7 @@ interface StatCardProps {
 }
 
 export function StatCard({ stat, icon: Icon, index }: StatCardProps) {
+  const href = STAT_ROUTES[stat.id];
   const trend = stat.trend;
   const TrendIcon = trend === null || trend === 0 ? Minus : trend > 0 ? TrendingUp : TrendingDown;
   const trendColor =
@@ -38,9 +51,15 @@ export function StatCard({ stat, icon: Icon, index }: StatCardProps) {
         'group relative overflow-hidden rounded-xl border border-border bg-card p-5 shadow-soft transition-shadow hover:shadow-elevated',
         'bg-gradient-to-br',
         STAT_GRADIENTS[stat.id] ?? 'from-primary/10 to-transparent',
+        href && 'cursor-pointer',
       )}
       aria-label={`${stat.label}: ${stat.value}`}
     >
+      {href ? (
+        <Link href={href} className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <span className="sr-only">View {stat.label}</span>
+        </Link>
+      ) : null}
       <div className="flex items-start justify-between gap-3">
         <div className="rounded-lg bg-card/80 p-2.5 shadow-soft ring-1 ring-border/50">
           <Icon className="size-5 text-primary" aria-hidden="true" />

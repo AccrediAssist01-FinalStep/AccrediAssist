@@ -17,10 +17,17 @@ export interface GenerateTextOptions {
   prompt: string;
   systemInstruction?: string;
   temperature?: number;
+  mediaParts?: GeminiMediaPart[];
 }
 
 export interface GenerateJsonOptions {
   prompt: string;
   systemInstruction?: string;
   temperature?: number;
+  mediaParts?: GeminiMediaPart[];
+}
+
+export interface GeminiMediaPart {
+  url: string;
+  mimeType: string;
 }

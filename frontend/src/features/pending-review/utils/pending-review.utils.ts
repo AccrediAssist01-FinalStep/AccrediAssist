@@ -145,15 +145,21 @@ export function buildAiInsights(record: PendingRecord): AiInsightSummary {
   if (duplicate) duplicateStatus = 'duplicate';
   else if (similarity >= 0.5) duplicateStatus = 'possible';
 
-  let recommendedAction = 'Ready to approve after a quick verification.';
-  if (duplicateStatus === 'duplicate') {
-    recommendedAction = 'Potential duplicate detected — compare with matching record before approving.';
+  let recommendedAction = 'Auto-approved into ERP when confidence is 50% or higher.';
+  if (record.status === 'Rejected') {
+    recommendedAction = record.rejectionReason?.startsWith('Auto-rejected')
+      ? record.rejectionReason
+      : 'Record was rejected automatically.';
+  } else if (record.status === 'Approved') {
+    recommendedAction = 'Record was auto-approved and stored in the ERP database.';
+  } else if (duplicateStatus === 'duplicate') {
+    recommendedAction = 'Potential duplicate detected during AI processing.';
   } else if (validationStatus === 'invalid') {
-    recommendedAction = 'Validation issues found — edit fields or reject if incomplete.';
+    recommendedAction = 'Validation issues were detected during AI processing.';
   } else if (confidenceLevel === 'low') {
-    recommendedAction = 'Low AI confidence — carefully verify all extracted fields.';
-  } else if (record.status === 'Needs Review') {
-    recommendedAction = 'Flagged for review — inspect AI extraction before approval.';
+    recommendedAction = 'Low AI confidence — this record will be auto-rejected.';
+  } else if (record.status === 'Needs Review' || record.status === 'Pending') {
+    recommendedAction = 'Waiting for automatic confidence-based review.';
   }
 
   return {
@@ -196,6 +202,6 @@ export function canEditRecord(record: PendingRecord): boolean {
   return record.status === 'Pending' || record.status === 'Needs Review';
 }
 
-export function canApproveOrReject(record: PendingRecord): boolean {
-  return canEditRecord(record);
+export function canApproveOrReject(_record: PendingRecord): boolean {
+  return false;
 }

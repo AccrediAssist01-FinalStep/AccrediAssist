@@ -92,8 +92,15 @@ export class WhatsAppConnectionManager {
     }
 
     logger.info('WhatsApp connection manager attempting reconnect');
-    whatsappService.setStatus(WhatsAppConnectionStatus.RECONNECTING);
-    await whatsappService.startConnection({ displayQrInTerminal: false });
+
+    if (whatsappService.getStatus() !== WhatsAppConnectionStatus.DISCONNECTED) {
+      whatsappService.setStatus(WhatsAppConnectionStatus.DISCONNECTED);
+    }
+
+    await whatsappService.connect({
+      displayQrInTerminal: false,
+      connectionTimeoutMs: 60_000,
+    });
   }
 }
 

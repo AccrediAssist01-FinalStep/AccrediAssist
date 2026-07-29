@@ -25,6 +25,8 @@ export function PendingRecordCard({ record, index, isSelected, onSelect }: Pendi
   const title = getRecordTitle(record);
   const department = getRecordDepartment(record);
   const attachments = hasAttachments(record);
+  const activityModule = record.extractedData?.activityModule as string | undefined;
+  const activitySubCategory = record.extractedData?.activitySubCategory as string | undefined;
 
   return (
     <motion.button
@@ -44,6 +46,12 @@ export function PendingRecordCard({ record, index, isSelected, onSelect }: Pendi
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline">{record.category}</Badge>
+            {activityModule && (
+              <Badge variant="secondary">
+                {activityModule}
+                {activitySubCategory ? ` · ${activitySubCategory}` : ''}
+              </Badge>
+            )}
             <Badge variant={getStatusBadgeVariant(record.status)}>{record.status}</Badge>
             {attachments && (
               <Badge variant="secondary" className="gap-1">

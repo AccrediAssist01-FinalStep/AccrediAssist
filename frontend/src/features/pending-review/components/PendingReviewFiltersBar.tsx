@@ -72,6 +72,7 @@ export function PendingReviewFiltersBar({
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active Queue</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
                 <SelectItem value="Needs Review">Needs Review</SelectItem>

@@ -28,6 +28,8 @@ const CATEGORY_TARGET_MAP: Partial<Record<RecordCategory, PendingApprovalTargetM
   Workshop: 'CompletedEventReport',
   Seminar: 'CompletedEventReport',
   'Industrial Visit': 'CompletedEventReport',
+  Certification: 'StudentAchievement',
+  Research: 'StudentAchievement',
 };
 
 const EVENT_CATEGORY_MAP: Partial<Record<RecordCategory, EventType>> = {
@@ -96,6 +98,14 @@ const normalizeAchievementType = (
 
   if (category === 'Cultural') {
     return 'Cultural';
+  }
+
+  if (category === 'Certification') {
+    return 'Certification';
+  }
+
+  if (category === 'Research') {
+    return 'Research';
   }
 
   return fallback;

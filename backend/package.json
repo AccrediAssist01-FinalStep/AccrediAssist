@@ -68,6 +68,7 @@
     "test:gemini-provider": "tsx src/scripts/test-gemini-provider.ts",
     "test:gemini-live": "tsx src/scripts/test-gemini-live.ts",
     "test:message-validation": "tsx src/scripts/test-message-validation.ts",
+    "test:sports-classification": "tsx src/scripts/test-sports-classification.ts",
     "test:pipeline-e2e": "tsx src/scripts/test-pipeline-e2e.ts",
     "test:prompt-templates": "tsx src/scripts/test-prompt-templates.ts",
     "test:extraction-agent": "tsx src/scripts/test-extraction-agent.ts",

@@ -28,6 +28,7 @@ export interface WhatsAppMediaMetadata {
   secureUrl?: string;
   publicId?: string;
   localPath?: string;
+  caption?: string;
 }
 
 export interface DetectedWhatsAppMedia {

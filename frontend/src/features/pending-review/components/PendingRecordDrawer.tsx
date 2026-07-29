@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Edit3, Eye, X } from 'lucide-react';
+import { Edit3, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,16 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PendingRecord } from '@/types/api-models';
 import { PendingRecordAIInsights } from './PendingRecordAIInsights';
@@ -32,7 +21,6 @@ import { PendingRecordMedia } from './PendingRecordMedia';
 import { PendingRecordTimeline } from './PendingRecordTimeline';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import {
-  canApproveOrReject,
   canEditRecord,
   formatSubmittedDate,
   getEditableFields,
@@ -73,15 +61,11 @@ export function PendingRecordDrawer({
   onActionComplete,
 }: PendingRecordDrawerProps) {
   const [mode, setMode] = useState<'preview' | 'edit'>('preview');
-  const [approveOpen, setApproveOpen] = useState(false);
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
-  const { editMutation, approveMutation, rejectMutation, isMutating } = usePendingReviewMutations();
+  const { editMutation, isMutating } = usePendingReviewMutations();
 
   const handleClose = (nextOpen: boolean) => {
     if (!nextOpen) {
       setMode('preview');
-      setRejectReason('');
     }
     onOpenChange(nextOpen);
   };
@@ -114,25 +98,6 @@ export function PendingRecordDrawer({
       },
     });
     setMode('preview');
-  };
-
-  const handleApprove = async () => {
-    if (!record) return;
-    await approveMutation.mutateAsync(record._id);
-    setApproveOpen(false);
-    handleClose(false);
-    onActionComplete?.();
-  };
-
-  const handleReject = async () => {
-    if (!record || !rejectReason.trim()) return;
-    await rejectMutation.mutateAsync({
-      id: record._id,
-      payload: { reason: rejectReason.trim() },
-    });
-    setRejectOpen(false);
-    handleClose(false);
-    onActionComplete?.();
   };
 
   const title = record ? getRecordTitle(record) : 'Record Details';
@@ -231,87 +196,20 @@ export function PendingRecordDrawer({
             </motion.div>
           </ScrollArea>
 
-          {record && canApproveOrReject(record) && (
+          {record && canEditRecord(record) && mode === 'preview' && (
             <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-card p-4">
-              <Button
-                onClick={() => setApproveOpen(true)}
-                disabled={isMutating}
-                aria-label="Approve record"
-              >
-                <Check className="size-4" />
-                Approve
+              <Button variant="secondary" onClick={() => setMode('edit')} disabled={isMutating}>
+                <Edit3 className="size-4" />
+                Edit Extracted Fields
               </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setRejectOpen(true)}
-                disabled={isMutating}
-                aria-label="Reject record"
-              >
-                <X className="size-4" />
-                Reject
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setMode('preview')}
-                disabled={isMutating}
-              >
+              <Button variant="outline" onClick={() => setMode('preview')} disabled={isMutating}>
                 <Eye className="size-4" />
                 Preview
               </Button>
-              {canEditRecord(record) && (
-                <Button variant="secondary" onClick={() => setMode('edit')} disabled={isMutating}>
-                  <Edit3 className="size-4" />
-                  Edit
-                </Button>
-              )}
             </div>
           )}
         </SheetContent>
       </Sheet>
-
-      <ConfirmDialog
-        open={approveOpen}
-        onOpenChange={setApproveOpen}
-        title="Approve this record?"
-        description="This will validate the extracted data and insert it into the ERP database. This action cannot be undone."
-        confirmLabel="Approve Record"
-        isLoading={approveMutation.isPending}
-        onConfirm={handleApprove}
-      />
-
-      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reject Record</DialogTitle>
-            <DialogDescription>
-              Provide a reason for rejection. This will be stored with the record.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label htmlFor="reject-reason">Rejection Reason</Label>
-            <Textarea
-              id="reject-reason"
-              value={rejectReason}
-              onChange={(event) => setRejectReason(event.target.value)}
-              placeholder="Explain why this record is being rejected..."
-              rows={4}
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectOpen(false)} disabled={rejectMutation.isPending}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              isLoading={rejectMutation.isPending}
-              disabled={!rejectReason.trim()}
-              onClick={handleReject}
-            >
-              Reject Record
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

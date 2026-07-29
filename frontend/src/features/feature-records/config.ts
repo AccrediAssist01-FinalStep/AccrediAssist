@@ -1,0 +1,122 @@
+import type { FeatureRecordConfig } from './types';
+
+export const STAT_CARD_ROUTES: Record<string, string> = {
+  pendingReviews: '/pending-reviews',
+  studentAchievements: '/student-achievements',
+  facultyAchievements: '/faculty-achievements',
+  placements: '/placements',
+  internships: '/internships',
+  publications: '/publications',
+  patents: '/patents',
+  eventReports: '/event-reports',
+};
+
+export const FEATURE_RECORD_CONFIGS = {
+  placements: {
+    id: 'placements',
+    title: 'Placements',
+    description: 'Browse approved student placement records.',
+    apiPath: '/placements',
+    route: '/placements',
+    searchPlaceholder: 'Search by student, company, or department...',
+    columns: [
+      { key: 'studentName', label: 'Student' },
+      { key: 'company', label: 'Company' },
+      { key: 'role', label: 'Role' },
+      { key: 'package', label: 'Package' },
+      { key: 'joiningDate', label: 'Joining Date', format: 'date' },
+    ],
+  },
+  internships: {
+    id: 'internships',
+    title: 'Internships',
+    description: 'Browse approved student internship records.',
+    apiPath: '/internships',
+    route: '/internships',
+    searchPlaceholder: 'Search by student, company, or role...',
+    columns: [
+      { key: 'studentName', label: 'Student' },
+      { key: 'company', label: 'Company' },
+      { key: 'role', label: 'Role' },
+      { key: 'duration', label: 'Duration' },
+      { key: 'startDate', label: 'Start Date', format: 'date' },
+    ],
+  },
+  studentAchievements: {
+    id: 'studentAchievements',
+    title: 'Student Achievements',
+    description: 'Browse approved student achievement records.',
+    apiPath: '/student-achievements',
+    route: '/student-achievements',
+    searchPlaceholder: 'Search by student, title, or organization...',
+    columns: [
+      { key: 'studentName', label: 'Student' },
+      { key: 'achievementType', label: 'Type' },
+      { key: 'title', label: 'Title' },
+      { key: 'organization', label: 'Organization' },
+      { key: 'date', label: 'Date', format: 'date' },
+    ],
+  },
+  facultyAchievements: {
+    id: 'facultyAchievements',
+    title: 'Faculty Achievements',
+    description: 'Browse approved faculty achievement records.',
+    apiPath: '/faculty-achievements',
+    route: '/faculty-achievements',
+    searchPlaceholder: 'Search by faculty, title, or organization...',
+    columns: [
+      { key: 'facultyName', label: 'Faculty' },
+      { key: 'achievementType', label: 'Type' },
+      { key: 'title', label: 'Title' },
+      { key: 'organization', label: 'Organization' },
+      { key: 'date', label: 'Date', format: 'date' },
+    ],
+  },
+  publications: {
+    id: 'publications',
+    title: 'Publications',
+    description: 'Browse approved faculty publication records.',
+    apiPath: '/publications',
+    route: '/publications',
+    searchPlaceholder: 'Search by faculty, paper title, or journal...',
+    columns: [
+      { key: 'facultyName', label: 'Faculty' },
+      { key: 'paperTitle', label: 'Paper Title' },
+      { key: 'journal', label: 'Journal' },
+      { key: 'conference', label: 'Conference' },
+      { key: 'publicationDate', label: 'Date', format: 'date' },
+    ],
+  },
+  patents: {
+    id: 'patents',
+    title: 'Patents',
+    description: 'Browse approved patent records.',
+    apiPath: '/patents',
+    route: '/patents',
+    searchPlaceholder: 'Search by title, inventors, or patent number...',
+    columns: [
+      { key: 'patentTitle', label: 'Title' },
+      { key: 'inventors', label: 'Inventors', format: 'list' },
+      { key: 'patentNumber', label: 'Patent No.' },
+      { key: 'status', label: 'Status' },
+      { key: 'filingDate', label: 'Filing Date', format: 'date' },
+    ],
+  },
+  eventReports: {
+    id: 'eventReports',
+    title: 'Completed Event Reports',
+    description: 'Browse approved completed event report records.',
+    apiPath: '/event-reports',
+    route: '/event-reports',
+    searchPlaceholder: 'Search by event title, type, or coordinator...',
+    columns: [
+      { key: 'eventTitle', label: 'Event' },
+      { key: 'eventType', label: 'Type' },
+      { key: 'coordinator', label: 'Coordinator' },
+      { key: 'venue', label: 'Venue' },
+      { key: 'achievementDate', label: 'Date', format: 'date' },
+    ],
+  },
+} as const satisfies Record<string, FeatureRecordConfig>;
+
+export type FeatureRecordKey = keyof typeof FEATURE_RECORD_CONFIGS;

@@ -1,12 +1,17 @@
 import { pendingReviewService, PendingReviewService } from '../../services/pendingReview.service';
 import { logger } from '../../utils/logger';
 import { WhatsAppIncomingMessage } from '../../whatsapp/types';
+import { resolveIncomingMessageText } from '../../whatsapp/message-text.util';
 import { ClassificationAgent, classificationAgent } from '../agents/classification.agent';
 import { DuplicateDetectionAgent, duplicateDetectionAgent } from '../agents/duplicate-detection.agent';
 import { ExtractionAgent, extractionAgent } from '../agents/extraction.agent';
 import { ValidationAgent, validationAgent } from '../agents/validation.agent';
 import { AiPipelineResult, AiPipelineStageResults } from '../interfaces/ai-pipeline.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
+import { resolveActivityClassification } from '../utils/activity-module.util';
+import { enrichExtractionAchievementType } from '../utils/achievement-inference.util';
+import { enrichExtractionFields } from '../utils/extraction-enrichment.util';
+import { correctClassificationForExtraction } from '../utils/classification-correction.util';
 import { mapClassificationToRecordCategory } from '../utils/category-mapper.util';
 import {
   calculatePipelineConfidenceScore,
@@ -19,11 +24,15 @@ const buildPendingExtractedData = (
   extraction: ExtractionResult,
   stages: AiPipelineStageResults,
   detectedCategory: string,
+  activityModule: string,
+  activitySubCategory: string,
 ): Record<string, unknown> => ({
   ...extraction,
   media: message.media,
   mediaMetadata: message.mediaMetadata ?? null,
   detectedCategory,
+  activityModule,
+  activitySubCategory,
   aiPipeline: {
     classification: stages.classification.result,
     validation: stages.validation.result,
@@ -46,15 +55,25 @@ export class AiPipelineService {
   ) {}
 
   async processWhatsAppMessage(message: WhatsAppIncomingMessage): Promise<AiPipelineResult> {
+    const originalMessage = resolveIncomingMessageText({
+      message: message.message,
+      media: message.media,
+      mediaMetadata: message.mediaMetadata,
+      sender: message.sender,
+    });
+
     logPipelineStage(PIPELINE_STAGES.MESSAGE_RECEIVED, {
       groupName: message.groupName,
       sender: message.sender,
       hasMedia: Boolean(message.media),
-      messagePreview: message.message.slice(0, 120),
+      messagePreview: originalMessage.slice(0, 120),
     });
 
     const extractionResponse = await this.extraction.extract(message);
-    const extractedData = extractionResponse.result;
+    const extractedData = enrichExtractionFields(
+      enrichExtractionAchievementType(extractionResponse.result),
+      originalMessage,
+    );
 
     logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
       stage: 'extraction',
@@ -64,29 +83,36 @@ export class AiPipelineService {
 
     const classificationResponse = await this.classification.classify({
       extractedData,
-      originalMessage: message.message,
+      originalMessage,
     });
 
+    const correctedClassification = correctClassificationForExtraction(
+      classificationResponse.result,
+      extractedData,
+      originalMessage,
+    );
+
     logPipelineStage(PIPELINE_STAGES.CLASSIFICATION, {
-      category: classificationResponse.result.category,
-      confidence: classificationResponse.result.confidence,
+      category: correctedClassification.category,
+      confidence: correctedClassification.confidence,
       model: classificationResponse.model,
+      corrected: correctedClassification.category !== classificationResponse.result.category,
     });
 
     const validationResponse = await this.validation.validate({
-      category: classificationResponse.result.category,
+      category: correctedClassification.category,
       extractedData,
-      originalMessage: message.message,
+      originalMessage,
     });
 
     const duplicateDetectionResponse = await this.duplicateDetection.detect({
-      category: classificationResponse.result.category,
+      category: correctedClassification.category,
       extractedData,
     });
 
     const confidenceScore = calculatePipelineConfidenceScore(
       extractedData,
-      classificationResponse.result,
+      correctedClassification,
       validationResponse.result,
     );
 
@@ -97,19 +123,24 @@ export class AiPipelineService {
     });
 
     const recordCategory = mapClassificationToRecordCategory(
-      classificationResponse.result.category,
+      correctedClassification.category,
       extractedData,
     );
 
+    const activity = resolveActivityClassification(recordCategory, extractedData);
+
     const stages: AiPipelineStageResults = {
       extraction: extractionResponse,
-      classification: classificationResponse,
+      classification: {
+        ...classificationResponse,
+        result: correctedClassification,
+      },
       validation: validationResponse,
       duplicateDetection: duplicateDetectionResponse,
     };
 
     const pendingRecord = await this.pendingReview.createPendingRecord({
-      originalMessage: message.message,
+      originalMessage,
       groupName: message.groupName,
       senderName: message.sender,
       category: recordCategory,
@@ -117,7 +148,9 @@ export class AiPipelineService {
         message,
         extractedData,
         stages,
-        classificationResponse.result.category,
+        correctedClassification.category,
+        activity.module,
+        activity.subCategory,
       ),
       confidenceScore,
       status: pendingStatus,
@@ -126,7 +159,7 @@ export class AiPipelineService {
     logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
       pendingRecordId: pendingRecord._id,
       recordCategory,
-      detectedCategory: classificationResponse.result.category,
+      detectedCategory: correctedClassification.category,
       status: pendingStatus,
       confidenceScore,
       duplicate: duplicateDetectionResponse.result.duplicate,

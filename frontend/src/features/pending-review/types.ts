@@ -7,7 +7,7 @@ import type {
 
 export type ConfidenceLevel = 'high' | 'medium' | 'low';
 export type DateFilter = 'all' | 'today' | 'week' | 'month';
-export type StatusFilter = 'active' | PendingRecordStatus;
+export type StatusFilter = 'active' | 'all' | PendingRecordStatus;
 
 export interface PendingReviewFilters {
   search: string;
@@ -24,7 +24,7 @@ export interface PendingReviewFilters {
 export const DEFAULT_FILTERS: PendingReviewFilters = {
   search: '',
   category: 'all',
-  status: 'active',
+  status: 'all',
   confidence: 'all',
   date: 'all',
   sortBy: 'createdAt',
