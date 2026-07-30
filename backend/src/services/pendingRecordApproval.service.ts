@@ -9,6 +9,7 @@ import { Internship } from '../models/Internship';
 import { Publication } from '../models/Publication';
 import { Patent } from '../models/Patent';
 import { CompletedEventReport } from '../models/CompletedEventReport';
+import { News } from '../models/News';
 import { IPendingRecord, IPendingRecordResponse } from '../types/pendingRecord.types';
 import {
   PendingApprovalResult,
@@ -70,7 +71,17 @@ export class PendingRecordApprovalService {
 
     const approvalResult = await this.createTargetRecord(targetModule, payload, userId);
 
-    const approved = await pendingRecordRepository.updateStatus(id, 'Approved', userId);
+    const approved = await pendingRecordRepository.update(
+      id,
+      {
+        status: 'Approved',
+        reviewedBy: userId,
+        reviewedAt: new Date(),
+        approvedRecordId: approvalResult.createdRecordId,
+        approvedTargetModule: approvalResult.targetModule,
+      } as Partial<IPendingRecord>,
+      userId,
+    );
 
     if (!approved) {
       throw new BadRequestError('Failed to approve pending record');
@@ -174,12 +185,24 @@ export class PendingRecordApprovalService {
           });
           return storeRecord(targetModule, created._id.toString());
         }
+        case 'News': {
+          const created = await News.create(payload);
+          return storeRecord(targetModule, created._id.toString());
+        }
         default:
           throw new BadRequestError('Cannot approve pending record: unsupported target collection');
       }
     } catch (error) {
       if (error instanceof BadRequestError) {
         throw error;
+      }
+
+      if (error instanceof mongoose.Error.ValidationError) {
+        const messages = Object.values(error.errors).map((item) => item.message);
+        logger.warn('Failed to create approved ERP record', {
+          targetModule,
+          validationErrors: messages,
+        });
       }
 
       throw formatMongooseValidationError(error);

@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Lightbulb,
   LogOut,
+  Newspaper,
   Search,
   Settings,
   ShieldCheck,
@@ -455,6 +456,7 @@ export const MODULE_NAV_GROUPS: NavGroup[] = ERP_MODULES.map((module) => ({
 
 export const SYSTEM_NAV_ITEMS: NavItem[] = [
   { label: 'Smart Search', href: '/search', icon: Search, permission: 'search' },
+  { label: 'News', href: '/news', icon: Newspaper, permission: 'dashboard' },
   { label: 'Reports', href: '/reports', icon: FileText, permission: 'reports' },
   { label: 'Analytics', href: '/analytics', icon: Landmark, permission: 'dashboard' },
 ];
@@ -485,6 +487,7 @@ export const PROTECTED_ROUTES = [
   '/patents',
   '/event-reports',
   '/search',
+  '/news',
   '/reports',
   '/analytics',
   '/notifications',

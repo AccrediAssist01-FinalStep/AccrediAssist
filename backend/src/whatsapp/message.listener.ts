@@ -127,6 +127,12 @@ export class MessageListener {
 
     const groupName = await this.resolveGroupName(remoteJid);
     if (!groupName || !this.shouldProcess(remoteJid, groupName)) {
+      if (groupName) {
+        logger.debug('WhatsApp message ignored: group not in allowed list', {
+          groupName,
+          allowedGroups: groupFilter.getAllowedGroups(),
+        });
+      }
       return;
     }
 

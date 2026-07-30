@@ -37,7 +37,7 @@ export class CloudinaryService {
     }
 
     const cloudinary = await ensureCloudinaryConfigured();
-    const resourceType = input.mediaType === 'image' ? 'image' : 'raw';
+    const resourceType = input.mediaType === 'image' || input.mediaType === 'pdf' ? 'image' : 'raw';
     const folder = input.folder ?? 'accrediassist/whatsapp';
 
     const result = await cloudinary.uploader.upload(input.filePath, {

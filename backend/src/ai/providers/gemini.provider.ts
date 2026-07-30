@@ -1,4 +1,4 @@
-import { GoogleGenAI, createPartFromUri, createUserContent } from '@google/genai';
+import { GoogleGenAI, createPartFromBase64, createPartFromUri, createUserContent } from '@google/genai';
 import { BadRequestError, InternalServerError, ValidationError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
@@ -40,7 +40,17 @@ const buildGeminiContents = (options: GeminiInvokeOptions): string | unknown => 
   }
 
   const parts = [
-    ...options.mediaParts.map((part) => createPartFromUri(part.url, part.mimeType)),
+    ...options.mediaParts.map((part) => {
+      if (part.inlineData) {
+        return createPartFromBase64(part.inlineData, part.mimeType);
+      }
+
+      if (part.url) {
+        return createPartFromUri(part.url, part.mimeType);
+      }
+
+      throw new InternalServerError('Gemini media part must include a URL or inline data');
+    }),
     options.prompt,
   ];
 

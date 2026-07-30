@@ -67,11 +67,15 @@ export class CompletedEventReportRepository extends BaseRepository<ICompletedEve
     const query = withActiveFilter(this.buildFilterQuery(filters));
     const pageOptions = getPagination(pagination);
     const sortOrder = sort.sortOrder === 'asc' ? 1 : -1;
+    const sortSpec =
+      sort.sortBy === 'date'
+        ? { date: sortOrder, createdAt: sortOrder }
+        : { [sort.sortBy]: sortOrder };
 
     const [items, total] = await Promise.all([
       this.model
         .find(query)
-        .sort({ [sort.sortBy]: sortOrder })
+        .sort(sortSpec)
         .skip(pageOptions.skip)
         .limit(pageOptions.limit)
         .exec(),

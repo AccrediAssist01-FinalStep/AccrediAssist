@@ -18,9 +18,18 @@ export function PendingRecordMedia({ record }: PendingRecordMediaProps) {
   const certificates = data?.certificates ?? [];
   const mediaReferences = data?.mediaReferences ?? [];
   const rawMedia = data?.media;
+  const metadataUrl =
+    typeof data?.mediaMetadata === 'object' && data.mediaMetadata !== null
+      ? String((data.mediaMetadata as { secureUrl?: string }).secureUrl ?? '')
+      : '';
   const mediaItems = Array.isArray(rawMedia) ? rawMedia : rawMedia ? [rawMedia] : [];
+  const imageUrls = [
+    ...mediaReferences,
+    ...mediaItems.filter((item): item is string => typeof item === 'string'),
+    ...(metadataUrl ? [metadataUrl] : []),
+  ].filter((url, index, list) => list.indexOf(url) === index);
 
-  const hasContent = certificates.length > 0 || mediaReferences.length > 0 || mediaItems.length > 0;
+  const hasContent = certificates.length > 0 || imageUrls.length > 0;
 
   if (!hasContent) {
     return (
@@ -78,7 +87,7 @@ export function PendingRecordMedia({ record }: PendingRecordMediaProps) {
         </Card>
       )}
 
-      {(mediaReferences.length > 0 || mediaItems.length > 0) && (
+      {imageUrls.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -87,25 +96,25 @@ export function PendingRecordMedia({ record }: PendingRecordMediaProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            {mediaReferences.map((reference) =>
+            {imageUrls.map((reference) =>
               isImageUrl(reference) ? (
                 <div key={reference} className="overflow-hidden rounded-lg border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={reference} alt="Uploaded media" className="h-40 w-full object-cover" />
                 </div>
               ) : (
-                <div key={reference} className="rounded-lg border border-border p-3 text-sm">
-                  {reference}
-                </div>
+                <a
+                  key={reference}
+                  href={reference}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm transition-colors hover:bg-accent"
+                >
+                  <span className="truncate">{reference}</span>
+                  <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted" />
+                </a>
               ),
             )}
-            {mediaItems.map((item, index) => (
-              <div key={`media-${index}`} className="rounded-lg border border-border bg-accent/30 p-3 text-sm">
-                <pre className="overflow-x-auto whitespace-pre-wrap text-xs">
-                  {typeof item === 'string' ? item : JSON.stringify(item, null, 2)}
-                </pre>
-              </div>
-            ))}
           </CardContent>
         </Card>
       )}

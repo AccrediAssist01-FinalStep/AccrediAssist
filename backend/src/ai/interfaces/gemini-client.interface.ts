@@ -1,6 +1,7 @@
 export interface GeminiMediaPart {
-  url: string;
+  url?: string;
   mimeType: string;
+  inlineData?: string;
 }
 
 export interface GeminiGenerateContentParams {

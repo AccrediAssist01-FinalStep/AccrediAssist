@@ -7,6 +7,7 @@ export const AGGREGATION_MODULE_KEYS = [
   'publications',
   'patents',
   'completedEventReports',
+  'news',
   'pendingReviews',
 ] as const;
 

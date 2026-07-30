@@ -8,6 +8,7 @@ import {
   FileBadge,
   GraduationCap,
   Lightbulb,
+  Newspaper,
   ScrollText,
   Users,
 } from 'lucide-react';
@@ -38,6 +39,7 @@ export const GENERATION_REPORT_TYPES: BackendReportType[] = [
   'Publication',
   'Patent',
   'Completed Event',
+  'News',
 ];
 
 export const REPORT_TEMPLATES: ReportTemplate[] = [
@@ -123,6 +125,14 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     icon: CalendarDays,
     backendReportType: 'Completed Event',
     accent: 'from-rose-500/20 to-pink-500/5',
+  },
+  {
+    id: 'news',
+    title: 'News Analytics Report',
+    description: 'Total news, department-wise coverage, monthly trends, and AI news summary.',
+    icon: Newspaper,
+    backendReportType: 'News',
+    accent: 'from-orange-500/20 to-amber-500/5',
   },
 ];
 

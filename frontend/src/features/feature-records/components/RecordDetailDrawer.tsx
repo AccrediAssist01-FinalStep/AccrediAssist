@@ -10,6 +10,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import type { FeatureColumn, FeatureRecord } from '../types';
 import { formatRecordValue } from '../utils/format-record-value';
+import { isRecordMediaField } from '../utils/record-media.utils';
+import { RecordMediaPreview } from './RecordMediaPreview';
 
 interface RecordDetailDrawerProps {
   record: FeatureRecord | null;
@@ -34,7 +36,7 @@ function getDetailFields(record: FeatureRecord, columns: FeatureColumn[]) {
     format: Array.isArray(record[key]) ? 'list' : key.toLowerCase().includes('date') ? 'date' : 'text',
   }));
 
-  return [...columns, ...extraColumns];
+  return [...columns, ...extraColumns].filter((field) => !isRecordMediaField(field.key));
 }
 
 export function RecordDetailDrawer({
@@ -49,7 +51,7 @@ export function RecordDetailDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Full record details</DialogDescription>
@@ -62,7 +64,9 @@ export function RecordDetailDrawer({
             ))}
           </div>
         ) : record ? (
-          <dl className="space-y-3">
+          <div className="space-y-4">
+            <RecordMediaPreview record={record} />
+            <dl className="space-y-3">
             {fields.map((field) => (
               <div key={field.key} className="rounded-lg border border-border bg-muted/20 px-4 py-3">
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted">{field.label}</dt>
@@ -71,7 +75,8 @@ export function RecordDetailDrawer({
                 </dd>
               </div>
             ))}
-          </dl>
+            </dl>
+          </div>
         ) : null}
       </DialogContent>
     </Dialog>

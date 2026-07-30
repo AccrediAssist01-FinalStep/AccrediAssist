@@ -5,7 +5,8 @@ export type PendingApprovalTargetModule =
   | 'Internship'
   | 'Publication'
   | 'Patent'
-  | 'CompletedEventReport';
+  | 'CompletedEventReport'
+  | 'News';
 
 export interface PendingApprovalResult {
   targetModule: PendingApprovalTargetModule;

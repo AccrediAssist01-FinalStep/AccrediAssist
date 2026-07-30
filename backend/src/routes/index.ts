@@ -15,6 +15,7 @@ import auditLogRouter from './auditLog.routes';
 import whatsappRouter from './whatsapp.routes';
 import searchRouter from './search.routes';
 import dashboardRouter from './dashboard.routes';
+import newsRouter from './news.routes';
 import reportGenerationRouter from '../report-generation/routes/report-generation.routes';
 
 const apiRouter = Router();
@@ -35,6 +36,7 @@ apiRouter.use('/audit-logs', auditLogRouter);
 apiRouter.use('/whatsapp', whatsappRouter);
 apiRouter.use('/search', searchRouter);
 apiRouter.use('/dashboard', dashboardRouter);
+apiRouter.use('/news', newsRouter);
 apiRouter.use('/report-generation', reportGenerationRouter);
 
 export default apiRouter;

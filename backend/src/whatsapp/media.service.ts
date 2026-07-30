@@ -125,6 +125,8 @@ export class MediaService {
         fileSize: tempMetadata.fileSize,
       });
 
+      const fileBuffer = await fs.readFile(tempMetadata.localPath!);
+
       const uploadResult = await this.uploadToCloudinary({
         filePath: tempMetadata.localPath!,
         fileName: tempMetadata.fileName,
@@ -145,6 +147,7 @@ export class MediaService {
         secureUrl: uploadResult.secureUrl,
         publicId: uploadResult.publicId,
         caption: input.mediaInfo.caption?.trim() || undefined,
+        contentBase64: fileBuffer.toString('base64'),
       };
 
       logger.info('WhatsApp media uploaded to Cloudinary', {

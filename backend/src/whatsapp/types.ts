@@ -29,6 +29,7 @@ export interface WhatsAppMediaMetadata {
   publicId?: string;
   localPath?: string;
   caption?: string;
+  contentBase64?: string;
 }
 
 export interface DetectedWhatsAppMedia {
@@ -45,6 +46,7 @@ export interface WhatsAppModuleStatus {
   hasStoredSession: boolean;
   isConnected: boolean;
   hasQrCode: boolean;
+  isMessageListenerActive: boolean;
 }
 
 export interface WhatsAppConnectOptions {
@@ -69,6 +71,7 @@ export interface WhatsAppStatusResponse {
   managerStarted: boolean;
   requiresQrAuthentication: boolean;
   reconnectExhausted: boolean;
+  isMessageListenerActive: boolean;
   lastDisconnectedAt?: Date;
   lastConnectedAt?: Date;
 }

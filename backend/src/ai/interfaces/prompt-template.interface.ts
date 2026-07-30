@@ -3,7 +3,9 @@ export type PromptTemplateName =
   | 'classification'
   | 'validation'
   | 'report-summary'
-  | 'smart-search';
+  | 'smart-search'
+  | 'pdf-document'
+  | 'news-detection';
 
 export interface PromptTemplateMetadata {
   id: string;

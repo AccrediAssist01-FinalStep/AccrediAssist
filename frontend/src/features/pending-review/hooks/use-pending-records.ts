@@ -130,7 +130,8 @@ export function usePendingRecords(filters: PendingReviewFilters) {
       }
       return fetchServerList(filters);
     },
-    staleTime: 30_000,
+    staleTime: 15_000,
+    refetchInterval: 15_000,
   });
 }
 
@@ -179,6 +180,7 @@ export function usePendingReviewStats() {
         averageConfidence,
       };
     },
-    staleTime: 60_000,
+    staleTime: 30_000,
+    refetchInterval: 15_000,
   });
 }

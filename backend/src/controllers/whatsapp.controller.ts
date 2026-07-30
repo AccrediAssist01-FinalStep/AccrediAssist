@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { BaseController } from './base.controller';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { whatsappConnectionManager } from '../whatsapp/connection.manager';
+import { whatsappService } from '../whatsapp/whatsapp.service';
 import { groupService } from '../whatsapp/group.service';
 import { WhatsAppDisconnectQuery } from '../validations/whatsapp.validation';
 
@@ -18,6 +19,7 @@ class WhatsAppController extends BaseController {
 
   connect = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
     await whatsappConnectionManager.start();
+    await whatsappService.ensureMessageListenerActive();
     const status = await whatsappConnectionManager.getStatus();
     this.success(res, 'WhatsApp connection started', status);
   });

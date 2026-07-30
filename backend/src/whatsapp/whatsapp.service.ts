@@ -103,6 +103,7 @@ export class WhatsAppService {
 
   async startConnection(options: WhatsAppConnectOptions = {}): Promise<WhatsAppModuleStatus> {
     if (this.isConnected()) {
+      await this.ensureMessageListenerActive();
       return this.getModuleStatus();
     }
 
@@ -123,6 +124,7 @@ export class WhatsAppService {
 
   async connect(options: WhatsAppConnectOptions = {}): Promise<WhatsAppModuleStatus> {
     if (this.isConnected()) {
+      await this.ensureMessageListenerActive();
       return this.getModuleStatus();
     }
 
@@ -190,7 +192,22 @@ export class WhatsAppService {
       hasStoredSession: await sessionService.hasStoredSession(),
       isConnected: this.isConnected(),
       hasQrCode: Boolean(this.qrCode),
+      isMessageListenerActive: messageListener.isListening(),
     };
+  }
+
+  async ensureMessageListenerActive(): Promise<void> {
+    if (!this.isConnected() || !this.socket) {
+      return;
+    }
+
+    if (messageListener.isListening()) {
+      return;
+    }
+
+    logger.warn('WhatsApp is connected but message listener is inactive; restarting listener');
+    pendingReviewWorkflowService.registerWhatsAppMessageHandler();
+    await messageListener.start(this.socket);
   }
 
   getConfiguration() {

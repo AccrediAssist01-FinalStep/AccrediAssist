@@ -1,5 +1,87 @@
-import type { PendingRecord } from '@/types/api-models';
+import type { PendingRecord, RecordCategory } from '@/types/api-models';
 import type { AiInsightSummary, ConfidenceLevel, DateFilter } from '../types';
+
+export interface ApprovedModuleDestination {
+  href: string;
+  label: string;
+}
+
+const APPROVED_MODULE_DESTINATIONS: Partial<Record<RecordCategory, ApprovedModuleDestination>> = {
+  News: { href: '/news', label: 'News Dashboard' },
+  Placement: { href: '/student-activities/placement', label: 'Placements' },
+  Internship: { href: '/student-activities/internship', label: 'Internships' },
+  Workshop: { href: '/student-activities/workshops', label: 'Workshops' },
+  Seminar: { href: '/student-activities/seminars', label: 'Seminars' },
+  'Industrial Visit': {
+    href: '/department-activities/industrial-visit-reports',
+    label: 'Industrial Visit Reports',
+  },
+  'Student Achievement': { href: '/student-activities/technical', label: 'Student Achievements' },
+  'Faculty Achievement': { href: '/faculty-activities/awards', label: 'Faculty Achievements' },
+  Sports: { href: '/student-activities/sports', label: 'Sports' },
+  Cultural: { href: '/student-activities/cultural', label: 'Cultural Activities' },
+  Patent: { href: '/faculty-activities/patents', label: 'Patents' },
+  Publication: { href: '/faculty-activities/publications', label: 'Publications' },
+  Certification: { href: '/student-activities/certifications', label: 'Certifications' },
+  Certification: { href: '/student-activities/certifications', label: 'Certifications' },
+  Research: { href: '/student-activities/technical', label: 'Student Achievements' },
+};
+
+const APPROVED_TARGET_MODULE_DESTINATIONS: Record<string, ApprovedModuleDestination> = {
+  StudentAchievement: { href: '/student-activities/technical', label: 'Student Achievements' },
+  FacultyAchievement: { href: '/faculty-activities/awards', label: 'Faculty Achievements' },
+  Placement: { href: '/student-activities/placement', label: 'Placements' },
+  Internship: { href: '/student-activities/internship', label: 'Internships' },
+  Publication: { href: '/faculty-activities/publications', label: 'Publications' },
+  Patent: { href: '/faculty-activities/patents', label: 'Patents' },
+  CompletedEventReport: {
+    href: '/department-activities/industrial-visit-reports',
+    label: 'Event Reports',
+  },
+  News: { href: '/news', label: 'News Dashboard' },
+};
+
+export function getApprovedModuleDestination(
+  record: PendingRecord,
+): ApprovedModuleDestination | null {
+  if (record.status !== 'Approved') {
+    return null;
+  }
+
+  if (record.approvedTargetModule === 'CompletedEventReport') {
+    if (record.category === 'Industrial Visit') {
+      return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
+    }
+
+    const detectedCategory = record.extractedData?.detectedCategory as string | undefined;
+    if (detectedCategory === 'Completed Event Report' && record.category === 'Industrial Visit') {
+      return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
+    }
+  }
+
+  if (record.category === 'Industrial Visit') {
+    return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
+  }
+
+  if (record.approvedTargetModule) {
+    const byTarget = APPROVED_TARGET_MODULE_DESTINATIONS[record.approvedTargetModule];
+    if (byTarget) {
+      return byTarget;
+    }
+  }
+
+  const activitySubCategory = record.extractedData?.activitySubCategory as string | undefined;
+  if (activitySubCategory?.includes('Industrial Visit')) {
+    return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
+  }
+
+  const detectedCategory = record.extractedData?.detectedCategory as RecordCategory | undefined;
+  if (detectedCategory && APPROVED_MODULE_DESTINATIONS[detectedCategory]) {
+    return APPROVED_MODULE_DESTINATIONS[detectedCategory] ?? null;
+  }
+
+  return APPROVED_MODULE_DESTINATIONS[record.category] ?? null;
+}
 
 export function getConfidenceLevel(score: number): ConfidenceLevel {
   if (score >= 80) return 'high';
@@ -151,7 +233,10 @@ export function buildAiInsights(record: PendingRecord): AiInsightSummary {
       ? record.rejectionReason
       : 'Record was rejected automatically.';
   } else if (record.status === 'Approved') {
-    recommendedAction = 'Record was auto-approved and stored in the ERP database.';
+    const destination = getApprovedModuleDestination(record);
+    recommendedAction = destination
+      ? `Record was auto-approved and stored in ${destination.label}. Open that module to view the live ERP record.`
+      : 'Record was auto-approved and stored in the ERP database.';
   } else if (duplicateStatus === 'duplicate') {
     recommendedAction = 'Potential duplicate detected during AI processing.';
   } else if (validationStatus === 'invalid') {

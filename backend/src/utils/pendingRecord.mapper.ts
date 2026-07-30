@@ -12,6 +12,8 @@ export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordR
   rejectionReason: record.rejectionReason,
   reviewedBy: record.reviewedBy,
   reviewedAt: record.reviewedAt,
+  approvedRecordId: record.approvedRecordId,
+  approvedTargetModule: record.approvedTargetModule,
   editHistory: record.editHistory ?? [],
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,

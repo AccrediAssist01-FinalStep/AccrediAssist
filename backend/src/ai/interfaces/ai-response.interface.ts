@@ -28,6 +28,7 @@ export interface GenerateJsonOptions {
 }
 
 export interface GeminiMediaPart {
-  url: string;
+  url?: string;
   mimeType: string;
+  inlineData?: string;
 }

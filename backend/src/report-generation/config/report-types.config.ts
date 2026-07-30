@@ -12,6 +12,7 @@ export const GENERATION_REPORT_TYPES = [
   'Publication',
   'Patent',
   'Completed Event',
+  'News',
 ] as const;
 
 export type GenerationReportType = (typeof GENERATION_REPORT_TYPES)[number];
@@ -114,6 +115,16 @@ export const REPORT_TYPE_DEFINITIONS: Record<GenerationReportType, ReportTypeDef
     category: 'operational',
     dataSources: ['completedEventReports'],
     templateId: 'completed-event-v1',
+    chartsIncluded: true,
+    aiSummaryRequired: true,
+  },
+  News: {
+    id: 'News',
+    label: 'News Analytics Report',
+    description: 'Newspaper and magazine article analytics with department-wise and monthly news coverage.',
+    category: 'operational',
+    dataSources: ['news'],
+    templateId: 'news-v1',
     chartsIncluded: true,
     aiSummaryRequired: true,
   },

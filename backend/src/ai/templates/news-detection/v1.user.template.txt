@@ -1,0 +1,9 @@
+Analyze the WhatsApp image and determine if it is a genuine newspaper or magazine article clipping.
+
+WhatsApp context:
+Group: {{groupName}}
+Sender: {{senderName}}
+Caption/Message: {{message}}
+Media URL: {{media}}
+
+Return your analysis as JSON.

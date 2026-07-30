@@ -5,6 +5,7 @@ import { env } from './config/env';
 import { logger } from './utils/logger';
 import { whatsappConnectionManager } from './whatsapp/connection.manager';
 import { sessionService } from './whatsapp/session.service';
+import { whatsappService } from './whatsapp/whatsapp.service';
 
 let server: ReturnType<typeof app.listen> | undefined;
 
@@ -33,6 +34,10 @@ const startWhatsAppIfConfigured = async (): Promise<void> => {
 
     await whatsappConnectionManager.start();
     logger.info('WhatsApp auto-connected using saved session');
+
+    setTimeout(() => {
+      void whatsappService.ensureMessageListenerActive();
+    }, 8000);
   } catch (error) {
     logger.warn('WhatsApp auto-connect skipped or failed', { error });
   }

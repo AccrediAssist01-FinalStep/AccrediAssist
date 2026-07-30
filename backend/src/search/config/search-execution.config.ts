@@ -5,6 +5,7 @@ import { Internship } from '../../models/Internship';
 import { Patent } from '../../models/Patent';
 import { Placement } from '../../models/Placement';
 import { Publication } from '../../models/Publication';
+import { News } from '../../models/News';
 import { StudentAchievement } from '../../models/StudentAchievement';
 import { IBaseDocument } from '../../types/base.types';
 import { SmartSearchCollection } from './search-collections.config';
@@ -168,6 +169,32 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
       'createdAt',
     ],
     summaryFields: ['patentTitle', 'status'],
+  },
+  news: {
+    model: News as Model<IBaseDocument>,
+    dateField: 'publicationDate',
+    defaultSortField: 'createdAt',
+    textSearchFields: [
+      'headline',
+      'articleText',
+      'newspaperName',
+      'summary',
+      'peopleMentioned',
+      'organization',
+      'department',
+      'articleLanguage',
+    ],
+    defaultProjection: [
+      '_id',
+      'headline',
+      'newspaperName',
+      'articleCategory',
+      'articleLanguage',
+      'department',
+      'publicationDate',
+      'createdAt',
+    ],
+    summaryFields: ['headline', 'newspaperName', 'articleCategory'],
   },
 };
 

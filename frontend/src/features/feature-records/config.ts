@@ -114,7 +114,7 @@ export const FEATURE_RECORD_CONFIGS = {
       { key: 'eventType', label: 'Type' },
       { key: 'coordinator', label: 'Coordinator' },
       { key: 'venue', label: 'Venue' },
-      { key: 'achievementDate', label: 'Date', format: 'date' },
+      { key: 'date', label: 'Date', format: 'date' },
     ],
   },
 } as const satisfies Record<string, FeatureRecordConfig>;

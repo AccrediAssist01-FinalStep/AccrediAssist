@@ -33,6 +33,8 @@ export interface IPendingRecord extends IBaseDocument {
   rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
+  approvedRecordId?: Types.ObjectId;
+  approvedTargetModule?: string;
   editHistory?: PendingRecordEditHistoryEntry[];
 }
 
@@ -71,6 +73,8 @@ export interface IPendingRecordResponse {
   rejectionReason?: string;
   reviewedBy?: Types.ObjectId;
   reviewedAt?: Date;
+  approvedRecordId?: Types.ObjectId;
+  approvedTargetModule?: string;
   editHistory?: PendingRecordEditHistoryEntry[];
   createdAt: Date;
   updatedAt: Date;

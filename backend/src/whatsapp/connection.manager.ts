@@ -7,6 +7,7 @@ export class WhatsAppConnectionManager {
   private started = false;
   private lastConnectedAt?: Date;
   private lastDisconnectedAt?: Date;
+  private listenerHealthTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     whatsappService.setConnectionCallbacks({
@@ -31,10 +32,29 @@ export class WhatsAppConnectionManager {
     if (!whatsappService.isConnected()) {
       logger.info('WhatsApp connection manager starting connection');
       void whatsappService.startConnection({ displayQrInTerminal: false });
+    } else {
+      await whatsappService.ensureMessageListenerActive();
+    }
+
+    this.startListenerHealthCheck();
+  }
+
+  private startListenerHealthCheck(): void {
+    this.stopListenerHealthCheck();
+    this.listenerHealthTimer = setInterval(() => {
+      void whatsappService.ensureMessageListenerActive();
+    }, 30_000);
+  }
+
+  private stopListenerHealthCheck(): void {
+    if (this.listenerHealthTimer) {
+      clearInterval(this.listenerHealthTimer);
+      this.listenerHealthTimer = null;
     }
   }
 
   async stop(options: { logout?: boolean } = {}): Promise<void> {
+    this.stopListenerHealthCheck();
     reconnectService.cancel();
     whatsappService.enableAutoReconnect(false);
     this.started = false;
@@ -46,6 +66,10 @@ export class WhatsAppConnectionManager {
   }
 
   async getStatus(): Promise<WhatsAppStatusResponse> {
+    if (whatsappService.isConnected()) {
+      await whatsappService.ensureMessageListenerActive();
+    }
+
     const moduleStatus = await whatsappService.getModuleStatus();
 
     return {
@@ -61,6 +85,7 @@ export class WhatsAppConnectionManager {
       managerStarted: this.started,
       requiresQrAuthentication: whatsappService.requiresQrAuthentication(),
       reconnectExhausted: reconnectService.isExhausted(),
+      isMessageListenerActive: moduleStatus.isMessageListenerActive,
       lastConnectedAt: this.lastConnectedAt,
       lastDisconnectedAt: this.lastDisconnectedAt,
     };

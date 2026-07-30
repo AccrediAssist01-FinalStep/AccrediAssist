@@ -45,6 +45,20 @@ const PROMPT_METADATA: Record<PromptTemplateName, PromptTemplateMetadata> = {
     lastUpdated: '2026-07-25',
     userTemplateFile: 'v1.user.template.txt',
   },
+  'pdf-document': {
+    id: 'pdf-document-agent',
+    name: 'pdf-document',
+    version: 'v1',
+    lastUpdated: '2026-07-29',
+    userTemplateFile: 'v1.user.template.txt',
+  },
+  'news-detection': {
+    id: 'news-detection-agent',
+    name: 'news-detection',
+    version: 'v1',
+    lastUpdated: '2026-07-29',
+    userTemplateFile: 'v1.user.template.txt',
+  },
 };
 
 const readTemplateFile = async (filePath: string): Promise<string> => {

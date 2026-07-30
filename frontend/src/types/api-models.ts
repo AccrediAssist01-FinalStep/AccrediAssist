@@ -152,7 +152,8 @@ export type RecordCategory =
   | 'Patent'
   | 'Publication'
   | 'Certification'
-  | 'Research';
+  | 'Research'
+  | 'News';
 
 export interface PendingRecordEditChange {
   field: string;
@@ -234,6 +235,8 @@ export interface PendingRecord {
   rejectionReason?: string;
   reviewedBy?: string;
   reviewedAt?: string;
+  approvedRecordId?: string;
+  approvedTargetModule?: string;
   editHistory?: PendingRecordEditHistoryEntry[];
   createdAt: string;
   updatedAt: string;
@@ -276,7 +279,8 @@ export type BackendReportType =
   | 'NAAC'
   | 'AICTE'
   | 'Publication'
-  | 'Patent';
+  | 'Patent'
+  | 'News';
 
 export type ReportExportFormat = 'pdf' | 'docx';
 

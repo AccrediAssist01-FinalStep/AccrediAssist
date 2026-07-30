@@ -2,7 +2,7 @@ import { RecordCategory } from '../../database/enums';
 import { ExtractionResult } from '../interfaces/extraction.interface';
 import { enrichExtractionAchievementType } from './achievement-inference.util';
 
-export type ActivityModule = 'Student Activities' | 'Faculty Activities' | 'Department Activities';
+export type ActivityModule = 'Student Activities' | 'Faculty Activities' | 'Department Activities' | 'News';
 
 export interface ActivityClassification {
   module: ActivityModule;
@@ -23,6 +23,7 @@ const RECORD_CATEGORY_MODULE_MAP: Record<RecordCategory, ActivityClassification>
   Workshop: { module: 'Department Activities', subCategory: 'Events' },
   Seminar: { module: 'Department Activities', subCategory: 'Events' },
   'Industrial Visit': { module: 'Department Activities', subCategory: 'Industrial Visit Reports' },
+  News: { module: 'News', subCategory: 'Newspaper Articles' },
 };
 
 const ACHIEVEMENT_SUBCATEGORY: Record<string, string> = {

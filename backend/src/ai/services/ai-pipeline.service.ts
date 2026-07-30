@@ -1,10 +1,10 @@
 import { pendingReviewService, PendingReviewService } from '../../services/pendingReview.service';
-import { logger } from '../../utils/logger';
 import { WhatsAppIncomingMessage } from '../../whatsapp/types';
 import { resolveIncomingMessageText } from '../../whatsapp/message-text.util';
 import { ClassificationAgent, classificationAgent } from '../agents/classification.agent';
 import { DuplicateDetectionAgent, duplicateDetectionAgent } from '../agents/duplicate-detection.agent';
 import { ExtractionAgent, extractionAgent } from '../agents/extraction.agent';
+import { PdfDocumentAgent, pdfDocumentAgent } from '../agents/pdf-document.agent';
 import { ValidationAgent, validationAgent } from '../agents/validation.agent';
 import { AiPipelineResult, AiPipelineStageResults } from '../interfaces/ai-pipeline.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
@@ -13,11 +13,18 @@ import { enrichExtractionAchievementType } from '../utils/achievement-inference.
 import { enrichExtractionFields } from '../utils/extraction-enrichment.util';
 import { correctClassificationForExtraction } from '../utils/classification-correction.util';
 import { mapClassificationToRecordCategory } from '../utils/category-mapper.util';
+import { isPdfMessage } from '../utils/media-detection.util';
+import {
+  buildPdfPendingExtractedData,
+  mapPdfCategoryToRecordCategory,
+  mergePdfExtractionIntoResult,
+} from '../utils/pdf-document-mapper.util';
 import {
   calculatePipelineConfidenceScore,
   resolvePendingRecordStatus,
 } from '../utils/pipeline-status.util';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
+import { logger } from '../../utils/logger';
 
 const buildPendingExtractedData = (
   message: WhatsAppIncomingMessage,
@@ -26,8 +33,10 @@ const buildPendingExtractedData = (
   detectedCategory: string,
   activityModule: string,
   activitySubCategory: string,
+  pdfData?: Record<string, unknown>,
 ): Record<string, unknown> => ({
   ...extraction,
+  ...pdfData,
   media: message.media,
   mediaMetadata: message.mediaMetadata ?? null,
   detectedCategory,
@@ -37,6 +46,7 @@ const buildPendingExtractedData = (
     classification: stages.classification.result,
     validation: stages.validation.result,
     duplicateDetection: stages.duplicateDetection.result,
+    pdfDocument: pdfData ?? null,
     models: {
       extraction: stages.extraction.model,
       classification: stages.classification.model,
@@ -48,6 +58,7 @@ const buildPendingExtractedData = (
 export class AiPipelineService {
   constructor(
     private readonly extraction: ExtractionAgent = extractionAgent,
+    private readonly pdfDocument: PdfDocumentAgent = pdfDocumentAgent,
     private readonly classification: ClassificationAgent = classificationAgent,
     private readonly validation: ValidationAgent = validationAgent,
     private readonly duplicateDetection: DuplicateDetectionAgent = duplicateDetectionAgent,
@@ -69,11 +80,36 @@ export class AiPipelineService {
       messagePreview: originalMessage.slice(0, 120),
     });
 
+    let pdfResponse = null;
+    if (isPdfMessage(message)) {
+      try {
+        pdfResponse = await this.pdfDocument.extract(message);
+      } catch (error) {
+        logger.warn('PDF document extraction failed; continuing with standard extraction', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    if (pdfResponse) {
+      logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
+        stage: 'pdf-document',
+        model: pdfResponse.model,
+        documentType: pdfResponse.result.documentType,
+        confidence: pdfResponse.result.confidence,
+      });
+    }
+
     const extractionResponse = await this.extraction.extract(message);
-    const extractedData = enrichExtractionFields(
+    let extractedData = enrichExtractionFields(
       enrichExtractionAchievementType(extractionResponse.result),
       originalMessage,
     );
+
+    if (pdfResponse) {
+      extractedData = mergePdfExtractionIntoResult(extractedData, pdfResponse.result);
+      extractedData = enrichExtractionAchievementType(extractedData);
+    }
 
     logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
       stage: 'extraction',
@@ -122,12 +158,22 @@ export class AiPipelineService {
       confidenceScore,
     });
 
-    const recordCategory = mapClassificationToRecordCategory(
+    let recordCategory = mapClassificationToRecordCategory(
       correctedClassification.category,
       extractedData,
     );
 
+    if (pdfResponse && (pdfResponse.result.confidence ?? 0) >= 60) {
+      recordCategory = mapPdfCategoryToRecordCategory(pdfResponse.result);
+    }
+
     const activity = resolveActivityClassification(recordCategory, extractedData);
+    const pdfData = pdfResponse
+      ? buildPdfPendingExtractedData(
+          pdfResponse.result,
+          message.media ?? message.mediaMetadata?.secureUrl ?? null,
+        )
+      : undefined;
 
     const stages: AiPipelineStageResults = {
       extraction: extractionResponse,
@@ -151,6 +197,7 @@ export class AiPipelineService {
         correctedClassification.category,
         activity.module,
         activity.subCategory,
+        pdfData,
       ),
       confidenceScore,
       status: pendingStatus,

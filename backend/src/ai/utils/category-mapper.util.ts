@@ -87,6 +87,8 @@ export const mapClassificationToRecordCategory = (
     if (resolved) {
       return resolved;
     }
+
+    return classificationCategory;
   }
 
   const direct = DIRECT_CATEGORY_MAP[classificationCategory];

@@ -1,13 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { MessageCircle, Paperclip } from 'lucide-react';
+import { ExternalLink, MessageCircle, Paperclip } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { PendingRecord } from '@/types/api-models';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import {
   formatSubmittedDate,
+  getApprovedModuleDestination,
   getRecordDepartment,
   getRecordTitle,
   getStatusBadgeVariant,
@@ -27,6 +29,7 @@ export function PendingRecordCard({ record, index, isSelected, onSelect }: Pendi
   const attachments = hasAttachments(record);
   const activityModule = record.extractedData?.activityModule as string | undefined;
   const activitySubCategory = record.extractedData?.activitySubCategory as string | undefined;
+  const approvedDestination = getApprovedModuleDestination(record);
 
   return (
     <motion.button
@@ -68,6 +71,17 @@ export function PendingRecordCard({ record, index, isSelected, onSelect }: Pendi
             <span>{formatSubmittedDate(record.createdAt)}</span>
             {record.senderName && <span>From {record.senderName}</span>}
           </div>
+
+          {approvedDestination ? (
+            <Link
+              href={approvedDestination.href}
+              onClick={(event) => event.stopPropagation()}
+              className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+            >
+              <ExternalLink className="size-3.5" />
+              View in {approvedDestination.label}
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">

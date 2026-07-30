@@ -43,6 +43,16 @@ export const SMART_SEARCH_COLLECTION_FIELDS: Record<SmartSearchCollection, reado
     'year',
   ],
   patents: ['patentTitle', 'inventors', 'patentNumber', 'status', 'year'],
+  news: [
+    'headline',
+    'newspaperName',
+    'articleCategory',
+    'articleLanguage',
+    'department',
+    'organization',
+    'topic',
+    'year',
+  ],
 };
 
 export const SMART_SEARCH_COLLECTION_ALIASES: Record<string, SmartSearchCollection> = {
@@ -64,4 +74,8 @@ export const SMART_SEARCH_COLLECTION_ALIASES: Record<string, SmartSearchCollecti
   publications: 'publications',
   patent: 'patents',
   patents: 'patents',
+  news: 'news',
+  newspaper: 'news',
+  newspapers: 'news',
+  magazine: 'news',
 };

@@ -1,0 +1,9 @@
+Extract structured information from the PDF document below.
+
+WhatsApp context:
+Group: {{groupName}}
+Sender: {{senderName}}
+Caption/Message: {{message}}
+Media URL: {{media}}
+
+Return complete extracted text and structured fields.

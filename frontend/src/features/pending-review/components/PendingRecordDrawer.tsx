@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Edit3, Eye } from 'lucide-react';
+import Link from 'next/link';
+import { Edit3, ExternalLink, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { ConfidenceBadge } from './ConfidenceBadge';
 import {
   canEditRecord,
   formatSubmittedDate,
+  getApprovedModuleDestination,
   getEditableFields,
   getRecordDepartment,
   getRecordTitle,
@@ -101,6 +103,7 @@ export function PendingRecordDrawer({
   };
 
   const title = record ? getRecordTitle(record) : 'Record Details';
+  const approvedDestination = record ? getApprovedModuleDestination(record) : null;
 
   return (
     <>
@@ -142,6 +145,20 @@ export function PendingRecordDrawer({
               ) : (
                 <>
                   <PendingRecordAIInsights record={record} />
+
+                  {approvedDestination ? (
+                    <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+                      <p className="text-sm text-muted-foreground">
+                        This record was stored in the ERP module below after auto-approval.
+                      </p>
+                      <Button asChild className="mt-3" size="sm">
+                        <Link href={approvedDestination.href}>
+                          <ExternalLink className="size-4" />
+                          Open {approvedDestination.label}
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : null}
 
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-3">

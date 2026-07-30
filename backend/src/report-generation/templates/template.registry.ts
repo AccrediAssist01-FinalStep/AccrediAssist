@@ -20,6 +20,7 @@ const SECTION_OUTLINES: Record<GenerationReportType, string[]> = {
   Publication: ['Executive Summary', 'Publication Index', 'Journal Breakdown', 'Trends'],
   Patent: ['Executive Summary', 'Patent Status', 'IP Portfolio', 'Trends'],
   'Completed Event': ['Executive Summary', 'Event Summary', 'Participation Metrics', 'Outcomes'],
+  News: ['Executive Summary', 'Total News', 'Department-wise News', 'Monthly News', 'AI Summary'],
 };
 
 export const getTemplateDescriptor = (reportType: GenerationReportType): ReportTemplateDescriptor => {

@@ -88,6 +88,10 @@ export const REPORT_TEMPLATE_DEFINITIONS: Record<GenerationReportType, ReportTem
     description: 'Workshops, seminars, FDPs, and institutional event outcomes report template.',
     header: 'Completed Event Report',
   }),
+  News: createTemplate('News', {
+    description: 'Newspaper and magazine article analytics report template.',
+    header: 'News Analytics Report',
+  }),
 };
 
 export const getReportTemplateDefinition = (

@@ -92,6 +92,13 @@ const pendingRecordSchema = new Schema<IPendingRecord>(
     reviewedAt: {
       type: Date,
     },
+    approvedRecordId: {
+      type: Schema.Types.ObjectId,
+    },
+    approvedTargetModule: {
+      type: String,
+      trim: true,
+    },
     editHistory: {
       type: [editHistoryEntrySchema],
       default: [],

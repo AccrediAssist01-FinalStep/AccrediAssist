@@ -6,6 +6,7 @@ import { Patent } from '../../../models/Patent';
 import { PendingRecord } from '../../../models/PendingRecord';
 import { Placement } from '../../../models/Placement';
 import { Publication } from '../../../models/Publication';
+import { News } from '../../../models/News';
 import { StudentAchievement } from '../../../models/StudentAchievement';
 import type {
   AggregationModuleKey,
@@ -166,6 +167,28 @@ export const MODULE_AGGREGATION_CONFIGS: Record<AggregationModuleKey, ModuleAggr
       createdAt: 1,
     },
   },
+  news: {
+    key: 'news',
+    label: 'News Articles',
+    collection: 'news',
+    dateField: 'publicationDate',
+    departmentField: 'department',
+    categoryField: 'articleCategory',
+    performerField: 'headline',
+    performerLabel: 'Headline',
+    statsOnly: false,
+    latestLimit: 10,
+    topLimit: 10,
+    latestFields: {
+      headline: 1,
+      newspaperName: 1,
+      articleCategory: 1,
+      articleLanguage: 1,
+      department: 1,
+      publicationDate: 1,
+      createdAt: 1,
+    },
+  },
   pendingReviews: {
     key: 'pendingReviews',
     label: 'Pending Reviews',
@@ -193,6 +216,7 @@ export const MODULE_MODELS: Record<AggregationModuleKey, Model<unknown>> = {
   publications: Publication as Model<unknown>,
   patents: Patent as Model<unknown>,
   completedEventReports: CompletedEventReport as Model<unknown>,
+  news: News as Model<unknown>,
   pendingReviews: PendingRecord as Model<unknown>,
 };
 
@@ -211,6 +235,7 @@ export const mapDataSourceToModuleKey = (dataSource: string): AggregationModuleK
     publications: 'publications',
     patents: 'patents',
     completedEventReports: 'completedEventReports',
+    news: 'news',
     pendingReviews: 'pendingReviews',
   };
   return mapping[dataSource] ?? null;

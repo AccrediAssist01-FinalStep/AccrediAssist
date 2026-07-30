@@ -47,6 +47,7 @@ export const RECORD_CATEGORIES: RecordCategory[] = [
   'Publication',
   'Certification',
   'Research',
+  'News',
 ];
 
 export interface PendingReviewHeaderStats {

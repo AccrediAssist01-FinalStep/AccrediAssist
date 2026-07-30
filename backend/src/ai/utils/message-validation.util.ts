@@ -9,22 +9,41 @@ const CASUAL_EXACT = new Set([
   'thanks',
   'thank you',
   'thankyou',
+  'ty',
+  'thx',
   'ok',
   'okay',
   'k',
   'kk',
   'yes',
   'no',
+  'yep',
+  'nope',
   'good morning',
   'good afternoon',
   'good evening',
   'good night',
   'gm',
   'gn',
+  'bye',
+  'goodbye',
+  'see you',
+  'see ya',
+  'welcome',
+  'congrats',
+  'done',
+  'noted',
+  'received',
+  'sure',
+  'fine',
+  'cool',
+  'great',
+  'nice',
+  'wow',
 ]);
 
 const INSTITUTIONAL_KEYWORDS =
-  /\b(placement|placed|internship|intern|achievement|workshop|seminar|publication|published|patent|event|certificate|offer|letter|student|faculty|prof|dr\.|university|college|company|package|lpa|recruited|winner|award|conference|journal|paper|visit|training|hackathon|project)\b/i;
+  /\b(placement|placed|internship|intern|achievement|workshop|seminar|publication|published|patent|event|certificate|offer|letter|student|faculty|prof|dr\.|university|college|company|package|lpa|recruited|winner|award|conference|journal|paper|visit|training|hackathon|project|department|accreditation|nba|naac|aicte|circular|brochure|newspaper|magazine|news|report|research|stipend|placed at|selected for)\b/i;
 
 const EMOJI_ONLY_PATTERN = /^[\p{Extended_Pictographic}\p{Emoji_Component}\s]+$/u;
 
@@ -61,13 +80,16 @@ export const isNonInstitutionalMessage = (message: WhatsAppIncomingMessage): boo
   }
 
   const wordCount = normalized.split(' ').filter(Boolean).length;
-  if (wordCount <= 3 && !INSTITUTIONAL_KEYWORDS.test(text)) {
-    if (CASUAL_EXACT.has(normalized) || /^(hi|hello|hey|thanks|ok|good morning|good evening)\b/.test(normalized)) {
+  if (wordCount <= 4 && !INSTITUTIONAL_KEYWORDS.test(text)) {
+    if (
+      CASUAL_EXACT.has(normalized) ||
+      /^(hi|hello|hey|thanks|ok|good morning|good evening|good night|bye)\b/.test(normalized)
+    ) {
       return true;
     }
   }
 
-  if (wordCount <= 2 && !INSTITUTIONAL_KEYWORDS.test(text) && text.length <= 25) {
+  if (wordCount <= 2 && !INSTITUTIONAL_KEYWORDS.test(text) && text.length <= 30) {
     return true;
   }
 

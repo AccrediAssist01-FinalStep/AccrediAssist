@@ -6,6 +6,7 @@ export const SMART_SEARCH_COLLECTIONS = [
   'completed_event_reports',
   'publications',
   'patents',
+  'news',
 ] as const;
 
 export type SmartSearchCollection = (typeof SMART_SEARCH_COLLECTIONS)[number];

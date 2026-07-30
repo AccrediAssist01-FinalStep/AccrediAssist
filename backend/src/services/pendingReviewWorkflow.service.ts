@@ -1,4 +1,11 @@
 import { aiPipelineService, AiPipelineService } from '../ai/services/ai-pipeline.service';
+import { newsDetectionAgent } from '../ai/agents/news-detection.agent';
+import { newsPipelineService } from '../ai/services/news-pipeline.service';
+import {
+  isInstitutionalImageType,
+  shouldIgnoreRejectedImage,
+} from '../ai/utils/news-detection-result.util';
+import { isImageMessage, shouldRunNewsDetectionForImage } from '../ai/utils/media-detection.util';
 import { AiPipelineResult } from '../ai/interfaces/ai-pipeline.interface';
 import {
   getMessageValidationReason,
@@ -63,6 +70,64 @@ export class PendingReviewWorkflowService {
       hasText: Boolean(message.message.trim()),
     });
 
+    if (isImageMessage(message) && shouldRunNewsDetectionForImage(message)) {
+      const newsResponse = await newsDetectionAgent.analyze(message);
+
+      if (newsResponse) {
+        logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
+          stage: 'news-detection',
+          model: newsResponse.model,
+          isNewspaperArticle: newsResponse.result.isNewspaperArticle,
+          confidence: newsResponse.result.confidence,
+        });
+
+        if (shouldIgnoreRejectedImage(newsResponse.result)) {
+          logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+            ignored: true,
+            reason: `casual image (${newsResponse.result.rejectedImageType})`,
+          });
+          return null;
+        }
+
+        if (
+          !newsResponse.result.isNewspaperArticle &&
+          isInstitutionalImageType(newsResponse.result.rejectedImageType)
+        ) {
+          logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+            ignored: false,
+            reason: `non-newspaper institutional image (${newsResponse.result.rejectedImageType})`,
+            routing: 'standard-pipeline',
+          });
+        }
+
+        if (newsResponse.result.isNewspaperArticle) {
+          const result = await newsPipelineService.processNewsMessage(
+            message,
+            newsResponse.result,
+          );
+
+          const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
+            result.pendingRecord._id,
+            result.confidenceScore,
+          );
+
+          logger.info('Pending review workflow auto-resolved WhatsApp news message', {
+            pendingRecordId: autoReview.record._id,
+            category: 'News',
+            action: autoReview.action,
+            status: autoReview.record.status,
+            confidenceScore: result.confidenceScore,
+          });
+
+          return {
+            ...result,
+            pendingRecord: autoReview.record,
+            pendingStatus: autoReview.record.status,
+          };
+        }
+      }
+    }
+
     try {
       const result = await this.aiPipeline.processWhatsAppMessage(message);
 
@@ -113,8 +178,25 @@ export class PendingReviewWorkflowService {
           aiProcessingError: error instanceof Error ? error.message : String(error),
         },
         confidenceScore: 0,
-        status: 'Pending',
+        status: message.mediaMetadata?.mediaType === 'pdf' ? 'Needs Review' : 'Pending',
       });
+
+      if (message.mediaMetadata?.mediaType === 'pdf') {
+        logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
+          pendingRecordId: pendingRecord._id,
+          fallback: true,
+          status: pendingRecord.status,
+          reason: 'PDF processing failed; kept for manual review',
+        });
+
+        return {
+          pendingRecord,
+          stages: {} as AiPipelineResult['stages'],
+          recordCategory: 'Research',
+          pendingStatus: pendingRecord.status,
+          confidenceScore: 0,
+        };
+      }
 
       const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
         pendingRecord._id,

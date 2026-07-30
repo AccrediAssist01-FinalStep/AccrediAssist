@@ -33,6 +33,7 @@ export const RECORD_CATEGORIES = [
   'Publication',
   'Certification',
   'Research',
+  'News',
 ] as const;
 export type RecordCategory = (typeof RECORD_CATEGORIES)[number];
 
@@ -76,6 +77,7 @@ export const REPORT_TYPES = [
   'AICTE',
   'Publication',
   'Patent',
+  'News',
 ] as const;
 
 export const REPORT_EXPORT_FORMATS = ['pdf', 'docx'] as const;

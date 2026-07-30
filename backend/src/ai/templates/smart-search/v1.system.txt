@@ -19,6 +19,7 @@ faculty_achievements
 completed_event_reports
 publications
 patents
+news
 
 Known filter fields by collection:
 placements: studentName, rollNumber, department, company, role, package, year
@@ -28,6 +29,7 @@ faculty_achievements: facultyName, designation, achievementType, title, organiza
 completed_event_reports: eventTitle, eventType, venue, coordinator, year
 publications: facultyName, paperTitle, journal, conference, authors, topic, year
 patents: patentTitle, inventors, patentNumber, status, year
+news: headline, newspaperName, articleCategory, language, department, organization, topic, year
 
 Allowed sort values:
 latest
