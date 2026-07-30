@@ -29,6 +29,13 @@ pendingRouter.get(
   pendingReviewController.getById,
 );
 
+pendingRouter.get(
+  '/:id/attachment',
+  authorizePermission('pending_records_review'),
+  validateParams(idParamSchema),
+  pendingReviewController.downloadAttachment,
+);
+
 pendingRouter.patch(
   '/:id',
   authorizePermission('pending_records_review'),
@@ -50,6 +57,13 @@ pendingRouter.put(
   validateParams(idParamSchema),
   validate(rejectPendingRecordSchema),
   pendingRecordController.reject,
+);
+
+pendingRouter.post(
+  '/:id/regenerate',
+  authorizePermission('pending_records_review'),
+  validateParams(idParamSchema),
+  pendingRecordController.regenerate,
 );
 
 export default pendingRouter;

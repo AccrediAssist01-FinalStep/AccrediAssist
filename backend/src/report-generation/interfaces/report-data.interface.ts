@@ -11,6 +11,8 @@ export interface CollectedReportData {
   totals: ReportDataTotals;
   /** Full aggregation payload from the data aggregation engine */
   aggregation?: ReportAggregationResult;
+  /** Report-specific headline statistics for dashboards and PDF summaries */
+  summaryStats?: Record<string, number>;
 }
 
 export interface ReportDataSection {

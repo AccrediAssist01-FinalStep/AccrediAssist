@@ -9,6 +9,14 @@ export interface CloudinaryUploadInput {
   folder?: string;
 }
 
+export interface CloudinaryBufferUploadInput {
+  buffer: Buffer;
+  fileName: string;
+  mediaType: WhatsAppMediaType;
+  folder?: string;
+  mimeType?: string;
+}
+
 export interface CloudinaryUploadResult {
   secureUrl: string;
   publicId: string;
@@ -37,7 +45,7 @@ export class CloudinaryService {
     }
 
     const cloudinary = await ensureCloudinaryConfigured();
-    const resourceType = input.mediaType === 'image' || input.mediaType === 'pdf' ? 'image' : 'raw';
+    const resourceType = input.mediaType === 'image' ? 'image' : 'raw';
     const folder = input.folder ?? 'accrediassist/whatsapp';
 
     const result = await cloudinary.uploader.upload(input.filePath, {
@@ -57,6 +65,40 @@ export class CloudinaryService {
       publicId: result.public_id,
       resourceType,
       bytes: result.bytes ?? 0,
+    };
+  }
+
+  async uploadWhatsAppBuffer(input: CloudinaryBufferUploadInput): Promise<CloudinaryUploadResult> {
+    if (!this.isConfigured()) {
+      throw new BadRequestError('Cloudinary is not configured');
+    }
+
+    const cloudinary = await ensureCloudinaryConfigured();
+    const resourceType = input.mediaType === 'image' ? 'image' : 'raw';
+    const folder = input.folder ?? 'accrediassist/whatsapp';
+    const mimeType =
+      input.mimeType ??
+      (input.mediaType === 'pdf' ? 'application/pdf' : 'application/octet-stream');
+    const dataUri = `data:${mimeType};base64,${input.buffer.toString('base64')}`;
+
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder,
+      resource_type: resourceType,
+      use_filename: true,
+      unique_filename: true,
+      overwrite: false,
+      filename_override: input.fileName,
+    });
+
+    if (!result.secure_url) {
+      throw new InternalServerError('Cloudinary upload did not return a secure URL');
+    }
+
+    return {
+      secureUrl: result.secure_url,
+      publicId: result.public_id,
+      resourceType,
+      bytes: result.bytes ?? input.buffer.length,
     };
   }
 }

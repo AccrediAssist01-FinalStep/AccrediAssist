@@ -59,6 +59,11 @@ export const mapToAggregationFilters = (filters: ReportGenerationFilters): Aggre
   return {
     department: filters.department,
     academicYear: filters.academicYear,
+    semester: filters.semester,
+    category: filters.category,
+    faculty: filters.faculty,
+    student: filters.student,
+    keyword: filters.keyword,
     startDate: filters.startDate ?? monthYearRange.startDate,
     endDate: filters.endDate ?? monthYearRange.endDate,
   };

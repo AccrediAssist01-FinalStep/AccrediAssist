@@ -1,0 +1,21 @@
+Analyse the following WhatsApp department group conversation as ONE combined institutional event.
+
+Group: {{groupName}}
+Message count: {{messageCount}}
+Combined conversation timeline:
+{{conversationTimeline}}
+
+Return JSON with:
+- reportType (Workshop | Industrial Visit | Seminar | Conference | Guest Lecture | Training Program | Hackathon | Department Event)
+- title, date, time, venue, department, coordinator, chiefGuest, speaker, organization
+- participants (number or null)
+- objectives, activitiesConducted, learningOutcomes, keyHighlights, achievements (arrays of strings)
+- futureScope, conclusion, summary, keywords
+- missingFields (array of field names not found in evidence)
+- confidenceScore (0-100)
+- aiGeneratedReport (minimum 800 words, target 800-1000 words; write professionally even when some fields are missing)
+- validationNotes (brief note on evidence quality)
+- imageObservations [{reference, observation}]
+- pdfObservations [{reference, observation}]
+
+Use reference labels like "Image 1", "PDF 1" matching attachment order.

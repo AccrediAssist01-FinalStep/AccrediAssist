@@ -24,6 +24,30 @@ export const buildBaseFieldMatch = (
     };
   }
 
+  if (filters.eventType && config.key === 'completedEventReports') {
+    match.eventType = {
+      $regex: `^${escapeRegex(filters.eventType)}$`,
+      $options: 'i',
+    };
+  }
+
+  if (filters.keyword?.trim()) {
+    const keyword = escapeRegex(filters.keyword.trim());
+    match.$or = [
+      { title: { $regex: keyword, $options: 'i' } },
+      { eventTitle: { $regex: keyword, $options: 'i' } },
+      { studentName: { $regex: keyword, $options: 'i' } },
+      { facultyName: { $regex: keyword, $options: 'i' } },
+      { company: { $regex: keyword, $options: 'i' } },
+      { organization: { $regex: keyword, $options: 'i' } },
+      { headline: { $regex: keyword, $options: 'i' } },
+      { paperTitle: { $regex: keyword, $options: 'i' } },
+      { patentTitle: { $regex: keyword, $options: 'i' } },
+      { description: { $regex: keyword, $options: 'i' } },
+      { summary: { $regex: keyword, $options: 'i' } },
+    ];
+  }
+
   if (filters.faculty && config.facultyField) {
     match[config.facultyField] = {
       $regex: escapeRegex(filters.faculty),
@@ -74,6 +98,8 @@ export const normalizeFilters = (filters: AggregationFilters): AggregationFilter
   department: filters.department?.trim() || undefined,
   academicYear: filters.academicYear?.trim() || undefined,
   category: filters.category?.trim() || undefined,
+  eventType: filters.eventType?.trim() || undefined,
   faculty: filters.faculty?.trim() || undefined,
   student: filters.student?.trim() || undefined,
+  keyword: filters.keyword?.trim() || undefined,
 });

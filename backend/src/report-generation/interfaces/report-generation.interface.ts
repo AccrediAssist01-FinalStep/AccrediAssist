@@ -6,6 +6,12 @@ export interface ReportGenerationFilters {
   endDate?: Date;
   academicYear?: string;
   department?: string;
+  semester?: 1 | 2;
+  category?: string;
+  status?: string;
+  faculty?: string;
+  student?: string;
+  keyword?: string;
   month?: string;
   year?: number;
 }

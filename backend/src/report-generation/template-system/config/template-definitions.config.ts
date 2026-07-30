@@ -42,6 +42,18 @@ const createTemplate = (
 };
 
 export const REPORT_TEMPLATE_DEFINITIONS: Record<GenerationReportType, ReportTemplateDefinition> = {
+  'Student Activities': createTemplate('Student Activities', {
+    description: 'Student activity repository with sectioned tables, charts, and executive summary.',
+    header: 'Student Activities Report',
+  }),
+  'Faculty Activities': createTemplate('Faculty Activities', {
+    description: 'Faculty professional activity report with modular tables and analytics.',
+    header: 'Faculty Activities Report',
+  }),
+  'Department Activities': createTemplate('Department Activities', {
+    description: 'Department-wide events, achievements, and accreditation activity report.',
+    header: 'Department Activities Report',
+  }),
   NBA: createTemplate('NBA', {
     description: 'NBA accreditation report template with outcomes, placements, and research sections.',
     header: 'NBA Accreditation Report',
@@ -60,37 +72,13 @@ export const REPORT_TEMPLATE_DEFINITIONS: Record<GenerationReportType, ReportTem
     watermark: 'AICTE',
     showWatermark: false,
   }),
-  Placement: createTemplate('Placement', {
-    description: 'Department placement statistics and company-wise outcomes report template.',
-    header: 'Placement Report',
+  'AI Generated Workshop': createTemplate('AI Generated Workshop', {
+    description: 'AI-assisted workshop report with event analytics and executive summary.',
+    header: 'AI Generated Workshop Report',
   }),
-  Internship: createTemplate('Internship', {
-    description: 'Internship participation and organization-wise summary report template.',
-    header: 'Internship Report',
-  }),
-  'Student Achievement': createTemplate('Student Achievement', {
-    description: 'Student awards, competitions, and extracurricular achievement report template.',
-    header: 'Student Achievement Report',
-  }),
-  'Faculty Achievement': createTemplate('Faculty Achievement', {
-    description: 'Faculty awards, certifications, and professional milestone report template.',
-    header: 'Faculty Achievement Report',
-  }),
-  Publication: createTemplate('Publication', {
-    description: 'Faculty and student publication index report template.',
-    header: 'Publication Report',
-  }),
-  Patent: createTemplate('Patent', {
-    description: 'Patent filings, grants, and intellectual property portfolio report template.',
-    header: 'Patent Report',
-  }),
-  'Completed Event': createTemplate('Completed Event', {
-    description: 'Workshops, seminars, FDPs, and institutional event outcomes report template.',
-    header: 'Completed Event Report',
-  }),
-  News: createTemplate('News', {
-    description: 'Newspaper and magazine article analytics report template.',
-    header: 'News Analytics Report',
+  'AI Generated Industrial Visit': createTemplate('AI Generated Industrial Visit', {
+    description: 'AI-assisted industrial visit report with participation metrics and summary.',
+    header: 'AI Generated Industrial Visit Report',
   }),
 };
 
@@ -116,6 +104,7 @@ export const getInstitutionDefaultsFromEnv = () => {
   );
 
   const collegeLogoPath = process.env.INSTITUTION_COLLEGE_LOGO_PATH ?? process.env.INSTITUTION_LOGO_PATH;
+  const departmentLogoPath = process.env.INSTITUTION_DEPARTMENT_LOGO_PATH;
   const accrediassistLogoPath =
     process.env.ACCREDIASSIST_LOGO_PATH ??
     (fs.existsSync(defaultAccrediLogo) ? defaultAccrediLogo : undefined);
@@ -125,6 +114,8 @@ export const getInstitutionDefaultsFromEnv = () => {
     department: process.env.INSTITUTION_DEPARTMENT_NAME ?? 'All Departments',
     address: process.env.INSTITUTION_ADDRESS ?? '',
     collegeLogoPath: collegeLogoPath && fs.existsSync(collegeLogoPath) ? collegeLogoPath : undefined,
+    departmentLogoPath:
+      departmentLogoPath && fs.existsSync(departmentLogoPath) ? departmentLogoPath : undefined,
     accrediassistLogoPath,
     exportsDirectory,
   };

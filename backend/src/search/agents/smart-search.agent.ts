@@ -10,6 +10,10 @@ import {
   SmartSearchQueryInput,
 } from '../interfaces/smart-search.interface';
 import { normalizeSmartSearchResult } from '../utils/smart-search-result.util';
+import {
+  buildQueryFallbackFilters,
+  inferCollectionFromQuery,
+} from '../utils/global-search.util';
 
 export class SmartSearchAgent {
   constructor(private readonly provider: GeminiProvider = geminiProvider) {}
@@ -51,6 +55,21 @@ export class SmartSearchAgent {
     const normalized = normalizeSmartSearchResult(response.data);
 
     if (!normalized.collection && Object.keys(normalized.filters).length === 0) {
+      const fallbackCollection = inferCollectionFromQuery(query);
+
+      if (fallbackCollection) {
+        return {
+          result: {
+            collection: fallbackCollection,
+            filters: buildQueryFallbackFilters(query, fallbackCollection),
+            sort: normalized.sort || 'latest',
+            confidence: null,
+          },
+          model: response.model,
+          provider: 'gemini',
+        };
+      }
+
       throw new ValidationError('Gemini could not interpret the search query');
     }
 

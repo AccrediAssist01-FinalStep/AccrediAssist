@@ -269,15 +269,20 @@ export interface ReportFiltersApplied {
 }
 
 export type BackendReportType =
+  | 'Student Activities'
+  | 'Faculty Activities'
+  | 'Department Activities'
+  | 'NBA'
+  | 'NAAC'
+  | 'AICTE'
+  | 'AI Generated Workshop'
+  | 'AI Generated Industrial Visit'
   | 'Monthly'
   | 'Placement'
   | 'Internship'
   | 'Student Achievement'
   | 'Faculty Achievement'
   | 'Completed Event'
-  | 'NBA'
-  | 'NAAC'
-  | 'AICTE'
   | 'Publication'
   | 'Patent'
   | 'News';
@@ -319,6 +324,12 @@ export interface GenerateReportPayload {
   year?: number;
   academicYear?: string;
   department?: string;
+  semester?: number;
+  category?: string;
+  status?: string;
+  faculty?: string;
+  student?: string;
+  keyword?: string;
   startDate?: string;
   endDate?: string;
 }

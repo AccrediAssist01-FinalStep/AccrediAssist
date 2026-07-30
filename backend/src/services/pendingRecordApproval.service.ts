@@ -23,6 +23,7 @@ import { toPendingRecordResponse } from '../utils/pendingRecord.mapper';
 import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { notificationService } from './notification.service';
+import { aiEventReportExportService } from './ai-event-report-export.service';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -51,7 +52,19 @@ export class PendingRecordApprovalService {
     this.ensureReviewable(existing);
 
     const targetModule = resolveApprovalTargetModule(existing.category);
-    const payload = mapPendingRecordToTarget(existing, targetModule);
+    let payload = mapPendingRecordToTarget(existing, targetModule);
+
+    if (
+      targetModule === 'CompletedEventReport' &&
+      existing.extractedData?.sourceType === 'ai-event-report'
+    ) {
+      const exports = await aiEventReportExportService.generateFromPendingRecord(existing);
+      payload = {
+        ...payload,
+        generatedReportUrl: exports.pdfUrl,
+        docxReportUrl: exports.docxUrl,
+      };
+    }
 
     logger.info('Approving pending record', {
       pendingRecordId: id,

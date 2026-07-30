@@ -37,6 +37,11 @@ interface GenerateFormValues {
   month: string;
   year: string;
   department: string;
+  semester: string;
+  category: string;
+  faculty: string;
+  student: string;
+  keyword: string;
   startDate: string;
   endDate: string;
 }
@@ -55,6 +60,11 @@ export function GenerateReportDialog({
       month: '',
       year: String(new Date().getFullYear()),
       department: '',
+      semester: '',
+      category: '',
+      faculty: '',
+      student: '',
+      keyword: '',
       startDate: '',
       endDate: '',
     },
@@ -68,6 +78,11 @@ export function GenerateReportDialog({
       month: template.defaultFilters?.month ?? '',
       year: String(template.defaultFilters?.year ?? new Date().getFullYear()),
       department: '',
+      semester: '',
+      category: '',
+      faculty: '',
+      student: '',
+      keyword: '',
       startDate: '',
       endDate: '',
     });
@@ -83,6 +98,11 @@ export function GenerateReportDialog({
       month: values.month || undefined,
       year: values.year ? Number(values.year) : undefined,
       department: values.department || undefined,
+      semester: values.semester ? Number(values.semester) : undefined,
+      category: values.category || undefined,
+      faculty: values.faculty || undefined,
+      student: values.student || undefined,
+      keyword: values.keyword || undefined,
       startDate: values.startDate || undefined,
       endDate: values.endDate || undefined,
     });
@@ -123,6 +143,26 @@ export function GenerateReportDialog({
             <div className="space-y-2">
               <Label htmlFor="department">Department</Label>
               <Input id="department" placeholder="Computer Science" {...form.register('department')} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="semester">Semester</Label>
+              <Input id="semester" type="number" min={1} max={2} placeholder="1 or 2" {...form.register('semester')} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Input id="category" placeholder="Sports, Workshop, etc." {...form.register('category')} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="faculty">Faculty</Label>
+              <Input id="faculty" placeholder="Faculty name" {...form.register('faculty')} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="student">Student</Label>
+              <Input id="student" placeholder="Student name" {...form.register('student')} />
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="keyword">Keyword Search</Label>
+              <Input id="keyword" placeholder="Search across all report sections" {...form.register('keyword')} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="month">Month</Label>

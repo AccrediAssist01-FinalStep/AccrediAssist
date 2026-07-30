@@ -44,7 +44,7 @@ const runTests = async (): Promise<void> => {
   assert(baileysConfig.printQRInTerminal === false, 'Baileys QR printing is disabled');
 
   assert(
-    groupFilter.isAllowedGroup('Computer Department'),
+    groupFilter.isAllowedGroup(whatsappConfig.allowedGroups[0] ?? ''),
     'Group filter allows configured group',
   );
   assert(!groupFilter.isAllowedGroup('Unknown Group'), 'Group filter rejects unknown group');

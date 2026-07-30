@@ -7,6 +7,71 @@ import {
   SmartSearchApiResponse,
   SmartSearchUnderstanding,
 } from '../interfaces/smart-search-response.interface';
+import { normalizeSmartSearchCollection } from './smart-search-result.util';
+
+const QUERY_COLLECTION_PATTERNS: Array<{ pattern: RegExp; collection: SmartSearchCollection }> = [
+  { pattern: /\b(news|newspaper|newspapers|magazine|clipping)\b/i, collection: 'news' },
+  { pattern: /\b(placement|placements|placed|recruited|offer letter)\b/i, collection: 'placements' },
+  { pattern: /\b(internship|internships|intern)\b/i, collection: 'internships' },
+  {
+    pattern: /\b(student achievement|student achievements|hackathon|student award)\b/i,
+    collection: 'student_achievements',
+  },
+  {
+    pattern: /\b(faculty achievement|faculty achievements|faculty award)\b/i,
+    collection: 'faculty_achievements',
+  },
+  {
+    pattern: /\b(publication|publications|journal|conference paper|research paper)\b/i,
+    collection: 'publications',
+  },
+  { pattern: /\b(patent|patents|invention)\b/i, collection: 'patents' },
+  {
+    pattern: /\b(workshop|seminar|event report|guest lecture|industrial visit|completed event)\b/i,
+    collection: 'completed_event_reports',
+  },
+];
+
+export const inferCollectionFromQuery = (query: string): SmartSearchCollection | undefined => {
+  const normalized = query.trim().toLowerCase();
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  const direct = normalizeSmartSearchCollection(normalized);
+
+  if (direct) {
+    return direct;
+  }
+
+  for (const { pattern, collection } of QUERY_COLLECTION_PATTERNS) {
+    if (pattern.test(normalized)) {
+      return collection;
+    }
+  }
+
+  return undefined;
+};
+
+export const buildQueryFallbackFilters = (
+  query: string,
+  collection?: SmartSearchCollection,
+): Record<string, unknown> => {
+  const filters: Record<string, unknown> = { search: query.trim() };
+
+  const yearMatch = query.match(/\b(20\d{2})\b/);
+  if (yearMatch) {
+    filters.year = Number(yearMatch[1]);
+  }
+
+  const companyMatch = query.match(/\b(?:in|at|from|with)\s+([A-Za-z0-9][A-Za-z0-9&.\- ]{1,40})/i);
+  if (companyMatch && collection === 'placements') {
+    filters.company = companyMatch[1].trim();
+  }
+
+  return filters;
+};
 
 const isAllowedFilterKey = (
   collection: SmartSearchCollection,

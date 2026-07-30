@@ -20,6 +20,7 @@ import {
   isGeminiConfigured,
   mapClassificationToRecordCategory,
   resolvePendingRecordStatus,
+  pdfDocumentAgent,
 } from '../ai';
 import { ExtractionResult } from '../ai/interfaces/extraction.interface';
 import { GeminiGenerativeClient } from '../ai/interfaces/gemini-client.interface';
@@ -274,6 +275,7 @@ const createMockedPipeline = (): AiPipelineService => {
 
   return new AiPipelineService(
     new ExtractionAgent(provider),
+    pdfDocumentAgent,
     new ClassificationAgent(provider),
     new ValidationAgent(provider),
     new DuplicateDetectionAgent(),

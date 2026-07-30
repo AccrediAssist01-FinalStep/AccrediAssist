@@ -51,14 +51,17 @@ export const COLLECTION_LABELS: Record<string, string> = {
   completed_event_reports: 'Completed Event Reports',
   publications: 'Publications',
   patents: 'Patents',
+  news: 'News',
 };
 
 export function toSearchRequest(state: SmartSearchState): SearchRequest {
+  const collection = state.collection !== 'all' ? state.collection : undefined;
+
   return {
     query: state.query.trim(),
     page: state.page,
     limit: state.limit,
     sort: state.sort,
-    ...(state.collection !== 'all' ? { collection: state.collection } : {}),
+    ...(collection ? { collection } : {}),
   };
 }

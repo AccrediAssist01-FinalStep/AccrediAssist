@@ -5,7 +5,8 @@ export type PromptTemplateName =
   | 'report-summary'
   | 'smart-search'
   | 'pdf-document'
-  | 'news-detection';
+  | 'news-detection'
+  | 'ai-event-report';
 
 export interface PromptTemplateMetadata {
   id: string;

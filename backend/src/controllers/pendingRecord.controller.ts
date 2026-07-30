@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { BaseController } from './base.controller';
 import { pendingRecordService } from '../services/pendingRecord.service';
+import { pendingRecordRegenerateService } from '../services/pendingRecordRegenerate.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
 import { PendingRecordListQuery } from '../validations/pendingRecord.validation';
@@ -54,6 +55,12 @@ class PendingRecordController extends BaseController {
       req.body,
     );
     this.success(res, 'Pending record rejected successfully', record);
+  });
+
+  regenerate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    this.requireUserId(req);
+    const record = await pendingRecordRegenerateService.regenerateAiEventReport(req.params.id);
+    this.success(res, 'AI event report regenerated successfully', record);
   });
 
   private requireUserId(req: Request): string {

@@ -38,4 +38,16 @@ export const pendingReviewService = {
     );
     return data.data!;
   },
+
+  regenerate: async (id: string): Promise<PendingRecord> => {
+    const { data } = await apiClient.post<ApiResponse<PendingRecord>>(`/pending/${id}/regenerate`);
+    return data.data!;
+  },
+
+  downloadAttachment: async (id: string): Promise<Blob> => {
+    const { data } = await apiClient.get<Blob>(`/pending/${id}/attachment`, {
+      responseType: 'blob',
+    });
+    return data;
+  },
 };

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Edit3, ExternalLink, Eye } from 'lucide-react';
+import { CheckCircle2, Edit3, ExternalLink, RefreshCw, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,9 +20,12 @@ import { PendingRecordAIInsights } from './PendingRecordAIInsights';
 import { PendingRecordEditForm, type EditFormValues } from './PendingRecordEditForm';
 import { PendingRecordMedia } from './PendingRecordMedia';
 import { PendingRecordTimeline } from './PendingRecordTimeline';
+import { AiGeneratedReportPreview } from './AiGeneratedReportPreview';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import {
+  canApproveOrReject,
   canEditRecord,
+  canRegenerateAiReport,
   formatSubmittedDate,
   getApprovedModuleDestination,
   getEditableFields,
@@ -63,7 +66,10 @@ export function PendingRecordDrawer({
   onActionComplete,
 }: PendingRecordDrawerProps) {
   const [mode, setMode] = useState<'preview' | 'edit'>('preview');
-  const { editMutation, isMutating } = usePendingReviewMutations();
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const { editMutation, approveMutation, rejectMutation, regenerateMutation, isMutating } =
+    usePendingReviewMutations();
 
   const handleClose = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -100,6 +106,31 @@ export function PendingRecordDrawer({
       },
     });
     setMode('preview');
+  };
+
+  const handleApprove = async () => {
+    if (!record) return;
+    await approveMutation.mutateAsync(record._id);
+    onActionComplete?.();
+    onOpenChange(false);
+  };
+
+  const handleReject = async () => {
+    if (!record || !rejectReason.trim()) return;
+    await rejectMutation.mutateAsync({
+      id: record._id,
+      payload: { reason: rejectReason.trim() },
+    });
+    setRejectOpen(false);
+    setRejectReason('');
+    onActionComplete?.();
+    onOpenChange(false);
+  };
+
+  const handleRegenerate = async () => {
+    if (!record) return;
+    await regenerateMutation.mutateAsync(record._id);
+    onActionComplete?.();
   };
 
   const title = record ? getRecordTitle(record) : 'Record Details';
@@ -145,6 +176,7 @@ export function PendingRecordDrawer({
               ) : (
                 <>
                   <PendingRecordAIInsights record={record} />
+                  <AiGeneratedReportPreview record={record} />
 
                   {approvedDestination ? (
                     <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
@@ -215,18 +247,55 @@ export function PendingRecordDrawer({
 
           {record && canEditRecord(record) && mode === 'preview' && (
             <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-card p-4">
-              <Button variant="secondary" onClick={() => setMode('edit')} disabled={isMutating}>
+              {canApproveOrReject(record) && (
+                <>
+                  <Button onClick={handleApprove} disabled={isMutating}>
+                    <CheckCircle2 className="size-4" />
+                    Approve
+                  </Button>
+                  <Button variant="destructive" onClick={() => setRejectOpen(true)} disabled={isMutating}>
+                    <XCircle className="size-4" />
+                    Reject
+                  </Button>
+                </>
+              )}
+              {canRegenerateAiReport(record) && (
+                <Button variant="secondary" onClick={handleRegenerate} disabled={isMutating}>
+                  <RefreshCw className="size-4" />
+                  Regenerate AI Report
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setMode('edit')} disabled={isMutating}>
                 <Edit3 className="size-4" />
                 Edit Extracted Fields
-              </Button>
-              <Button variant="outline" onClick={() => setMode('preview')} disabled={isMutating}>
-                <Eye className="size-4" />
-                Preview
               </Button>
             </div>
           )}
         </SheetContent>
       </Sheet>
+
+      {rejectOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-elevated">
+            <h3 className="text-lg font-semibold">Reject Record</h3>
+            <p className="mt-1 text-sm text-muted">Provide a reason for rejecting this AI report.</p>
+            <textarea
+              className="mt-4 min-h-24 w-full rounded-md border border-border bg-background p-3 text-sm"
+              value={rejectReason}
+              onChange={(event) => setRejectReason(event.target.value)}
+              placeholder="Reason for rejection"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setRejectOpen(false)} disabled={isMutating}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleReject} disabled={isMutating || !rejectReason.trim()}>
+                Confirm Reject
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -29,7 +29,9 @@ import {
 } from './search-history.service';
 import {
   buildGlobalSearchHistoryQuery,
+  buildQueryFallbackFilters,
   inferCollectionFromFilters,
+  inferCollectionFromQuery,
   mergeSearchFilters,
   resolveSearchSort,
   toGlobalSearchApiData,
@@ -104,7 +106,11 @@ export class SearchService {
       parsed = {
         result: {
           collection: input.collection,
-          filters: input.filters ?? {},
+          filters: mergeSearchFilters(
+            buildQueryFallbackFilters(query, input.collection),
+            input.filters ?? {},
+            input.collection,
+          ),
           sort: input.sort ?? '',
           confidence: null,
         },
@@ -123,24 +129,40 @@ export class SearchService {
         });
       } catch (error) {
         if (error instanceof ValidationError || error instanceof BadRequestError) {
+          const fallbackCollection = inferCollectionFromQuery(query);
+
+          if (fallbackCollection) {
+            parsed = {
+              result: {
+                collection: fallbackCollection,
+                filters: buildQueryFallbackFilters(query, fallbackCollection),
+                sort: input.sort ?? 'latest',
+                confidence: null,
+              },
+              model: '',
+              provider: 'gemini',
+            };
+          } else {
+            throw error;
+          }
+        } else if (error instanceof InternalServerError || isGeminiAvailabilityError(error)) {
+          throw new BadRequestError('Smart search query understanding is temporarily unavailable');
+        } else {
           throw error;
         }
-
-        if (error instanceof InternalServerError || isGeminiAvailabilityError(error)) {
-          throw new BadRequestError('Smart search query understanding is temporarily unavailable');
-        }
-
-        throw error;
       }
     }
 
     const collection =
       input.collection ??
       parsed.result.collection ??
-      inferCollectionFromFilters(mergeSearchFilters(parsed.result.filters, input.filters ?? {}));
+      inferCollectionFromFilters(mergeSearchFilters(parsed.result.filters, input.filters ?? {})) ??
+      inferCollectionFromQuery(query);
 
     if (!collection) {
-      throw new ValidationError('Could not determine a search collection for the query');
+      throw new ValidationError(
+        'Could not determine a search collection for the query. Try mentioning placements, internships, achievements, publications, patents, events, or news.',
+      );
     }
 
     const appliedFilters = mergeSearchFilters(parsed.result.filters, input.filters ?? {}, collection);

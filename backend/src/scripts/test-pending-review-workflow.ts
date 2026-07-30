@@ -18,6 +18,7 @@ import {
   GeminiProvider,
   ValidationAgent,
   isGeminiConfigured,
+  pdfDocumentAgent,
 } from '../ai';
 import { ExtractionResult } from '../ai/interfaces/extraction.interface';
 import { GeminiGenerativeClient } from '../ai/interfaces/gemini-client.interface';
@@ -27,6 +28,7 @@ import { Placement } from '../models/Placement';
 import { CompletedEventReport } from '../models/CompletedEventReport';
 import { AuditLog } from '../models/AuditLog';
 import { PendingReviewWorkflowService } from '../services/pendingReviewWorkflow.service';
+import { pendingReviewService } from '../services/pendingReview.service';
 import { createTestUser, cleanupTestUser } from './test-helpers';
 import { MessageListener } from '../whatsapp/message.listener';
 import { createTestMessageUtils } from '../whatsapp/message.mapper';
@@ -218,6 +220,7 @@ const createMockedPipeline = (): AiPipelineService => {
 
   return new AiPipelineService(
     new ExtractionAgent(provider),
+    pdfDocumentAgent,
     new ClassificationAgent(provider),
     new ValidationAgent(provider),
     new DuplicateDetectionAgent(),
@@ -256,7 +259,7 @@ const teardown = async (): Promise<void> => {
 
 const testWhatsAppToPendingReview = async (
   workflow: PendingReviewWorkflowService,
-): Promise<{ placementId: string; workshopId: string; noticeId: string }> => {
+): Promise<void> => {
   console.log('\n--- WhatsApp -> AI Pipeline -> Pending Review ---');
 
   const placementResult = await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.placement);
@@ -287,19 +290,13 @@ const testWhatsAppToPendingReview = async (
     ),
     'Pending record stores AI pipeline metadata',
   );
-  assert(placementResult.pendingStatus === 'Pending', 'Valid placement routes to Pending review');
-
+  assert(placementResult.pendingStatus === 'Approved', 'High-confidence placement is auto-approved');
   assert(workshopResult.recordCategory === 'Workshop', 'Workshop message classified correctly');
-  assert(noticeResult.pendingStatus === 'Needs Review', 'Sparse notice routes to Needs Review');
+  assert(workshopResult.pendingStatus === 'Approved', 'High-confidence workshop is auto-approved');
+  assert(noticeResult.pendingStatus === 'Rejected', 'Low-confidence notice is auto-rejected');
 
-  const finalCollectionBefore = await Placement.countDocuments({ company: new RegExp(TEST_PREFIX) });
-  assert(finalCollectionBefore === 0, 'Pipeline stage does not write to final collections');
-
-  return {
-    placementId: placementResult.pendingRecord._id.toString(),
-    workshopId: workshopResult.pendingRecord._id.toString(),
-    noticeId: noticeResult.pendingRecord._id.toString(),
-  };
+  const autoApprovedPlacements = await Placement.countDocuments({ company: new RegExp(TEST_PREFIX) });
+  assert(autoApprovedPlacements >= 1, 'Auto-approved placement is stored in final collection');
 };
 
 const testFacultyEditAndApprove = async (
@@ -359,10 +356,7 @@ const testRejectPath = async (
 ): Promise<void> => {
   console.log('\n--- Reject -> Remains in PendingRecord ---');
 
-  const eventCountBefore = await CompletedEventReport.countDocuments({
-    eventTitle: new RegExp(TEST_PREFIX),
-  });
-  assert(eventCountBefore === 0, 'Reject path has not created final event records yet');
+  const eventCountBefore = await CompletedEventReport.countDocuments();
 
   const rejected = await workflow.rejectPendingRecord(noticeId, facultyUserId, {
     reason: `${TEST_PREFIX} Insufficient institutional evidence`,
@@ -385,6 +379,9 @@ const testRejectPath = async (
     description: new RegExp(TEST_PREFIX),
   });
   assert(Boolean(rejectAudit), 'Reject creates audit log entry');
+
+  const eventCountAfter = await CompletedEventReport.countDocuments();
+  assert(eventCountBefore === eventCountAfter, 'Reject does not create final event records');
 };
 
 const testWhatsAppListenerIntegration = async (
@@ -495,9 +492,29 @@ const runTests = async (): Promise<void> => {
   const workflow = await setup();
 
   try {
-    const { placementId, noticeId } = await testWhatsAppToPendingReview(workflow);
-    await testFacultyEditAndApprove(workflow, placementId);
-    await testRejectPath(workflow, noticeId);
+    await testWhatsAppToPendingReview(workflow);
+
+    const editPending = await pendingReviewService.createPendingRecord({
+      originalMessage: `${TEST_PREFIX} Manual placement for faculty edit`,
+      category: 'Placement',
+      extractedData: {
+        company: `${TEST_PREFIX}Infosys`,
+        studentName: `${TEST_PREFIX}Rahul Patil`,
+        title: `${TEST_PREFIX} Infosys Placement`,
+      },
+      confidenceScore: 75,
+      status: 'Pending',
+    });
+    await testFacultyEditAndApprove(workflow, editPending._id);
+
+    const rejectPending = await pendingReviewService.createPendingRecord({
+      originalMessage: `${TEST_PREFIX} Manual notice for reject path`,
+      category: 'Research',
+      extractedData: { title: `${TEST_PREFIX} Department notice` },
+      confidenceScore: 55,
+      status: 'Needs Review',
+    });
+    await testRejectPath(workflow, rejectPending._id);
     await testWhatsAppListenerIntegration(workflow);
     await testLiveWorkflowOptional();
   } finally {

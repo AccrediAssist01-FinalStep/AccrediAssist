@@ -21,8 +21,10 @@ export interface AggregationFilters {
   startDate?: Date;
   endDate?: Date;
   category?: string;
+  eventType?: string;
   faculty?: string;
   student?: string;
+  keyword?: string;
   /** Limit aggregation to specific modules (defaults to all) */
   modules?: AggregationModuleKey[];
 }

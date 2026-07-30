@@ -1,31 +1,27 @@
 import { GenerationReportType } from '../config/report-types.config';
 import { BaseReportGenerator } from './base-report.generator';
 import {
+  AiIndustrialVisitReportGenerator,
+  AiWorkshopReportGenerator,
   AicteReportGenerator,
-  CompletedEventReportGenerator,
-  FacultyAchievementReportGenerator,
-  InternshipReportGenerator,
+  DepartmentActivitiesReportGenerator,
+  FacultyActivitiesReportGenerator,
   NaacReportGenerator,
   NbaReportGenerator,
-  PatentReportGenerator,
-  PlacementReportGenerator,
-  PublicationReportGenerator,
-  StudentAchievementReportGenerator,
+  StudentActivitiesReportGenerator,
 } from './report-generators';
 import { parseGenerationReportType } from '../utils/report-type.util';
 import { NotFoundError } from '../../utils/errors';
 
 const generatorInstances: BaseReportGenerator[] = [
+  new StudentActivitiesReportGenerator(),
+  new FacultyActivitiesReportGenerator(),
+  new DepartmentActivitiesReportGenerator(),
   new NbaReportGenerator(),
   new NaacReportGenerator(),
   new AicteReportGenerator(),
-  new PlacementReportGenerator(),
-  new InternshipReportGenerator(),
-  new StudentAchievementReportGenerator(),
-  new FacultyAchievementReportGenerator(),
-  new PublicationReportGenerator(),
-  new PatentReportGenerator(),
-  new CompletedEventReportGenerator(),
+  new AiWorkshopReportGenerator(),
+  new AiIndustrialVisitReportGenerator(),
 ];
 
 const generatorMap = new Map<GenerationReportType, BaseReportGenerator>(

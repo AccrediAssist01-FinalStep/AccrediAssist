@@ -59,6 +59,12 @@ export const reportGenerationFiltersSchema = z
     endDate: z.coerce.date().optional(),
     academicYear: z.string().trim().optional(),
     department: z.string().trim().optional(),
+    semester: z.coerce.number().int().min(1).max(2).optional(),
+    category: z.string().trim().optional(),
+    status: z.string().trim().optional(),
+    faculty: z.string().trim().optional(),
+    student: z.string().trim().optional(),
+    keyword: z.string().trim().max(200).optional(),
     month: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
   })

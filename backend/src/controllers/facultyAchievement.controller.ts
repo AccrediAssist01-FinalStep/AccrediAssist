@@ -3,6 +3,7 @@ import { BaseController } from './base.controller';
 import { facultyAchievementService } from '../services/facultyAchievement.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
+import { withSignedCloudinaryMedia } from '../utils/cloudinary-url.util';
 import { FacultyAchievementListQuery } from '../validations/facultyAchievement.validation';
 
 class FacultyAchievementController extends BaseController {
@@ -22,12 +23,18 @@ class FacultyAchievementController extends BaseController {
       { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
 
-    this.paginated(res, 'Faculty achievements retrieved successfully', result.items, result.meta);
+    const items = await Promise.all(result.items.map((item) => withSignedCloudinaryMedia(item)));
+
+    this.paginated(res, 'Faculty achievements retrieved successfully', items, result.meta);
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const record = await facultyAchievementService.getById(req.params.id);
-    this.success(res, 'Faculty achievement retrieved successfully', record);
+    this.success(
+      res,
+      'Faculty achievement retrieved successfully',
+      await withSignedCloudinaryMedia(record),
+    );
   });
 
   create = asyncHandler(async (req: Request, res: Response): Promise<void> => {

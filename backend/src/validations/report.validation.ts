@@ -1,19 +1,39 @@
 import { z } from 'zod';
 import {
+  PRIMARY_REPORT_TYPES,
   REPORT_EXPORT_FORMATS,
   REPORT_STATUSES,
   REPORT_TYPES,
 } from '../database/enums';
+import { normalizeGenerationReportType } from '../report-generation/utils/report-type.util';
 import { objectIdSchema, paginationSchema } from './common.validation';
+
+const reportTypeSchema = z.preprocess((value) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  try {
+    return normalizeGenerationReportType(value);
+  } catch {
+    return value;
+  }
+}, z.enum(PRIMARY_REPORT_TYPES, { required_error: 'Report type is required' }));
 
 export const generateReportSchema = z
   .object({
-    reportType: z.enum(REPORT_TYPES, { required_error: 'Report type is required' }),
+    reportType: reportTypeSchema,
     format: z.enum(REPORT_EXPORT_FORMATS).optional(),
     month: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
     academicYear: z.string().trim().optional(),
     department: z.string().trim().optional(),
+    semester: z.coerce.number().int().min(1).max(2).optional(),
+    category: z.string().trim().optional(),
+    status: z.string().trim().optional(),
+    faculty: z.string().trim().optional(),
+    student: z.string().trim().optional(),
+    keyword: z.string().trim().max(200).optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
   })

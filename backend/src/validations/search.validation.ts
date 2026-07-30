@@ -3,6 +3,14 @@ import { SMART_SEARCH_COLLECTIONS } from '../search/config/search-collections.co
 import { SMART_SEARCH_SORT_VALUES } from '../search/config/search-fields.config';
 import { paginationSchema } from './common.validation';
 
+const optionalSearchCollectionSchema = z.preprocess((value) => {
+  if (value === 'all' || value === '' || value === null || value === undefined) {
+    return undefined;
+  }
+
+  return value;
+}, z.enum(SMART_SEARCH_COLLECTIONS).optional());
+
 export const globalSearchRequestSchema = paginationSchema.extend({
   query: z
     .string({ required_error: 'Search query is required' })
@@ -10,8 +18,8 @@ export const globalSearchRequestSchema = paginationSchema.extend({
     .min(1, 'Search query is required')
     .max(500, 'Search query cannot exceed 500 characters'),
   department: z.string().trim().max(100).optional(),
-  collection: z.enum(SMART_SEARCH_COLLECTIONS).optional(),
-  filters: z.record(z.unknown()).optional(),
+  collection: optionalSearchCollectionSchema,
+  filters: z.record(z.string(), z.unknown()).optional(),
   sort: z.enum(SMART_SEARCH_SORT_VALUES).optional(),
   fields: z.array(z.string().trim().min(1)).max(30).optional(),
 });
@@ -22,7 +30,7 @@ export const searchExecuteSchema = paginationSchema.extend({
   collection: z.enum(SMART_SEARCH_COLLECTIONS, {
     required_error: 'Search collection is required',
   }),
-  filters: z.record(z.unknown()).optional().default({}),
+  filters: z.record(z.string(), z.unknown()).optional().default({}),
   sort: z.enum(SMART_SEARCH_SORT_VALUES).optional(),
   department: z.string().trim().max(100).optional(),
   fields: z.array(z.string().trim().min(1)).max(30).optional(),
@@ -35,7 +43,7 @@ export const searchListQuerySchema = paginationSchema.extend({
     .min(1, 'Search query is required')
     .max(500, 'Search query cannot exceed 500 characters'),
   department: z.string().trim().max(100).optional(),
-  collection: z.enum(SMART_SEARCH_COLLECTIONS).optional(),
+  collection: optionalSearchCollectionSchema,
   filters: z.preprocess((value) => {
     if (typeof value === 'string' && value.trim()) {
       try {
@@ -46,7 +54,7 @@ export const searchListQuerySchema = paginationSchema.extend({
     }
 
     return value;
-  }, z.record(z.unknown()).optional()),
+  }, z.record(z.string(), z.unknown()).optional()),
   sort: z.enum(SMART_SEARCH_SORT_VALUES).optional(),
   fields: z.string().trim().optional(),
 });

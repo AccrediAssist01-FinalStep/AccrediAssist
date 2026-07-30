@@ -15,7 +15,7 @@ import type { BackendReportType } from '@/types/api-models';
 import type { ReportsFilterState } from '../types';
 import { GENERATION_REPORT_TYPES } from '../types';
 
-const REPORT_TYPE_OPTIONS: BackendReportType[] = [...GENERATION_REPORT_TYPES, 'Monthly'];
+const REPORT_TYPE_OPTIONS: BackendReportType[] = [...GENERATION_REPORT_TYPES];
 
 interface ReportsFiltersBarProps {
   filters: ReportsFilterState;

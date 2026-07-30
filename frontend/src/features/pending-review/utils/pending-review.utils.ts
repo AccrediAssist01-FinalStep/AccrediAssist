@@ -287,6 +287,17 @@ export function canEditRecord(record: PendingRecord): boolean {
   return record.status === 'Pending' || record.status === 'Needs Review';
 }
 
-export function canApproveOrReject(_record: PendingRecord): boolean {
-  return false;
+export function canApproveOrReject(record: PendingRecord): boolean {
+  if (record.status !== 'Pending' && record.status !== 'Needs Review') {
+    return false;
+  }
+
+  return record.extractedData?.sourceType === 'ai-event-report' || record.status === 'Needs Review';
+}
+
+export function canRegenerateAiReport(record: PendingRecord): boolean {
+  return (
+    canEditRecord(record) &&
+    record.extractedData?.sourceType === 'ai-event-report'
+  );
 }

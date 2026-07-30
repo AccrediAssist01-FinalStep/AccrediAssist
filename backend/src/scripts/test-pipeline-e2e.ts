@@ -16,6 +16,7 @@ import {
   GeminiProvider,
   ValidationAgent,
   isGeminiConfigured,
+  pdfDocumentAgent,
 } from '../ai';
 import { GeminiGenerativeClient } from '../ai/interfaces/gemini-client.interface';
 import { ExtractionResult } from '../ai/interfaces/extraction.interface';
@@ -266,6 +267,7 @@ const createMockedPipeline = (): AiPipelineService => {
 
   return new AiPipelineService(
     new ExtractionAgent(provider),
+    pdfDocumentAgent,
     new ClassificationAgent(provider),
     new ValidationAgent(provider),
     new DuplicateDetectionAgent(),

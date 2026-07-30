@@ -138,6 +138,15 @@ export class PdfBuilder {
     sectionsIncluded.push('statistics');
     recordToc(tocEntries, 'Statistics', doc);
     writeHeading(doc, state, 'Statistics');
+
+    const summaryStats = input.collectedData?.summaryStats ?? {};
+    const summaryEntries = Object.entries(summaryStats);
+    if (summaryEntries.length > 0) {
+      summaryEntries.forEach(([key, value]) => {
+        writeBody(doc, state, `${key.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase())}: ${value}`);
+      });
+    }
+
     const statsRows = Object.entries(input.collectedData?.aggregation?.statistics.byModule ?? {})
       .filter(([, stats]) => !!stats)
       .map(([, stats]) => ({

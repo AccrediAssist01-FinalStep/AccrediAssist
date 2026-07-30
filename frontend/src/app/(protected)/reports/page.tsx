@@ -9,8 +9,11 @@ import { ReportsIllustration } from '@/components/illustrations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/AuthProvider';
+import { pendingReviewService } from '@/services/pending-review.service';
+import { useQuery } from '@tanstack/react-query';
 import {
   AIReportPanel,
+  AiEventReportsDashboard,
   DEFAULT_REPORTS_FILTERS,
   GenerateReportDialog,
   QuickReportCards,
@@ -41,6 +44,16 @@ export default function ReportsPage() {
 
   const historyQuery = useReportHistory(filters);
   const allReportsQuery = useReportHistory({ ...DEFAULT_REPORTS_FILTERS, limit: 50 });
+  const aiPendingQuery = useQuery({
+    queryKey: ['ai-event-pending-records'],
+    queryFn: () =>
+      pendingReviewService.list({
+        limit: 100,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      }),
+    staleTime: 30_000,
+  });
   const { generateMutation, downloadMutation, deleteMutation } = useReportMutations();
   const trackingQuery = useReportDetail(trackingReportId, Boolean(trackingReportId));
 
@@ -163,6 +176,11 @@ export default function ReportsPage() {
       )}
 
       <AIReportPanel latestReport={latestReport} isLoading={allReportsQuery.isLoading} />
+
+      <AiEventReportsDashboard
+        records={aiPendingQuery.data?.items ?? []}
+        isLoading={aiPendingQuery.isLoading}
+      />
 
       <ReportsFiltersBarWithActions
         filters={filters}

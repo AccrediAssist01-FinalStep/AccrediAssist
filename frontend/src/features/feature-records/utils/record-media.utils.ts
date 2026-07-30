@@ -16,11 +16,35 @@ const MEDIA_FIELD_KEY_SET = new Set<string>(RECORD_MEDIA_FIELD_KEYS);
 export const isRecordMediaField = (key: string): key is RecordMediaFieldKey =>
   MEDIA_FIELD_KEY_SET.has(key);
 
-export const isImageMediaUrl = (url: string): boolean =>
-  /\.(png|jpe?g|gif|webp|svg|bmp)(\?.*)?$/i.test(url) ||
-  /\/image\/upload\//i.test(url);
+export const isImageMediaUrl = (url: string): boolean => {
+  if (isPdfMediaUrl(url)) {
+    return false;
+  }
 
-export const isPdfMediaUrl = (url: string): boolean => /\.pdf(\?.*)?$/i.test(url);
+  return (
+    /\.(png|jpe?g|gif|webp|svg|bmp)(\?|&|$)/i.test(url) ||
+    /\/image\/(upload|download)\//i.test(url) ||
+    /[?&]format=(png|jpe?g|gif|webp|svg|bmp)/i.test(url)
+  );
+};
+
+export const isPdfMediaUrl = (url: string): boolean =>
+  /\.pdf(\?|&|$)/i.test(url) ||
+  /\/raw\/(upload|download)\//i.test(url) ||
+  /[?&]format=pdf/i.test(url);
+
+/** Cloudinary PDFs uploaded before the raw-resource fix used /image/upload/ and return 401 in browsers. */
+export const normalizePdfMediaUrl = (url: string): string => {
+  if (!isPdfMediaUrl(url)) {
+    return url;
+  }
+
+  if (/\/image\/upload\//i.test(url) && /\.pdf(\?.*)?$/i.test(url)) {
+    return url.replace('/image/upload/', '/raw/upload/');
+  }
+
+  return url;
+};
 
 export const collectRecordMediaUrls = (record: FeatureRecord): string[] => {
   const urls = new Set<string>();
@@ -28,12 +52,12 @@ export const collectRecordMediaUrls = (record: FeatureRecord): string[] => {
   for (const key of RECORD_MEDIA_FIELD_KEYS) {
     const value = record[key];
     if (typeof value === 'string' && value.startsWith('http')) {
-      urls.add(value);
+      urls.add(normalizePdfMediaUrl(value));
     }
     if (Array.isArray(value)) {
       for (const item of value) {
         if (typeof item === 'string' && item.startsWith('http')) {
-          urls.add(item);
+          urls.add(normalizePdfMediaUrl(item));
         }
       }
     }

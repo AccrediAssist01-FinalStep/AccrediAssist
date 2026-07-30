@@ -3,6 +3,7 @@ import { BaseController } from './base.controller';
 import { completedEventReportService } from '../services/completedEventReport.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
+import { withSignedCloudinaryMedia } from '../utils/cloudinary-url.util';
 import { CompletedEventReportListQuery } from '../validations/completedEventReport.validation';
 
 class CompletedEventReportController extends BaseController {
@@ -22,12 +23,14 @@ class CompletedEventReportController extends BaseController {
       { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
 
-    this.paginated(res, 'Event reports retrieved successfully', result.items, result.meta);
+    const items = await Promise.all(result.items.map((item) => withSignedCloudinaryMedia(item)));
+
+    this.paginated(res, 'Event reports retrieved successfully', items, result.meta);
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const record = await completedEventReportService.getById(req.params.id);
-    this.success(res, 'Event report retrieved successfully', record);
+    this.success(res, 'Event report retrieved successfully', await withSignedCloudinaryMedia(record));
   });
 
   create = asyncHandler(async (req: Request, res: Response): Promise<void> => {

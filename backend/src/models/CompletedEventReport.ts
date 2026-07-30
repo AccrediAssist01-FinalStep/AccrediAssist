@@ -50,7 +50,7 @@ const completedEventReportSchema = new Schema<ICompletedEventReport>(
     description: {
       type: String,
       trim: true,
-      maxlength: [5000, 'Description cannot exceed 5000 characters'],
+      maxlength: [12000, 'Description cannot exceed 12000 characters'],
     },
     photoUrls: {
       type: [String],
@@ -62,6 +62,11 @@ const completedEventReportSchema = new Schema<ICompletedEventReport>(
       },
     },
     generatedReportUrl: {
+      type: String,
+      trim: true,
+      validate: urlValidator,
+    },
+    docxReportUrl: {
       type: String,
       trim: true,
       validate: urlValidator,

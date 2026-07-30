@@ -20,11 +20,17 @@ export function useSmartSearch() {
       void queryClient.invalidateQueries({ queryKey: ['search-history'] });
     },
     onError: (error: unknown) => {
-      const message =
+      const responseData =
         error && typeof error === 'object' && 'response' in error
-          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          ? (error as { response?: { data?: { message?: string; errors?: string[] } } }).response
+              ?.data
           : undefined;
-      toast.error(message || 'Search failed. Please try again.');
+
+      const details = responseData?.errors?.length
+        ? responseData.errors.join('. ')
+        : undefined;
+
+      toast.error(details || responseData?.message || 'Search failed. Please try again.');
     },
   });
 

@@ -3,6 +3,7 @@ import { BaseController } from './base.controller';
 import { studentAchievementService } from '../services/studentAchievement.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
+import { withSignedCloudinaryMedia } from '../utils/cloudinary-url.util';
 import { StudentAchievementListQuery } from '../validations/studentAchievement.validation';
 
 class StudentAchievementController extends BaseController {
@@ -22,12 +23,18 @@ class StudentAchievementController extends BaseController {
       { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
 
-    this.paginated(res, 'Student achievements retrieved successfully', result.items, result.meta);
+    const items = await Promise.all(result.items.map((item) => withSignedCloudinaryMedia(item)));
+
+    this.paginated(res, 'Student achievements retrieved successfully', items, result.meta);
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const record = await studentAchievementService.getById(req.params.id);
-    this.success(res, 'Student achievement retrieved successfully', record);
+    this.success(
+      res,
+      'Student achievement retrieved successfully',
+      await withSignedCloudinaryMedia(record),
+    );
   });
 
   create = asyncHandler(async (req: Request, res: Response): Promise<void> => {

@@ -18,9 +18,11 @@ import {
   toStandardMessageJson,
 } from '../whatsapp/message.mapper';
 import { MediaService, resolveMediaType } from '../whatsapp/media.service';
-import { mediaConfig } from '../whatsapp/whatsapp.config';
+import { mediaConfig, whatsappConfig } from '../whatsapp/whatsapp.config';
 
 dotenv.config();
+
+const primaryAllowedGroup = whatsappConfig.allowedGroups[0] ?? 'Final Step';
 
 type WAMessage = import('@whiskeysockets/baileys').proto.IWebMessageInfo;
 
@@ -269,12 +271,12 @@ const testListenerMediaIntegration = async (): Promise<void> => {
     groupFetchAllParticipating: async () => ({
       [groupJid]: {
         id: groupJid,
-        subject: 'Computer Department',
+        subject: primaryAllowedGroup,
       },
     }),
     groupMetadata: async () => ({
       id: groupJid,
-      subject: 'Computer Department',
+      subject: primaryAllowedGroup,
     }),
   };
 

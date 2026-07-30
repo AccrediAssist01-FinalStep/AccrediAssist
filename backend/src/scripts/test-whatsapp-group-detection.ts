@@ -82,6 +82,8 @@ const login = async (email: string): Promise<string> => {
   return (result.body.data as { token: string }).token;
 };
 
+const primaryAllowedGroup = whatsappConfig.allowedGroups[0] ?? 'Final Step';
+
 const testAllowedGroupConfiguration = (): void => {
   console.log('\n--- Allowed group configuration ---');
 
@@ -93,7 +95,7 @@ const testAllowedGroupConfiguration = (): void => {
     'Configuration matches WhatsApp config',
   );
   assert(
-    groupFilter.isAllowedGroup('Computer Department'),
+    groupFilter.isAllowedGroup(primaryAllowedGroup),
     'Configured group is recognized as allowed',
   );
 };
@@ -107,13 +109,13 @@ const testPrivateAndUnknownFiltering = (): void => {
   assert(groupFilter.isPrivateChat(privateJid), 'Private chat JID is detected');
   assert(!groupFilter.isPrivateChat(groupJid), 'Group chat JID is not treated as private');
   assert(groupFilter.isGroupChat(groupJid), 'Group chat JID is detected');
-  assert(!groupFilter.shouldMonitorChat(privateJid, 'Computer Department'), 'Private chats are ignored');
+  assert(!groupFilter.shouldMonitorChat(privateJid, primaryAllowedGroup), 'Private chats are ignored');
   assert(
     !groupFilter.shouldMonitorChat(groupJid, 'Unknown Group'),
     'Unknown groups are ignored',
   );
   assert(
-    groupFilter.shouldMonitorChat(groupJid, 'Computer Department'),
+    groupFilter.shouldMonitorChat(groupJid, primaryAllowedGroup),
     'Allowed joined groups are marked for monitoring',
   );
 
@@ -123,14 +125,14 @@ const testPrivateAndUnknownFiltering = (): void => {
     'Message listener classifies unknown groups',
   );
   assert(
-    messageListener.classifyChat(groupJid, 'Computer Department') === 'allowed',
+    messageListener.classifyChat(groupJid, primaryAllowedGroup) === 'allowed',
     'Message listener classifies allowed groups',
   );
   assert(!messageListener.isListening(), 'Message listener remains inactive');
-  assert(!messageListener.shouldProcess(privateJid, 'Computer Department'), 'Private chats are not processed');
+  assert(!messageListener.shouldProcess(privateJid, primaryAllowedGroup), 'Private chats are not processed');
   assert(!messageListener.shouldProcess(groupJid, 'Unknown Group'), 'Unknown groups are not processed');
   assert(
-    messageListener.shouldProcess(groupJid, 'Computer Department'),
+    messageListener.shouldProcess(groupJid, primaryAllowedGroup),
     'Allowed groups would be processed when listening is enabled later',
   );
 };
@@ -141,7 +143,7 @@ const testJoinedGroupFetch = async (): Promise<void> => {
   const mockGroups = {
     '120363012345678901@g.us': {
       id: '120363012345678901@g.us',
-      subject: 'Computer Department',
+      subject: primaryAllowedGroup,
     },
     '120363098765432109@g.us': {
       id: '120363098765432109@g.us',
@@ -166,7 +168,7 @@ const testJoinedGroupFetch = async (): Promise<void> => {
     const joinedGroups = await testGroupService.fetchJoinedGroups();
     assert(joinedGroups.length === 3, 'Joined groups are fetched from WhatsApp socket');
     assert(
-      joinedGroups.some((group) => group.name === 'Computer Department' && group.isAllowed),
+      joinedGroups.some((group) => group.name === primaryAllowedGroup && group.isAllowed),
       'Allowed joined group is flagged as allowed',
     );
     assert(
@@ -175,12 +177,25 @@ const testJoinedGroupFetch = async (): Promise<void> => {
     );
 
     const detection = await testGroupService.getGroupDetectionStatus();
-    assert(detection.monitoredGroups.length === 2, 'Monitored groups include only allowed joined groups');
-    assert(detection.unknownGroups.length === 1, 'Unknown joined groups are separated');
+    const expectedMonitored = joinedGroups.filter((group) => group.isAllowed).length;
     assert(
-      detection.missingAllowedGroups.includes('Faculty Updates'),
-      'Configured but not joined groups are reported as missing',
+      detection.monitoredGroups.length === expectedMonitored,
+      'Monitored groups include only allowed joined groups',
     );
+    const expectedUnknown = joinedGroups.filter((group) => !group.isAllowed).length;
+    assert(
+      detection.unknownGroups.length === expectedUnknown,
+      'Unknown joined groups are separated',
+    );
+    const configuredNotJoined = whatsappConfig.allowedGroups.filter(
+      (name) => !joinedGroups.some((group) => group.name === name),
+    );
+    if (configuredNotJoined.length > 0) {
+      assert(
+        configuredNotJoined.every((name) => detection.missingAllowedGroups.includes(name)),
+        'Configured but not joined groups are reported as missing',
+      );
+    }
   } finally {
     whatsappService.isConnected = originalIsConnected;
   }

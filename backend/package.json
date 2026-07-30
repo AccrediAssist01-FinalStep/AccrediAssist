@@ -85,7 +85,9 @@
     "test:pending-notifications": "tsx src/scripts/test-pending-notifications.ts",
     "test:pending-review": "npm run test:pending-model && npm run test:pending-review-service && npm run test:faculty-review-api && npm run test:pending-api && npm run test:pending-approve-api && npm run test:pending-reject-api && npm run test:pending-edit-api && npm run test:pending-review-workflow && npm run test:pending-notifications && npm run test:ai-pipeline && npm run test:notification-api && npm run test:audit-log-api",
     "whatsapp:connect": "tsx src/scripts/whatsapp-connect.ts",
-    "simulate:whatsapp-placement": "tsx src/scripts/simulate-whatsapp-placement.ts"
+    "test:industrial-visit-routing": "tsx src/scripts/test-industrial-visit-routing.ts",
+    "test:ai-extensions-integration": "tsx src/scripts/test-ai-extensions-integration.ts",
+    "test:final-qa": "tsx src/scripts/test-final-qa-evaluation.ts"
   },
   "dependencies": {
     "@google/genai": "^2.13.0",

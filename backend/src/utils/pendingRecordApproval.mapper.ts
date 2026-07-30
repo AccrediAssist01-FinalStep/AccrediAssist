@@ -361,17 +361,26 @@ export const mapPendingRecordToCompletedEventReport = (
 ): Record<string, unknown> => {
   const data = getExtractedData(record);
   const structured = getStructuredData(data);
+  const isAiEventReport = data.sourceType === 'ai-event-report';
   const documentUrl = resolveDocumentUrl(data);
+  const evidenceUrls = Array.isArray(data.evidence)
+    ? (data.evidence as Array<{ url?: string }>)
+        .map((item) => sanitizeHttpUrl(item.url))
+        .filter((url): url is string => Boolean(url))
+    : [];
   const photoUrls = documentUrl
-    ? [...new Set([...getPhotoUrls(data), documentUrl])]
-    : getPhotoUrls(data);
+    ? [...new Set([...getPhotoUrls(data), ...evidenceUrls, documentUrl])]
+    : [...new Set([...getPhotoUrls(data), ...evidenceUrls])];
+
+  const aiReport = toStringValue(data.aiGeneratedReport);
+  const narrative = aiReport ?? toStringValue(data.description);
 
   return {
     eventTitle: requireValue(
       toStringValue(data.eventName) ?? toStringValue(data.title) ?? toStringValue(structured.title),
       'event title',
     ),
-    eventType: normalizeEventType(record.category, data.eventType),
+    eventType: normalizeEventType(record.category, data.eventType ?? data.reportType),
     date: resolveRecordDate(data),
     venue:
       toStringValue(data.location) ??
@@ -379,18 +388,19 @@ export const mapPendingRecordToCompletedEventReport = (
       toStringValue(structured.organization) ??
       toStringValue(data.organization) ??
       undefined,
-    coordinator: record.senderName ?? toStringValue(data.coordinator) ?? undefined,
+    coordinator:
+      toStringValue(data.coordinator) ?? record.senderName ?? undefined,
     participants:
       typeof data.participants === 'number' && data.participants >= 0
         ? data.participants
         : undefined,
-    summary: toStringValue(data.description)?.slice(0, 2000) ?? undefined,
-    description:
-      toStringValue(data.description) ??
-      toStringValue(data.extractedText)?.slice(0, 5000) ??
-      undefined,
+    summary:
+      toStringValue(data.summary)?.slice(0, 2000) ??
+      (isAiEventReport ? aiReport?.slice(0, 500) : undefined),
+    description: narrative?.slice(0, 12000) ?? undefined,
     photoUrls,
     generatedReportUrl: documentUrl,
+    docxReportUrl: sanitizeHttpUrl(data.docxReportUrl) ?? undefined,
   };
 };
 

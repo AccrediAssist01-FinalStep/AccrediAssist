@@ -3,6 +3,7 @@ import { BaseController } from './base.controller';
 import { newsService } from '../services/news.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
+import { withSignedCloudinaryMedia } from '../utils/cloudinary-url.util';
 import { NewsListQuery } from '../validations/news.validation';
 
 class NewsController extends BaseController {
@@ -21,7 +22,9 @@ class NewsController extends BaseController {
       { page: query.page, limit: query.limit },
       { sortBy: query.sortBy, sortOrder: query.sortOrder },
     );
-    this.paginated(res, 'News articles retrieved successfully', result.items, result.meta);
+    const items = await Promise.all(result.items.map((item) => withSignedCloudinaryMedia(item)));
+
+    this.paginated(res, 'News articles retrieved successfully', items, result.meta);
   });
 
   dashboard = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
@@ -31,7 +34,7 @@ class NewsController extends BaseController {
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const record = await newsService.getById(req.params.id);
-    this.success(res, 'News article retrieved successfully', record);
+    this.success(res, 'News article retrieved successfully', await withSignedCloudinaryMedia(record));
   });
 
   create = asyncHandler(async (req: Request, res: Response): Promise<void> => {

@@ -52,11 +52,24 @@ export function usePendingReviewMutations() {
     onError: () => toast.error('Failed to reject record. Please try again.'),
   });
 
+  const regenerateMutation = useMutation({
+    mutationFn: (id: string) => pendingReviewService.regenerate(id),
+    onSuccess: async () => {
+      toast.success('AI report regenerated from WhatsApp evidence');
+      await invalidate();
+    },
+    onError: () => toast.error('Failed to regenerate AI report. Please try again.'),
+  });
+
   return {
     editMutation,
     approveMutation,
     rejectMutation,
+    regenerateMutation,
     isMutating:
-      editMutation.isPending || approveMutation.isPending || rejectMutation.isPending,
+      editMutation.isPending ||
+      approveMutation.isPending ||
+      rejectMutation.isPending ||
+      regenerateMutation.isPending,
   };
 }

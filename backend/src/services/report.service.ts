@@ -50,6 +50,12 @@ const extractFiltersApplied = (input: GenerateReportBody): GenerateReportFilters
   if (input.year) filters.year = input.year;
   if (input.academicYear) filters.academicYear = input.academicYear;
   if (input.department) filters.department = input.department;
+  if (input.semester) filters.semester = input.semester as 1 | 2;
+  if (input.category) filters.category = input.category;
+  if (input.status) filters.status = input.status;
+  if (input.faculty) filters.faculty = input.faculty;
+  if (input.student) filters.student = input.student;
+  if (input.keyword) filters.keyword = input.keyword;
   if (input.startDate) filters.startDate = input.startDate;
   if (input.endDate) filters.endDate = input.endDate;
 
@@ -148,7 +154,7 @@ export class ReportService {
 
     if (shouldGenerateFile && !isGenerationReportType(input.reportType)) {
       throw new BadRequestError(
-        `Report type "${input.reportType}" does not support PDF/DOCX generation. Supported types: NBA, NAAC, AICTE, Placement, Internship, Student Achievement, Faculty Achievement, Publication, Patent, Completed Event.`,
+        `Report type "${input.reportType}" does not support PDF/DOCX generation.`,
       );
     }
 

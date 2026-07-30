@@ -37,18 +37,19 @@ const downloadPdfBytes = async (message: WhatsAppIncomingMessage): Promise<Buffe
 
   if (publicId && isCloudinaryConfigured()) {
     const cloudinary = await ensureCloudinaryConfigured();
+    const expiresAt = Math.floor(Date.now() / 1000) + 3600;
 
-    for (const resourceType of ['image', 'raw'] as const) {
-      const signedUrl = cloudinary.url(publicId, {
+    for (const resourceType of ['raw', 'image'] as const) {
+      const format = resourceType === 'raw' ? 'pdf' : 'jpg';
+      const privateUrl = cloudinary.utils.private_download_url(publicId, format, {
         resource_type: resourceType,
         type: 'upload',
-        secure: true,
-        sign_url: true,
+        expires_at: expiresAt,
       });
 
-      const signedBytes = await fetchBytes(signedUrl);
-      if (signedBytes && signedBytes.length > 0) {
-        return signedBytes;
+      const privateBytes = await fetchBytes(privateUrl);
+      if (privateBytes && privateBytes.length > 0) {
+        return privateBytes;
       }
     }
   }

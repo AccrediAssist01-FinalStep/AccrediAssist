@@ -1,29 +1,33 @@
-import { logger } from '../../utils/logger';
+import { GenerationReportType } from '../config/report-types.config';
 import { aggregationService } from '../aggregation/services/aggregation.service';
 import { mapDataSourceToModuleKey } from '../aggregation/config/module-aggregation.config';
 import type { AggregationFilters } from '../aggregation/interfaces/aggregation.interface';
-import { GenerationReportType } from '../config/report-types.config';
 import { getGenerationReportTypeDefinition } from '../config/report-types.config';
 import {
   CollectedReportData,
-  ReportDataSection,
   ReportPipelineContext,
 } from '../interfaces/report-data.interface';
 import { ReportGenerationFilters } from '../interfaces/report-generation.interface';
 import { mapToAggregationFilters } from '../utils/filter-mapper.util';
+import {
+  buildReportSummaryStats,
+  buildSectionedReportData,
+} from '../utils/sectioned-report.util';
+import { logger } from '../../utils/logger';
 
-/** Maps report-generation filters to aggregation module keys from type definition */
 const resolveModulesForReportType = (reportType: GenerationReportType) => {
   const definition = getGenerationReportTypeDefinition(reportType);
-  const modules = definition.dataSources
+  return definition.dataSources
     .map(mapDataSourceToModuleKey)
     .filter((key): key is NonNullable<typeof key> => key !== null);
-  return modules;
 };
 
-/**
- * Collects institutional data via the Report Data Aggregation Engine.
- */
+const resolveEventTypeForReport = (reportType: GenerationReportType): string | undefined => {
+  if (reportType === 'AI Generated Workshop') return 'Workshop';
+  if (reportType === 'AI Generated Industrial Visit') return 'Industrial Visit';
+  return undefined;
+};
+
 export class DataCollectionService {
   async collect(
     reportType: GenerationReportType,
@@ -33,6 +37,7 @@ export class DataCollectionService {
     const aggregationFilters: AggregationFilters = {
       ...mapToAggregationFilters(filters),
       modules,
+      eventType: resolveEventTypeForReport(reportType),
     };
 
     logger.info('Collecting report data via aggregation engine', {
@@ -42,17 +47,8 @@ export class DataCollectionService {
     });
 
     const result = await aggregationService.aggregate(aggregationFilters);
-
-    const sections: ReportDataSection[] = modules.map((moduleKey) => {
-      const stats = result.statistics.byModule[moduleKey];
-      return {
-        key: moduleKey,
-        label: stats?.label ?? moduleKey,
-        collection: moduleKey,
-        recordCount: stats?.totalCount ?? 0,
-        records: result.records.byModule[moduleKey] ?? [],
-      };
-    });
+    const sections = buildSectionedReportData(reportType, result, filters.keyword);
+    const summaryStats = buildReportSummaryStats(reportType, sections, result);
 
     return {
       reportType,
@@ -67,9 +63,9 @@ export class DataCollectionService {
         publications: result.statistics.byModule.publications?.totalCount,
         patents: result.statistics.byModule.patents?.totalCount,
         completedEvents: result.statistics.byModule.completedEventReports?.totalCount,
-        pendingReviews: result.statistics.byModule.pendingReviews?.totalCount,
       },
       aggregation: result,
+      summaryStats,
     };
   }
 

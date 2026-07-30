@@ -12,6 +12,7 @@ export { News } from './News';
 export { Report } from './Report';
 export { Notification } from './Notification';
 export { SearchHistory } from './SearchHistory';
+export { EventReportSession } from './EventReportSession';
 
 export type {
   UserRole,

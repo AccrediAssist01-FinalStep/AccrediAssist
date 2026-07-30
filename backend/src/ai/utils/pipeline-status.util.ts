@@ -67,6 +67,13 @@ export const resolvePendingRecordStatus = (input: {
   duplicateDetection: DuplicateDetectionResult;
   confidenceScore: number;
 }): PendingRecordStatus => {
-  void input;
+  if (input.duplicateDetection.duplicate) {
+    return 'Needs Review';
+  }
+
+  if (input.validation.validationStatus === 'invalid') {
+    return 'Needs Review';
+  }
+
   return 'Pending';
 };

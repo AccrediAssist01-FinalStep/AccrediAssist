@@ -64,21 +64,31 @@ export type EventType = (typeof EVENT_TYPES)[number];
 export const PATENT_STATUSES = ['Filed', 'Published', 'Granted'] as const;
 export type PatentStatus = (typeof PATENT_STATUSES)[number];
 
-// Report types (includes accreditation types used by report generation)
-export const REPORT_TYPES = [
+// Report types — eight primary ERP reports plus legacy values for historical records
+export const PRIMARY_REPORT_TYPES = [
+  'Student Activities',
+  'Faculty Activities',
+  'Department Activities',
+  'NBA',
+  'NAAC',
+  'AICTE',
+  'AI Generated Workshop',
+  'AI Generated Industrial Visit',
+] as const;
+
+export const LEGACY_REPORT_TYPES = [
   'Monthly',
   'Placement',
   'Internship',
   'Student Achievement',
   'Faculty Achievement',
   'Completed Event',
-  'NBA',
-  'NAAC',
-  'AICTE',
   'Publication',
   'Patent',
   'News',
 ] as const;
+
+export const REPORT_TYPES = [...PRIMARY_REPORT_TYPES, ...LEGACY_REPORT_TYPES] as const;
 
 export const REPORT_EXPORT_FORMATS = ['pdf', 'docx'] as const;
 export type ReportExportFormat = (typeof REPORT_EXPORT_FORMATS)[number];

@@ -1,6 +1,7 @@
 export { ReportsHeader } from './components/ReportsHeader';
 export { QuickReportCards } from './components/QuickReportCards';
 export { AIReportPanel } from './components/AIReportPanel';
+export { AiEventReportsDashboard } from './components/AiEventReportsDashboard';
 export { ReportsFiltersBarWithActions } from './components/ReportsFiltersBar';
 export { ReportHistoryTable } from './components/ReportHistoryTable';
 export { ReportPreviewDrawer } from './components/ReportPreviewDrawer';

@@ -26,18 +26,6 @@ export const isPdfMessage = (message: WhatsAppIncomingMessage): boolean =>
 export const isImageMessage = (message: WhatsAppIncomingMessage): boolean =>
   detectIncomingMediaKind(message) === 'image';
 
-const NEWSPAPER_HINT_PATTERN =
-  /\b(newspaper|news article|news clipping|epaper|e-paper|headline|published in|times of india|lokmat|sakal|maharashtra times|dainik|pudhari|loksatta)\b/i;
-
-const PLACEHOLDER_IMAGE_CAPTION = /^\[WhatsApp image attachment from/i;
-
-/** Skip the news-detection pass for typical ERP photos to reduce WhatsApp processing time. */
-export const shouldRunNewsDetectionForImage = (message: WhatsAppIncomingMessage): boolean => {
-  const caption = message.message.trim();
-
-  if (!caption || PLACEHOLDER_IMAGE_CAPTION.test(caption)) {
-    return false;
-  }
-
-  return NEWSPAPER_HINT_PATTERN.test(caption);
-};
+/** Run news detection for every WhatsApp image so newspaper clippings without captions are recognized. */
+export const shouldRunNewsDetectionForImage = (message: WhatsAppIncomingMessage): boolean =>
+  isImageMessage(message);

@@ -13,6 +13,7 @@ export interface ICompletedEventReport extends IBaseDocument {
   description?: string;
   photoUrls: string[];
   generatedReportUrl?: string;
+  docxReportUrl?: string;
   approvedBy?: Types.ObjectId;
 }
 
@@ -56,6 +57,7 @@ export interface ICompletedEventReportResponse {
   description?: string;
   photoUrls: string[];
   generatedReportUrl?: string;
+  docxReportUrl?: string;
   approvedBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;

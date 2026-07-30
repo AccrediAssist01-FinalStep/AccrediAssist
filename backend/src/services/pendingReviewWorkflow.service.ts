@@ -1,6 +1,7 @@
 import { aiPipelineService, AiPipelineService } from '../ai/services/ai-pipeline.service';
 import { newsDetectionAgent } from '../ai/agents/news-detection.agent';
 import { newsPipelineService } from '../ai/services/news-pipeline.service';
+import { eventCorrelationService } from './event-correlation.service';
 import {
   isInstitutionalImageType,
   shouldIgnoreRejectedImage,
@@ -98,6 +99,12 @@ export class PendingReviewWorkflowService {
             reason: `non-newspaper institutional image (${newsResponse.result.rejectedImageType})`,
             routing: 'standard-pipeline',
           });
+        } else if (!newsResponse.result.isNewspaperArticle) {
+          logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+            ignored: false,
+            reason: 'non-newspaper image without institutional type',
+            routing: 'standard-pipeline',
+          });
         }
 
         if (newsResponse.result.isNewspaperArticle) {
@@ -126,6 +133,16 @@ export class PendingReviewWorkflowService {
           };
         }
       }
+    }
+
+    const routedToEventSession = await eventCorrelationService.handleMessage(message);
+    if (routedToEventSession) {
+      logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+        ignored: false,
+        routing: 'ai-event-report-session',
+        groupName: message.groupName,
+      });
+      return null;
     }
 
     try {
@@ -165,11 +182,14 @@ export class PendingReviewWorkflowService {
         sender: message.sender,
       });
 
+      const isPdf = message.mediaMetadata?.mediaType === 'pdf';
+      const isImage = isImageMessage(message);
+
       const pendingRecord = await pendingReviewService.createPendingRecord({
         originalMessage: fallbackMessage,
         groupName: message.groupName,
         senderName: message.sender,
-        category: 'Research',
+        category: isImage ? 'News' : 'Research',
         extractedData: {
           message: fallbackMessage,
           media: message.media,
@@ -178,21 +198,23 @@ export class PendingReviewWorkflowService {
           aiProcessingError: error instanceof Error ? error.message : String(error),
         },
         confidenceScore: 0,
-        status: message.mediaMetadata?.mediaType === 'pdf' ? 'Needs Review' : 'Pending',
+        status: isPdf || isImage ? 'Needs Review' : 'Pending',
       });
 
-      if (message.mediaMetadata?.mediaType === 'pdf') {
+      if (isPdf || isImage) {
         logPipelineStage(PIPELINE_STAGES.PENDING_REVIEW_CREATION, {
           pendingRecordId: pendingRecord._id,
           fallback: true,
           status: pendingRecord.status,
-          reason: 'PDF processing failed; kept for manual review',
+          reason: isPdf
+            ? 'PDF processing failed; kept for manual review'
+            : 'Image processing failed; kept for manual review',
         });
 
         return {
           pendingRecord,
           stages: {} as AiPipelineResult['stages'],
-          recordCategory: 'Research',
+          recordCategory: isImage ? 'News' : 'Research',
           pendingStatus: pendingRecord.status,
           confidenceScore: 0,
         };
@@ -238,6 +260,11 @@ export class PendingReviewWorkflowService {
     input: RejectPendingRecordInput,
   ): Promise<IPendingRecordResponse> {
     return pendingRecordRejectionService.rejectPendingRecord(id, userId, input);
+  }
+
+  async regenerateAiEventReport(id: string): Promise<IPendingRecordResponse> {
+    const { pendingRecordRegenerateService } = await import('./pendingRecordRegenerate.service');
+    return pendingRecordRegenerateService.regenerateAiEventReport(id);
   }
 
   async getPendingRecord(id: string): Promise<IPendingRecordResponse> {
