@@ -102,6 +102,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     icon: CalendarDays,
     backendReportType: 'AI Generated Workshop',
     accent: 'from-emerald-500/20 to-green-500/5',
+    defaultFilters: { year: new Date().getFullYear() },
   },
   {
     id: 'ai-industrial-visit',

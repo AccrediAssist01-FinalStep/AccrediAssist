@@ -18,7 +18,7 @@ export const shouldStartEventReportSession = (message: WhatsAppIncomingMessage):
     return true;
   }
 
-  if (isImageMessage(message) && text.length > 0 && EVENT_KEYWORD_PATTERN.test(text)) {
+  if (isImageMessage(message)) {
     return true;
   }
 

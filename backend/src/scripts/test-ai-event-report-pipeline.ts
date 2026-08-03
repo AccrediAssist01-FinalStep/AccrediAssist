@@ -161,6 +161,26 @@ const main = async (): Promise<void> => {
 
   assert('Result normalization keeps extracted fields', normalized.title === 'Workshop on Artificial Intelligence');
   assert('Result normalization clamps confidence', normalized.confidenceScore === 88);
+
+  const fractional = normalizeAiEventReportResult({
+    reportType: 'Workshop',
+    title: 'Workshop on Azure',
+    confidenceScore: 0.95,
+    aiGeneratedReport: 'Sample report text.',
+  });
+  assert(
+    'Fractional Gemini confidence converts to percent',
+    fractional.confidenceScore === 95,
+    `got ${fractional.confidenceScore}`,
+  );
+  assert(
+    'Workshop normalization builds structured report',
+    Boolean(normalized.workshopReportStructured?.eventDetails.title),
+  );
+  assert(
+    'Structured preview includes Event Details',
+    normalized.aiGeneratedReport.includes('Event Details :'),
+  );
   assert('Workshop maps to Workshop category', mapReportTypeToCategory('Workshop') === 'Workshop');
   assert('Industrial Visit maps correctly', mapReportTypeToCategory('Industrial Visit') === 'Industrial Visit');
   assert('AI event report prompt registered', listPromptTemplates().includes('ai-event-report'));
@@ -207,7 +227,7 @@ const main = async (): Promise<void> => {
         const wordCount = reportText.trim().split(/\s+/).filter(Boolean).length;
 
         assert('Gemini generates pending AI event report', Boolean(pipelineResult.pendingRecord._id));
-        assert('AI report status is Needs Review', pipelineResult.pendingStatus === 'Needs Review');
+        assert('AI report starts as Pending', pipelineResult.pendingStatus === 'Pending');
         assert(
           'Combined narrative word count in target range',
           wordCount >= 300,

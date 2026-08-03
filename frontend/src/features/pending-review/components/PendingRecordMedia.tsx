@@ -10,6 +10,16 @@ interface PendingRecordMediaProps {
   record: PendingRecord;
 }
 
+interface MediaDisplayItem {
+  id: string;
+  type: 'image' | 'pdf' | 'document';
+  url: string;
+  label?: string;
+  caption?: string;
+  fileName?: string;
+  observation?: string;
+}
+
 function isImageUrl(url: string): boolean {
   return (
     (/\.(png|jpe?g|gif|webp|svg)(\?|&|$)/i.test(url) && !/\.pdf(\?|&|$)/i.test(url)) ||
@@ -47,139 +57,195 @@ async function openPdfAttachment(recordId: string, fallbackUrl?: string): Promis
   }
 }
 
-export function PendingRecordMedia({ record }: PendingRecordMediaProps) {
-  const data = record.extractedData;
-  const certificates = data?.certificates ?? [];
-  const mediaReferences = data?.mediaReferences ?? [];
-  const rawMedia = data?.media;
+function asMediaObject(item: unknown): MediaDisplayItem | null {
+  if (!item || typeof item !== 'object') return null;
+  const record = item as Record<string, unknown>;
+  const url = typeof record.url === 'string' ? record.url : '';
+  if (!url) return null;
+
+  const rawType = typeof record.type === 'string' ? record.type : '';
+  const type =
+    rawType === 'pdf' || isPdfUrl(url)
+      ? 'pdf'
+      : rawType === 'image' || isImageUrl(url)
+        ? 'image'
+        : 'document';
+
+  return {
+    id: `${typeof record.label === 'string' ? record.label : url}-${typeof record.sourceMessageIndex === 'number' ? record.sourceMessageIndex : ''}`,
+    type,
+    url,
+    label: typeof record.label === 'string' ? record.label : undefined,
+    caption: typeof record.caption === 'string' ? record.caption : undefined,
+    fileName: typeof record.fileName === 'string' ? record.fileName : undefined,
+    observation: typeof record.observation === 'string' ? record.observation : undefined,
+  };
+}
+
+function collectMediaItems(record: PendingRecord): MediaDisplayItem[] {
+  const data = record.extractedData ?? {};
+  const items: MediaDisplayItem[] = [];
+  const seen = new Set<string>();
+
+  const pushItem = (item: MediaDisplayItem | null) => {
+    if (!item || seen.has(item.url)) return;
+    seen.add(item.url);
+    items.push(item);
+  };
+
+  if (Array.isArray(data.media)) {
+    data.media.forEach((entry) => pushItem(asMediaObject(entry)));
+  }
+
+  if (Array.isArray(data.evidence)) {
+    data.evidence.forEach((entry) => pushItem(asMediaObject(entry)));
+  }
+
+  const photoUrls = Array.isArray(data.photoUrls) ? data.photoUrls : [];
+  photoUrls.forEach((url, index) => {
+    if (typeof url !== 'string') return;
+    pushItem({
+      id: `photo-${index}`,
+      type: isPdfUrl(url) ? 'pdf' : 'image',
+      url,
+      label: `Image ${index + 1}`,
+    });
+  });
+
+  const certificates = Array.isArray(data.certificates) ? data.certificates : [];
+  certificates.forEach((url, index) => {
+    if (typeof url !== 'string') return;
+    pushItem({
+      id: `cert-${index}`,
+      type: 'pdf',
+      url,
+      label: `PDF ${index + 1}`,
+    });
+  });
+
+  const rawMedia = data.media;
+  if (typeof rawMedia === 'string') {
+    pushItem({
+      id: 'legacy-media',
+      type: isPdfUrl(rawMedia) ? 'pdf' : 'image',
+      url: rawMedia,
+    });
+  }
+
   const metadataUrl =
-    typeof data?.mediaMetadata === 'object' && data.mediaMetadata !== null
+    typeof data.mediaMetadata === 'object' && data.mediaMetadata !== null
       ? String((data.mediaMetadata as { secureUrl?: string }).secureUrl ?? '')
       : '';
-  const mediaItems = Array.isArray(rawMedia) ? rawMedia : rawMedia ? [rawMedia] : [];
-  const imageUrls = [
-    ...mediaReferences,
-    ...mediaItems.filter((item): item is string => typeof item === 'string'),
-    ...(metadataUrl ? [metadataUrl] : []),
-  ].filter((url, index, list) => list.indexOf(url) === index);
-
-  const hasContent = certificates.length > 0 || imageUrls.length > 0;
-
-  if (!hasContent) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Attachments & Media</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted">No attachments were included with this submission.</p>
-        </CardContent>
-      </Card>
-    );
+  if (metadataUrl) {
+    pushItem({
+      id: 'legacy-metadata',
+      type: isPdfUrl(metadataUrl) ? 'pdf' : 'image',
+      url: metadataUrl,
+    });
   }
+
+  return items;
+}
+
+export function PendingRecordMedia({ record }: PendingRecordMediaProps) {
+  const mediaItems = collectMediaItems(record);
+  const images = mediaItems.filter((item) => item.type === 'image');
+  const documents = mediaItems.filter((item) => item.type === 'pdf' || item.type === 'document');
+  const conversation =
+    typeof record.extractedData?.conversationTimeline === 'string'
+      ? record.extractedData.conversationTimeline
+      : record.originalMessage;
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">WhatsApp Message Preview</CardTitle>
+          <CardTitle className="text-base">WhatsApp Conversation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-lg border border-border bg-accent/40 p-4 text-sm leading-relaxed whitespace-pre-wrap">
-            {record.originalMessage}
+          <div className="max-h-72 overflow-y-auto rounded-lg border border-border bg-accent/40 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+            {conversation}
           </div>
           <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
             {record.groupName && <Badge variant="outline">{record.groupName}</Badge>}
             {record.senderName && <Badge variant="outline">{record.senderName}</Badge>}
+            {mediaItems.length > 0 && (
+              <Badge variant="secondary">{mediaItems.length} attachments</Badge>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {certificates.length > 0 && (
+      {images.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ImageIcon className="size-4" />
+              Event Images ({images.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            {images.map((item) => (
+              <div key={item.id} className="overflow-hidden rounded-lg border border-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.url}
+                  alt={item.caption ?? item.label ?? 'Event image'}
+                  className="h-48 w-full object-cover"
+                />
+                <div className="space-y-1 p-3">
+                  {item.label && <p className="text-sm font-medium">{item.label}</p>}
+                  {item.caption && <p className="text-sm text-muted-foreground">{item.caption}</p>}
+                  {item.observation && (
+                    <p className="text-xs text-muted-foreground italic">{item.observation}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {documents.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileText className="size-4" />
-              Certificates & Documents
+              PDFs & Documents ({documents.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
-            {certificates.map((url) => {
-              const href = normalizePdfUrl(url);
-              if (isPdfUrl(href)) {
-                return (
+            {documents.map((item) => {
+              const href = normalizePdfUrl(item.url);
+              return (
+                <div key={item.id} className="rounded-lg border border-border p-3">
                   <button
-                    key={url}
                     type="button"
                     onClick={() => void openPdfAttachment(record._id, href)}
-                    className="flex w-full items-center gap-2 rounded-lg border border-border p-3 text-left text-sm transition-colors hover:bg-accent"
+                    className="flex w-full items-center gap-2 text-left text-sm transition-colors hover:text-primary"
                   >
                     <FileText className="size-4 shrink-0 text-primary" />
-                    <span className="truncate">Open PDF document</span>
+                    <span className="truncate">{item.fileName ?? item.label ?? 'Open PDF document'}</span>
                     <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted" />
                   </button>
-                );
-              }
-
-              return (
-              <a
-                key={url}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm transition-colors hover:bg-accent"
-              >
-                <FileText className="size-4 shrink-0 text-primary" />
-                <span className="truncate">{href}</span>
-                <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted" />
-              </a>
-            );
+                  {item.caption && <p className="mt-2 text-xs text-muted-foreground">{item.caption}</p>}
+                  {item.observation && (
+                    <p className="mt-1 text-xs text-muted-foreground italic">{item.observation}</p>
+                  )}
+                </div>
+              );
             })}
           </CardContent>
         </Card>
       )}
 
-      {imageUrls.length > 0 && (
+      {mediaItems.length === 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <ImageIcon className="size-4" />
-              Media Preview
-            </CardTitle>
+            <CardTitle className="text-base">Attachments & Media</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-2">
-            {imageUrls.map((reference) => {
-              const href = normalizePdfUrl(reference);
-              return isImageUrl(reference) && !isPdfUrl(href) ? (
-                <div key={reference} className="overflow-hidden rounded-lg border border-border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={reference} alt="Uploaded media" className="h-40 w-full object-cover" />
-                </div>
-              ) : isPdfUrl(href) ? (
-                <button
-                  key={reference}
-                  type="button"
-                  onClick={() => void openPdfAttachment(record._id, href)}
-                  className="flex w-full items-center gap-2 rounded-lg border border-border p-3 text-left text-sm transition-colors hover:bg-accent"
-                >
-                  <FileText className="size-4 shrink-0 text-primary" />
-                  <span className="truncate">Open PDF document</span>
-                  <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted" />
-                </button>
-              ) : (
-                <a
-                  key={reference}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-lg border border-border p-3 text-sm transition-colors hover:bg-accent"
-                >
-                  <FileText className="size-4 shrink-0 text-primary" />
-                  <span className="truncate">{isPdfUrl(href) ? 'Open PDF document' : href}</span>
-                  <ExternalLink className="ml-auto size-3.5 shrink-0 text-muted" />
-                </a>
-              );
-            })}
+          <CardContent>
+            <p className="text-sm text-muted">No attachments were included with this submission.</p>
           </CardContent>
         </Card>
       )}

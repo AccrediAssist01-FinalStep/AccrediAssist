@@ -1,8 +1,13 @@
+import dns from 'dns';
 import mongoose from 'mongoose';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
 mongoose.set('strictQuery', true);
+
+// Some Windows networks block Node.js SRV DNS lookups to the system resolver.
+// Public DNS servers allow mongodb+srv Atlas URIs to resolve reliably.
+dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 
 export const connectDatabase = async (): Promise<void> => {
   try {

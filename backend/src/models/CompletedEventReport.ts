@@ -7,8 +7,13 @@ import {
   EVENT_TYPES,
 } from '../database';
 
-const urlValidator = {
-  validator: (value: string) => !value || /^https?:\/\/.+/.test(value),
+const isValidReportUrl = (value: string): boolean =>
+  !value ||
+  /^https?:\/\/.+/.test(value) ||
+  /^\/api\/v1\/report-generation\/downloads\/.+/.test(value);
+
+const reportUrlValidator = {
+  validator: (value: string) => isValidReportUrl(value),
   message: 'Must be a valid URL',
 };
 
@@ -64,12 +69,19 @@ const completedEventReportSchema = new Schema<ICompletedEventReport>(
     generatedReportUrl: {
       type: String,
       trim: true,
-      validate: urlValidator,
+      validate: reportUrlValidator,
     },
     docxReportUrl: {
       type: String,
       trim: true,
-      validate: urlValidator,
+      validate: reportUrlValidator,
+    },
+    workshopReportStructured: {
+      type: Schema.Types.Mixed,
+    },
+    media: {
+      type: [Schema.Types.Mixed],
+      default: [],
     },
     approvedBy: {
       type: Schema.Types.ObjectId,

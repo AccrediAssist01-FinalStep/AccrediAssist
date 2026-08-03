@@ -5,6 +5,8 @@ import {
 } from '../report-generation';
 import { docxReportService } from '../report-generation/docx/services/docx-report.service';
 import { pdfReportService } from '../report-generation/pdf/services/pdf-report.service';
+import { workshopReportGeneratorService } from '../report-generation/workshop/services/workshop-report-generator.service';
+import { WORKSHOP_REPORT_SECTION_ORDER } from '../report-generation/workshop/workshop-report-template.config';
 import { GenerationReportType } from '../report-generation/config/report-types.config';
 import { ReportGenerationFilters } from '../report-generation/interfaces/report-generation.interface';
 import { createPipelineContext } from '../report-generation/utils/report-context.util';
@@ -26,6 +28,30 @@ export class ReportGenerationOrchestrator {
   ): Promise<GeneratedReportFile> {
     let context = createPipelineContext(reportType, filters);
     context = await dataCollectionService.collectForContext(context);
+
+    if (reportType === 'AI Generated Workshop') {
+      const workshopResult = await workshopReportGeneratorService.generateFromPipelineContext(
+        context,
+        format === 'docx' ? 'docx' : 'pdf',
+      );
+
+      if (format === 'docx') {
+        return {
+          fileName: workshopResult.docxFileName,
+          filePath: workshopResult.docxFilePath ?? '',
+          fileSizeBytes: workshopResult.docxBuffer?.length ?? 0,
+          sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
+        };
+      }
+
+      return {
+        fileName: workshopResult.pdfFileName,
+        filePath: workshopResult.pdfFilePath ?? '',
+        fileSizeBytes: workshopResult.pdfBuffer?.length ?? 0,
+        sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
+      };
+    }
+
     context = await aiSummaryService.summarizeForContext(context);
     context = await chartPreparationService.prepareForContext(context);
 

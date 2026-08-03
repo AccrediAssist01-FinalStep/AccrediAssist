@@ -14,6 +14,8 @@ export interface ICompletedEventReport extends IBaseDocument {
   photoUrls: string[];
   generatedReportUrl?: string;
   docxReportUrl?: string;
+  workshopReportStructured?: Record<string, unknown>;
+  media?: unknown[];
   approvedBy?: Types.ObjectId;
 }
 

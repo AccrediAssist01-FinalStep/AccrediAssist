@@ -27,8 +27,23 @@ export interface AiEventReportEvidenceItem {
   url: string;
   mimeType?: string;
   fileName?: string;
+  caption?: string;
+  uploadedAt?: string;
   observation?: string;
   sourceMessageIndex?: number;
+}
+
+/** Structured media array stored on pending records and event reports */
+export interface EventMediaItem {
+  type: 'image' | 'pdf' | 'document';
+  url: string;
+  caption?: string;
+  fileName?: string;
+  mimeType?: string;
+  uploadedAt: string;
+  label: string;
+  sourceMessageIndex: number;
+  observation?: string;
 }
 
 export interface AiEventReportResult {
@@ -58,4 +73,5 @@ export interface AiEventReportResult {
   validationNotes: string;
   imageObservations: Array<{ reference: string; observation: string }>;
   pdfObservations: Array<{ reference: string; observation: string }>;
+  workshopReportStructured?: WorkshopReportStructuredContent;
 }

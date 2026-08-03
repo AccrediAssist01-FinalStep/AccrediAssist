@@ -13,6 +13,7 @@ import { getPdfInstitutionConfig, PDF_LAYOUT, PDF_COLORS, getContentWidth } from
 import { getDocxInstitutionConfig } from '../report-generation/docx/config/docx.config';
 import { IPendingRecord } from '../types/pendingRecord.types';
 import { logger } from '../utils/logger';
+import { workshopReportGeneratorService } from '../report-generation/workshop/services/workshop-report-generator.service';
 
 const sanitizeFileName = (value: string): string =>
   value.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').slice(0, 80);
@@ -68,6 +69,10 @@ const splitReportSections = (report: string): Array<{ heading: string; body: str
 
 export class AiEventReportExportService {
   async generateFromPendingRecord(record: IPendingRecord): Promise<ExportUrls> {
+    if (record.category === 'Workshop' && record.extractedData?.sourceType === 'ai-event-report') {
+      return workshopReportGeneratorService.generateFromPendingRecord(record);
+    }
+
     const data = getExtracted(record);
     const title =
       (typeof data.eventName === 'string' && data.eventName) ||
@@ -79,6 +84,7 @@ export class AiEventReportExportService {
       record.originalMessage;
     const summary = typeof data.summary === 'string' ? data.summary : undefined;
     const evidence = Array.isArray(data.evidence) ? data.evidence : [];
+    const media = Array.isArray(data.media) ? data.media : evidence;
 
     const pdfConfig = getPdfInstitutionConfig();
     const docxConfig = getDocxInstitutionConfig();
@@ -97,7 +103,7 @@ export class AiEventReportExportService {
       summary,
       department: typeof data.department === 'string' ? data.department : pdfConfig.departmentName,
       coordinator: typeof data.coordinator === 'string' ? data.coordinator : record.senderName,
-      evidence,
+      evidence: media.length > 0 ? media : evidence,
       institution: pdfConfig,
     });
 
@@ -107,7 +113,7 @@ export class AiEventReportExportService {
       summary,
       department: typeof data.department === 'string' ? data.department : docxConfig.departmentName,
       coordinator: typeof data.coordinator === 'string' ? data.coordinator : record.senderName,
-      evidence,
+      evidence: media.length > 0 ? media : evidence,
       institution: docxConfig,
     });
 
@@ -184,8 +190,16 @@ export class AiEventReportExportService {
         if (!item || typeof item !== 'object') return;
         const record = item as Record<string, unknown>;
         const label = typeof record.label === 'string' ? record.label : `Evidence ${index + 1}`;
-        const url = typeof record.url === 'string' ? record.url : '';
+        const caption = typeof record.caption === 'string' ? record.caption : '';
+        const observation = typeof record.observation === 'string' ? record.observation : '';
         doc.font('Helvetica-Bold').fontSize(10).text(label);
+        if (caption) {
+          doc.font('Helvetica').fontSize(9).fillColor('#333333').text(caption);
+        }
+        if (observation) {
+          doc.font('Helvetica-Oblique').fontSize(9).fillColor(PDF_COLORS.secondary).text(observation);
+        }
+        const url = typeof record.url === 'string' ? record.url : '';
         if (url) {
           doc.font('Helvetica').fontSize(9).fillColor(PDF_COLORS.secondary).text(url, {
             link: url,

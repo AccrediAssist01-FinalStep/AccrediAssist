@@ -5,17 +5,46 @@ Message count: {{messageCount}}
 Combined conversation timeline:
 {{conversationTimeline}}
 
-Return JSON with:
-- reportType (Workshop | Industrial Visit | Seminar | Conference | Guest Lecture | Training Program | Hackathon | Department Event)
-- title, date, time, venue, department, coordinator, chiefGuest, speaker, organization
+Return JSON with top-level fields:
+- reportType, title, date, time, venue, department, coordinator, chiefGuest, speaker, organization
 - participants (number or null)
-- objectives, activitiesConducted, learningOutcomes, keyHighlights, achievements (arrays of strings)
-- futureScope, conclusion, summary, keywords
-- missingFields (array of field names not found in evidence)
-- confidenceScore (0-100)
-- aiGeneratedReport (minimum 800 words, target 800-1000 words; write professionally even when some fields are missing)
-- validationNotes (brief note on evidence quality)
-- imageObservations [{reference, observation}]
-- pdfObservations [{reference, observation}]
+- objectives, activitiesConducted, learningOutcomes, keyHighlights, achievements (arrays)
+- futureScope, conclusion, summary, keywords, missingFields, confidenceScore (integer 0-100, e.g. 85 means 85%)
+- aiGeneratedReport (full preview text, 800-1000 words)
+- validationNotes, imageObservations [{reference, observation}], pdfObservations [{reference, observation}]
 
-Use reference labels like "Image 1", "PDF 1" matching attachment order.
+Also return workshopReport object (required for Workshop/training events):
+{
+  "departmentName": "...",
+  "reportTitle": "Workshop Report on ...",
+  "eventDetails": {
+    "title": "...",
+    "organizedBy": "...",
+    "resourcePerson": "...",
+    "headOfDepartment": "...",
+    "venue": "...",
+    "date": "...",
+    "time": "...",
+    "participants": "..."
+  },
+  "introduction": ["paragraph 1", "paragraph 2"],
+  "objectives": ["..."],
+  "workshopProceedings": ["paragraph covering welcome, session flow, speaker delivery, interaction"],
+  "speakerDetails": ["paragraph about speaker credentials and session"],
+  "scheduleSummary": ["from PDF schedule if available"],
+  "topicsCovered": ["..."],
+  "activitiesConducted": ["..."],
+  "studentParticipation": ["paragraph about attendance and engagement"],
+  "learningOutcomes": ["..."],
+  "keyHighlights": ["..."],
+  "benefits": ["..."],
+  "conclusion": ["paragraph 1", "paragraph 2"],
+  "acknowledgement": ["paragraph thanking speaker, HOD, faculty, students"],
+  "aiExecutiveSummary": "150-200 word summary",
+  "imagePlacements": [
+    { "imageReference": "Image 1", "section": "introduction|workshopProceedings|speakerDetails|studentParticipation|conclusion|evidenceGallery", "caption": "..." }
+  ],
+  "missingFields": ["..."]
+}
+
+Use reference labels like "Image 1", "PDF 1" matching attachment order in the conversation.

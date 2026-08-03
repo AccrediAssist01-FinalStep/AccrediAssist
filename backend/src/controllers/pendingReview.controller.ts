@@ -48,6 +48,20 @@ const signPendingRecordMedia = async (
     data.mediaMetadata = metadata;
   }
 
+  if (Array.isArray(data.media)) {
+    data.media = await Promise.all(
+      data.media.map(async (item) => {
+        if (!item || typeof item !== 'object') return item;
+        const mediaItem = { ...(item as Record<string, unknown>) };
+        if (typeof mediaItem.url === 'string') {
+          mediaItem.url =
+            (await signCloudinaryDeliveryUrl(mediaItem.url)) ?? mediaItem.url;
+        }
+        return mediaItem;
+      }),
+    );
+  }
+
   if (Array.isArray(data.evidence)) {
     data.evidence = await Promise.all(
       data.evidence.map(async (item) => {

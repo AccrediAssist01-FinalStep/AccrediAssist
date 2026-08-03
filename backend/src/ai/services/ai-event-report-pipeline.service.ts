@@ -4,7 +4,7 @@ import { IEventReportSession } from '../../types/eventReportSession.types';
 import { AiPipelineResult } from '../interfaces/ai-pipeline.interface';
 import { aiEventReportAgent } from '../agents/ai-event-report.agent';
 import { mapReportTypeToCategory } from '../utils/event-routing.util';
-import { buildConversationTimeline, buildEvidenceItems } from '../utils/session-media.util';
+import { buildConversationTimeline, buildMediaItems } from '../utils/session-media.util';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
 import { RecordCategory } from '../../database/enums';
 import { NotFoundError } from '../../utils/errors';
@@ -26,7 +26,8 @@ export class AiEventReportPipelineService {
       session.messages,
     );
 
-    const evidence = buildEvidenceItems(session.messages).map((item) => {
+    const mediaItems = buildMediaItems(session.messages);
+    const evidence = mediaItems.map((item) => {
       const imageObservation = agentResponse.result.imageObservations.find(
         (obs) => obs.reference === item.label,
       );
@@ -45,65 +46,70 @@ export class AiEventReportPipelineService {
     ) as RecordCategory;
 
     const originalMessage = buildConversationTimeline(session.messages).slice(0, 8000);
-    const photoUrls = evidence
-      .filter((item) => item.type === 'image')
-      .map((item) => item.url);
-    const pdfUrls = evidence
-      .filter((item) => item.type === 'pdf')
-      .map((item) => item.url);
+    const photoUrls = mediaItems.filter((item) => item.type === 'image').map((item) => item.url);
+    const pdfUrls = mediaItems.filter((item) => item.type === 'pdf').map((item) => item.url);
+
+    const agentResult = agentResponse.result;
+    const workshopReportStructured = agentResult.workshopReportStructured;
 
     const extractedData: Record<string, unknown> = {
-      title: agentResponse.result.title,
-      eventName: agentResponse.result.title,
-      date: agentResponse.result.date,
-      time: agentResponse.result.time,
-      venue: agentResponse.result.venue,
-      location: agentResponse.result.venue,
-      department: agentResponse.result.department,
-      coordinator: agentResponse.result.coordinator,
-      chiefGuest: agentResponse.result.chiefGuest,
-      speaker: agentResponse.result.speaker,
-      organization: agentResponse.result.organization,
-      participants: agentResponse.result.participants,
-      objectives: agentResponse.result.objectives,
-      activitiesConducted: agentResponse.result.activitiesConducted,
-      learningOutcomes: agentResponse.result.learningOutcomes,
-      keyHighlights: agentResponse.result.keyHighlights,
-      achievements: agentResponse.result.achievements,
-      futureScope: agentResponse.result.futureScope,
-      conclusion: agentResponse.result.conclusion,
-      summary: agentResponse.result.summary,
-      keywords: agentResponse.result.keywords,
-      missingFields: agentResponse.result.missingFields,
-      aiGeneratedReport: agentResponse.result.aiGeneratedReport,
-      validationNotes: agentResponse.result.validationNotes,
-      description: agentResponse.result.aiGeneratedReport,
+      title: agentResult.title,
+      eventName: agentResult.title,
+      date: agentResult.date,
+      time: agentResult.time,
+      venue: agentResult.venue,
+      location: agentResult.venue,
+      department: agentResult.department,
+      coordinator: agentResult.coordinator,
+      chiefGuest: agentResult.chiefGuest,
+      speaker: agentResult.speaker,
+      organization: agentResult.organization,
+      participants: agentResult.participants,
+      objectives: agentResult.objectives,
+      activitiesConducted: agentResult.activitiesConducted,
+      learningOutcomes: agentResult.learningOutcomes,
+      keyHighlights: agentResult.keyHighlights,
+      achievements: agentResult.achievements,
+      futureScope: agentResult.futureScope,
+      conclusion: agentResult.conclusion,
+      summary: agentResult.summary,
+      keywords: agentResult.keywords,
+      missingFields: agentResult.missingFields,
+      aiGeneratedReport: agentResult.aiGeneratedReport,
+      validationNotes: agentResult.validationNotes,
+      description: agentResult.aiGeneratedReport,
+      media: mediaItems,
       evidence,
-      mediaReferences: evidence.map((item) => item.url),
+      mediaReferences: mediaItems.map((item) => item.url),
       certificates: pdfUrls,
       photoUrls,
-      imageObservations: agentResponse.result.imageObservations,
-      pdfObservations: agentResponse.result.pdfObservations,
+      imageObservations: agentResult.imageObservations,
+      pdfObservations: agentResult.pdfObservations,
+      ...(workshopReportStructured ? { workshopReportStructured } : {}),
       sourceType: 'ai-event-report',
       detectedCategory: category,
       activityModule: 'AI Event Report',
-      activitySubCategory: agentResponse.result.reportType,
+      activitySubCategory: agentResult.reportType,
       eventType: category,
-      reportType: agentResponse.result.reportType,
+      reportType: agentResult.reportType,
       sessionId: session._id?.toString(),
       messageCount: session.messages.length,
+      conversationTimeline: buildConversationTimeline(session.messages),
+      mediaCount: mediaItems.length,
+      imageCount: photoUrls.length,
+      pdfCount: pdfUrls.length,
       aiPipeline: {
-        aiEventReport: agentResponse.result,
+        aiEventReport: agentResult,
         model: agentResponse.model,
       },
     };
 
-    const confidenceScore = agentResponse.result.confidenceScore;
+    const confidenceScore = agentResult.confidenceScore;
 
     logPipelineStage(PIPELINE_STAGES.GEMINI_RESPONSE, {
       stage: 'ai-event-report',
       model: agentResponse.model,
-      reportType: agentResponse.result.reportType,
+      reportType: agentResult.reportType,
       confidence: confidenceScore,
       messageCount: session.messages.length,
       evidenceCount: evidence.length,
@@ -121,7 +127,7 @@ export class AiEventReportPipelineService {
           category,
           extractedData,
           confidenceScore,
-          status: 'Needs Review',
+          status: 'Pending',
         },
       );
 
@@ -138,7 +144,6 @@ export class AiEventReportPipelineService {
         category,
         extractedData,
         confidenceScore,
-        status: 'Needs Review',
       });
     }
 
@@ -146,7 +151,7 @@ export class AiEventReportPipelineService {
       pendingRecordId: pendingRecord._id,
       recordCategory: category,
       sourceType: 'ai-event-report',
-      status: 'Needs Review',
+      status: pendingRecord.status,
       confidenceScore,
       sessionId: session._id,
     });
@@ -155,7 +160,7 @@ export class AiEventReportPipelineService {
       pendingRecord,
       stages: {} as AiPipelineResult['stages'],
       recordCategory: category,
-      pendingStatus: 'Needs Review',
+      pendingStatus: pendingRecord.status,
       confidenceScore,
     };
   }

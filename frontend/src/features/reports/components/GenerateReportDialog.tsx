@@ -115,6 +115,12 @@ export function GenerateReportDialog({
           <DialogTitle>Generate {template?.title ?? 'Report'}</DialogTitle>
           <DialogDescription>
             Configure filters and export format. AI summary, charts, and document generation start immediately.
+            {template?.backendReportType === 'AI Generated Workshop' && (
+              <span className="mt-2 block text-xs">
+                Tip: Leave Academic Year blank unless you need a specific range. Recent WhatsApp workshops may fall
+                outside 2025-2026.
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
 

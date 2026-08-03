@@ -7,12 +7,32 @@ import { getPdfInstitutionConfig } from '../config/pdf.config';
 import type { PdfGenerationResult, PdfReportInput } from '../interfaces/pdf-report.interface';
 import { pdfBuilder } from '../builders/pdf.builder';
 import { imageRenderer } from '../renderers/image.renderer';
+import { workshopReportGeneratorService } from '../../workshop/services/workshop-report-generator.service';
+import { WORKSHOP_REPORT_SECTION_ORDER } from '../../workshop/workshop-report-template.config';
 
 const sanitizeFileName = (value: string): string =>
   value.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').slice(0, 120);
 
 export class PdfReportService {
   async generateFromContext(context: ReportPipelineContext): Promise<PdfGenerationResult> {
+    if (context.reportType === 'AI Generated Workshop') {
+      const workshop = await workshopReportGeneratorService.generateFromPipelineContext(
+        context,
+        'pdf',
+      );
+
+      return {
+        buffer: workshop.pdfBuffer ?? Buffer.alloc(0),
+        fileName: workshop.pdfFileName,
+        filePath: workshop.pdfFilePath ?? '',
+        downloadUrl: workshop.pdfUrl,
+        fileSizeBytes: workshop.pdfBuffer?.length ?? 0,
+        sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
+        pageCount: undefined,
+        generatedAt: new Date(),
+      };
+    }
+
     return this.generate(this.toReportInput(context));
   }
 

@@ -14,7 +14,26 @@ Department WhatsApp Group
   → 800–1000 word professional report + structured extraction
   → Pending Review (always Needs Review — no auto-approve)
   → Faculty Approve / Reject / Edit / Regenerate
-  → On approval: store CompletedEventReport + generate PDF & DOCX
+  → On approval: store CompletedEventReport + generate PDF & DOCX (Workshop uses official template layout)
+```
+
+## Workshop Report Template Generator
+
+Workshop reports follow the structure of `Workshop Report.docx` (reference copy: `backend/src/report-generation/workshop/assets/workshop-report-reference.docx`). The template is used **only for layout** — content is always generated from WhatsApp evidence via Gemini.
+
+**Section order:** Cover → Event Details → Introduction → Objectives → Workshop Proceedings → Topics Covered → Schedule Summary → Learning Outcomes → Key Highlights → Benefits → Conclusion → AI Executive Summary → Acknowledgement → Evidence Gallery
+
+**Image placement:** Gemini returns `imagePlacements[]` mapping each image to a section (introduction, workshopProceedings, speakerDetails, studentParticipation, conclusion, evidenceGallery). Images are embedded inline in DOCX/PDF, not appended only at the end.
+
+**Structured storage:** `extractedData.workshopReportStructured` on the pending record; preview shown in Pending Review UI.
+
+**Export:** On faculty approval of a Workshop AI event report, `workshopReportGeneratorService` produces template-aligned PDF and DOCX.
+
+Run workshop generator tests:
+
+```bash
+cd backend
+npx tsx src/scripts/test-workshop-report-generator.ts
 ```
 
 ## Key Backend Files
@@ -26,7 +45,9 @@ Department WhatsApp Group
 | Gemini agent | `backend/src/ai/agents/ai-event-report.agent.ts` |
 | Pipeline | `backend/src/ai/services/ai-event-report-pipeline.service.ts` |
 | Prompts | `backend/src/ai/templates/ai-event-report/` |
-| PDF/DOCX export | `backend/src/services/ai-event-report-export.service.ts` |
+| Workshop template generator | `backend/src/report-generation/workshop/` |
+| Generic PDF/DOCX export (IV/other) | `backend/src/services/ai-event-report-export.service.ts` |
+| Workshop PDF/DOCX (template layout) | `backend/src/report-generation/workshop/services/workshop-report-generator.service.ts` |
 | Regenerate API | `POST /api/v1/pending/:id/regenerate` |
 | Workflow routing | `backend/src/services/pendingReviewWorkflow.service.ts` |
 

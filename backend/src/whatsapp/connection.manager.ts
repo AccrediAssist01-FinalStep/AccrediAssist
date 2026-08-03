@@ -1,7 +1,10 @@
 import { logger } from '../utils/logger';
+import { env } from '../config/env';
 import { whatsappService } from './whatsapp.service';
 import { reconnectService } from './reconnect.service';
 import { WhatsAppConnectionStatus, WhatsAppStatusResponse, WhatsAppQrResponse } from './types';
+
+const showQrInTerminal = (): boolean => env.NODE_ENV === 'development';
 
 export class WhatsAppConnectionManager {
   private started = false;
@@ -31,7 +34,7 @@ export class WhatsAppConnectionManager {
 
     if (!whatsappService.isConnected()) {
       logger.info('WhatsApp connection manager starting connection');
-      void whatsappService.startConnection({ displayQrInTerminal: false });
+      void whatsappService.startConnection({ displayQrInTerminal: showQrInTerminal() });
     } else {
       await whatsappService.ensureMessageListenerActive();
     }
@@ -123,7 +126,7 @@ export class WhatsAppConnectionManager {
     }
 
     await whatsappService.connect({
-      displayQrInTerminal: false,
+      displayQrInTerminal: showQrInTerminal(),
       connectionTimeoutMs: 60_000,
     });
   }

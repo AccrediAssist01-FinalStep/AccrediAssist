@@ -6,6 +6,7 @@ import { logger } from './utils/logger';
 import { whatsappConnectionManager } from './whatsapp/connection.manager';
 import { sessionService } from './whatsapp/session.service';
 import { whatsappService } from './whatsapp/whatsapp.service';
+import { eventCorrelationService } from './services/event-correlation.service';
 
 let server: ReturnType<typeof app.listen> | undefined;
 
@@ -29,15 +30,23 @@ const startWhatsAppIfConfigured = async (): Promise<void> => {
   try {
     const hasStoredSession = await sessionService.hasStoredSession();
     if (!hasStoredSession) {
+      logger.warn(
+        'WhatsApp session not found. Run "npm run whatsapp:connect" (with backend stopped), scan QR, then restart backend.',
+      );
       return;
     }
 
     await whatsappConnectionManager.start();
     logger.info('WhatsApp auto-connected using saved session');
 
+    // Resume flush timers for WhatsApp sessions interrupted by server restart.
+    void eventCorrelationService.recoverInterruptedSessions();
+
+    // Start listener immediately and again after socket settles.
+    await whatsappService.ensureMessageListenerActive();
     setTimeout(() => {
       void whatsappService.ensureMessageListenerActive();
-    }, 8000);
+    }, 3000);
   } catch (error) {
     logger.warn('WhatsApp auto-connect skipped or failed', { error });
   }

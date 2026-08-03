@@ -178,6 +178,17 @@ const getCertificateUrl = (data: Record<string, unknown>): string | undefined =>
   undefined;
 
 const getPhotoUrls = (data: Record<string, unknown>): string[] => {
+  const fromMediaArray = Array.isArray(data.media)
+    ? (data.media as Array<{ url?: string; type?: string }>)
+        .filter((item) => item.type === 'image' || !item.type)
+        .map((item) => sanitizeHttpUrl(item.url))
+        .filter((url): url is string => Boolean(url))
+    : [];
+
+  const fromPhotoUrls = (Array.isArray(data.photoUrls) ? data.photoUrls : [])
+    .map(sanitizeHttpUrl)
+    .filter((url): url is string => Boolean(url));
+
   const certificates = (toStringArray(data.certificates) ?? [])
     .map(sanitizeHttpUrl)
     .filter((url): url is string => Boolean(url));
@@ -187,6 +198,8 @@ const getPhotoUrls = (data: Record<string, unknown>): string[] => {
   const mediaUrl = getMediaUrl(data);
   const pdfUrl = sanitizeHttpUrl(data.originalPdfUrl);
   const urls = [
+    ...fromMediaArray,
+    ...fromPhotoUrls,
     ...certificates,
     ...mediaReferences,
     ...(mediaUrl ? [mediaUrl] : []),
@@ -401,6 +414,10 @@ export const mapPendingRecordToCompletedEventReport = (
     photoUrls,
     generatedReportUrl: documentUrl,
     docxReportUrl: sanitizeHttpUrl(data.docxReportUrl) ?? undefined,
+    ...(data.workshopReportStructured && typeof data.workshopReportStructured === 'object'
+      ? { workshopReportStructured: data.workshopReportStructured }
+      : {}),
+    ...(Array.isArray(data.media) ? { media: data.media } : {}),
   };
 };
 

@@ -24,6 +24,7 @@ import { BadRequestError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { notificationService } from './notification.service';
 import { aiEventReportExportService } from './ai-event-report-export.service';
+import { workshopReportGeneratorService } from '../report-generation/workshop/services/workshop-report-generator.service';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -58,7 +59,10 @@ export class PendingRecordApprovalService {
       targetModule === 'CompletedEventReport' &&
       existing.extractedData?.sourceType === 'ai-event-report'
     ) {
-      const exports = await aiEventReportExportService.generateFromPendingRecord(existing);
+      const exports =
+        existing.category === 'Workshop'
+          ? await workshopReportGeneratorService.generateFromPendingRecord(existing)
+          : await aiEventReportExportService.generateFromPendingRecord(existing);
       payload = {
         ...payload,
         generatedReportUrl: exports.pdfUrl,

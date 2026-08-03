@@ -1,4 +1,10 @@
 import { AiEventReportResult } from '../../types/eventReportSession.types';
+import {
+  buildWorkshopReportFromGemini,
+  composeWorkshopPreviewText,
+} from '../../report-generation/workshop/utils/workshop-report-normalizer.util';
+import { WorkshopReportStructuredContent } from '../../report-generation/workshop/workshop-report.types';
+import { normalizeConfidenceScore } from './confidence-score.util';
 
 const toStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -36,14 +42,37 @@ const normalizeObservations = (
     .filter((item): item is { reference: string; observation: string } => item !== null);
 };
 
+const isWorkshopReportType = (reportType: string): boolean => {
+  const normalized = reportType.toLowerCase();
+  return (
+    normalized.includes('workshop') ||
+    normalized.includes('training') ||
+    normalized.includes('fdp')
+  );
+};
+
 export const normalizeAiEventReportResult = (payload: unknown): AiEventReportResult => {
   const record =
     payload && typeof payload === 'object' ? (payload as Record<string, unknown>) : {};
 
-  const confidence = toNullableNumber(record.confidenceScore);
+  const confidence = normalizeConfidenceScore(record.confidenceScore);
+  const reportType = toNullableString(record.reportType) ?? 'Department Event';
+
+  let workshopReportStructured: WorkshopReportStructuredContent | undefined;
+  if (isWorkshopReportType(reportType) || record.workshopReport) {
+    workshopReportStructured = buildWorkshopReportFromGemini(record);
+  }
+
+  let aiGeneratedReport = toNullableString(record.aiGeneratedReport) ?? '';
+  if (workshopReportStructured) {
+    const structuredPreview = composeWorkshopPreviewText(workshopReportStructured);
+    if (structuredPreview.trim()) {
+      aiGeneratedReport = structuredPreview;
+    }
+  }
 
   return {
-    reportType: toNullableString(record.reportType) ?? 'Department Event',
+    reportType,
     title: toNullableString(record.title),
     date: toNullableString(record.date),
     time: toNullableString(record.time),
@@ -64,12 +93,13 @@ export const normalizeAiEventReportResult = (payload: unknown): AiEventReportRes
     summary: toNullableString(record.summary),
     keywords: toStringArray(record.keywords),
     missingFields: toStringArray(record.missingFields),
-    confidenceScore: confidence === null ? 0 : Math.max(0, Math.min(100, confidence)),
-    aiGeneratedReport: toNullableString(record.aiGeneratedReport) ?? '',
+    confidenceScore: confidence,
+    aiGeneratedReport,
     validationNotes:
       toNullableString(record.validationNotes) ??
       'Report generated strictly from supplied WhatsApp evidence.',
     imageObservations: normalizeObservations(record.imageObservations),
     pdfObservations: normalizeObservations(record.pdfObservations),
+    workshopReportStructured,
   };
 };
