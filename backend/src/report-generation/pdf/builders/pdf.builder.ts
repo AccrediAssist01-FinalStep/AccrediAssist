@@ -12,6 +12,7 @@ import {
   PDF_LAYOUT,
   formatReportDate,
   getContentWidth,
+  getLandscapeContentWidth,
   getPdfInstitutionConfig,
 } from '../config/pdf.config';
 import {
@@ -63,6 +64,12 @@ const writeBullet = (doc: PdfDoc, state: PdfLayoutState, text: string): void => 
 const recordToc = (toc: TocEntry[], title: string, doc: PdfDoc): void => {
   const page = doc.bufferedPageRange().count;
   toc.push({ title, page: page + 1 });
+};
+
+const parseMonthSortKey = (monthLabel: string): number => {
+  if (monthLabel === 'Undated') return Number.MAX_SAFE_INTEGER;
+  const parsed = new Date(`1 ${monthLabel}`);
+  return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
 };
 
 export class PdfBuilder {
@@ -166,10 +173,45 @@ export class PdfBuilder {
       writeBody(doc, state, 'No statistical data was available for this report scope.');
     }
 
-    // 7. Tables
+    // 7. Date-wise Activity Register (Student Activities)
+    const dateWiseRegister = input.collectedData?.dateWiseRegister;
+    if (dateWiseRegister && dateWiseRegister.rows.length > 0) {
+      sectionsIncluded.push('date-register');
+      recordToc(tocEntries, 'Date-wise Activity Register', doc);
+      doc.addPage({ size: 'A4', layout: 'landscape' });
+      state.pageNumber += 1;
+      state.y = PDF_LAYOUT.margin + PDF_LAYOUT.headerHeight;
+      writeHeading(doc, state, 'Date-wise Activity Register', 14);
+      writeBody(
+        doc,
+        state,
+        `Consolidated tabular register covering Sports, Cultural, Technical, Research, Internships, Placements, Certifications, Workshops, Seminars, Industrial Visits, Startup & Innovation, and NSS/NCC — ${dateWiseRegister.totalCount} records sorted date-wise.`,
+      );
+
+      const columnLabels = dateWiseRegister.columns.map((column) => column.label);
+      const columnKeys = dateWiseRegister.columns.map((column) => column.key);
+      const landscapeWidth = getLandscapeContentWidth();
+      const sortedMonths = Object.entries(dateWiseRegister.byMonth).sort(
+        ([left], [right]) => parseMonthSortKey(left) - parseMonthSortKey(right),
+      );
+
+      for (const [monthLabel, monthRows] of sortedMonths) {
+        writeSubheading(doc, state, monthLabel);
+        tableRenderer.renderRegisterTable(
+          doc,
+          state,
+          columnLabels,
+          columnKeys,
+          monthRows,
+          landscapeWidth,
+        );
+      }
+    }
+
+    // 8. Submodule Tables
     sectionsIncluded.push('tables');
-    recordToc(tocEntries, 'Detailed Tables', doc);
-    writeHeading(doc, state, 'Detailed Tables');
+    recordToc(tocEntries, 'Submodule-wise Tables', doc);
+    writeHeading(doc, state, 'Submodule-wise Tables');
     const sections = input.collectedData?.sections ?? [];
     if (sections.length === 0) {
       writeBody(doc, state, 'No detailed records were available for this report scope.');

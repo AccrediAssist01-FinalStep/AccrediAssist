@@ -1,4 +1,5 @@
 import { EventMediaItem } from '../../types/eventReportSession.types';
+import type { EventReportKind } from './utils/event-report-labels.util';
 
 export interface WorkshopEventDetails {
   title: string | null;
@@ -26,6 +27,7 @@ export interface WorkshopImagePlacement {
 }
 
 export interface WorkshopReportStructuredContent {
+  reportKind?: EventReportKind;
   departmentName: string | null;
   reportTitle: string | null;
   eventDetails: WorkshopEventDetails;
@@ -54,6 +56,7 @@ export interface WorkshopReportGeneratorInput {
   defaultDepartment: string;
   coordinator?: string;
   generatedAt: Date;
+  reportKind: EventReportKind;
 }
 
 export interface WorkshopReportExportResult {

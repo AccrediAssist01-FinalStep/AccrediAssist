@@ -143,12 +143,51 @@ export class DocumentBuilder {
     );
     children.push(...chartInserter.insertCharts(input.charts));
 
-    // 7. Detailed Tables
+    // 7. Date-wise Activity Register
+    const dateWiseRegister = input.collectedData?.dateWiseRegister;
+    if (dateWiseRegister && dateWiseRegister.rows.length > 0) {
+      sectionsIncluded.push('date-register');
+      children.push(
+        new Paragraph({ children: [new PageBreak()] }),
+        new Paragraph({
+          heading: HeadingLevel.HEADING_1,
+          children: [
+            new TextRun({
+              text: 'Date-wise Activity Register',
+              bold: true,
+              font: DOCX_TYPOGRAPHY.fontFamily,
+              size: DOCX_TYPOGRAPHY.heading1Size,
+            }),
+          ],
+        }),
+        buildBodyParagraph(
+          `Consolidated tabular register covering all student activity sub-modules — ${dateWiseRegister.totalCount} records sorted chronologically and grouped by month.`,
+        ),
+      );
+
+      const columnLabels = dateWiseRegister.columns.map((column) => column.label);
+      const columnKeys = dateWiseRegister.columns.map((column) => column.key);
+      const sortedMonths = Object.entries(dateWiseRegister.byMonth).sort(([left], [right]) => {
+        const parseMonth = (label: string): number => {
+          if (label === 'Undated') return Number.MAX_SAFE_INTEGER;
+          const parsed = new Date(`1 ${label}`);
+          return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+        };
+        return parseMonth(left) - parseMonth(right);
+      });
+
+      for (const [monthLabel, monthRows] of sortedMonths) {
+        children.push(buildSectionHeading(monthLabel, 2));
+        children.push(tableBuilder.buildRegisterTable(columnLabels, columnKeys, monthRows));
+      }
+    }
+
+    // 8. Submodule-wise Tables
     sectionsIncluded.push('detailed-tables');
     children.push(
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: 'Detailed Tables', bold: true, font: DOCX_TYPOGRAPHY.fontFamily, size: DOCX_TYPOGRAPHY.heading1Size })],
+        children: [new TextRun({ text: 'Submodule-wise Tables', bold: true, font: DOCX_TYPOGRAPHY.fontFamily, size: DOCX_TYPOGRAPHY.heading1Size })],
       }),
     );
 

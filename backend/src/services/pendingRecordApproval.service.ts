@@ -59,10 +59,12 @@ export class PendingRecordApprovalService {
       targetModule === 'CompletedEventReport' &&
       existing.extractedData?.sourceType === 'ai-event-report'
     ) {
-      const exports =
-        existing.category === 'Workshop'
-          ? await workshopReportGeneratorService.generateFromPendingRecord(existing)
-          : await aiEventReportExportService.generateFromPendingRecord(existing);
+      const usesTemplateGenerator =
+        existing.category === 'Workshop' || existing.category === 'Industrial Visit';
+
+      const exports = usesTemplateGenerator
+        ? await workshopReportGeneratorService.generateFromPendingRecord(existing)
+        : await aiEventReportExportService.generateFromPendingRecord(existing);
       payload = {
         ...payload,
         generatedReportUrl: exports.pdfUrl,

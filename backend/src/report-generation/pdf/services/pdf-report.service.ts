@@ -13,20 +13,23 @@ import { WORKSHOP_REPORT_SECTION_ORDER } from '../../workshop/workshop-report-te
 const sanitizeFileName = (value: string): string =>
   value.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').slice(0, 120);
 
+const usesTemplateEventReport = (reportType: string): boolean =>
+  reportType === 'AI Generated Workshop' || reportType === 'AI Generated Industrial Visit';
+
 export class PdfReportService {
   async generateFromContext(context: ReportPipelineContext): Promise<PdfGenerationResult> {
-    if (context.reportType === 'AI Generated Workshop') {
-      const workshop = await workshopReportGeneratorService.generateFromPipelineContext(
+    if (usesTemplateEventReport(context.reportType)) {
+      const eventReport = await workshopReportGeneratorService.generateFromPipelineContext(
         context,
         'pdf',
       );
 
       return {
-        buffer: workshop.pdfBuffer ?? Buffer.alloc(0),
-        fileName: workshop.pdfFileName,
-        filePath: workshop.pdfFilePath ?? '',
-        downloadUrl: workshop.pdfUrl,
-        fileSizeBytes: workshop.pdfBuffer?.length ?? 0,
+        buffer: eventReport.pdfBuffer ?? Buffer.alloc(0),
+        fileName: eventReport.pdfFileName,
+        filePath: eventReport.pdfFilePath ?? '',
+        downloadUrl: eventReport.pdfUrl,
+        fileSizeBytes: eventReport.pdfBuffer?.length ?? 0,
         sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
         pageCount: undefined,
         generatedAt: new Date(),

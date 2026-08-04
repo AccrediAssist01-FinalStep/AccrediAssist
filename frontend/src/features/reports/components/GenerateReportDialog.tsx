@@ -115,10 +115,22 @@ export function GenerateReportDialog({
           <DialogTitle>Generate {template?.title ?? 'Report'}</DialogTitle>
           <DialogDescription>
             Configure filters and export format. AI summary, charts, and document generation start immediately.
+            {template?.backendReportType === 'Student Activities' && (
+              <span className="mt-2 block text-xs">
+                Includes a date-wise tabular register of all sub-modules (Sports, Cultural, Technical, Placements,
+                Workshops, etc.). Use Start/End Date or Academic Year to filter the date range.
+              </span>
+            )}
             {template?.backendReportType === 'AI Generated Workshop' && (
               <span className="mt-2 block text-xs">
                 Tip: Leave Academic Year blank unless you need a specific range. Recent WhatsApp workshops may fall
-                outside 2025-2026.
+                outside 2025-2026. All photos are placed at the end of the report.
+              </span>
+            )}
+            {template?.backendReportType === 'AI Generated Industrial Visit' && (
+              <span className="mt-2 block text-xs">
+                Tip: Leave Academic Year blank unless you need a specific range. Recent industrial visits may fall
+                outside 2025-2026. Photos appear at the end of the report.
               </span>
             )}
           </DialogDescription>

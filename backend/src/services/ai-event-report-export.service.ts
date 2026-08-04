@@ -69,7 +69,10 @@ const splitReportSections = (report: string): Array<{ heading: string; body: str
 
 export class AiEventReportExportService {
   async generateFromPendingRecord(record: IPendingRecord): Promise<ExportUrls> {
-    if (record.category === 'Workshop' && record.extractedData?.sourceType === 'ai-event-report') {
+    if (
+      (record.category === 'Workshop' || record.category === 'Industrial Visit') &&
+      record.extractedData?.sourceType === 'ai-event-report'
+    ) {
       return workshopReportGeneratorService.generateFromPendingRecord(record);
     }
 

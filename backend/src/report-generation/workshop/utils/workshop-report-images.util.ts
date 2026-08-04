@@ -2,8 +2,6 @@ import { ensureCloudinaryConfigured, isCloudinaryConfigured } from '../../../con
 import { EventMediaItem } from '../../../types/eventReportSession.types';
 import {
   ResolvedWorkshopImage,
-  WorkshopImagePlacement,
-  WorkshopImageSection,
   WorkshopReportGeneratorInput,
 } from '../workshop-report.types';
 
@@ -15,15 +13,6 @@ const fetchBytes = async (url: string): Promise<Buffer | null> => {
   } catch {
     return null;
   }
-};
-
-const inferSectionFromCaption = (caption: string): WorkshopImageSection => {
-  const text = caption.toLowerCase();
-  if (/banner|poster|invitation|brochure/.test(text)) return 'introduction';
-  if (/speaker|resource person|guest|session|stage/.test(text)) return 'speakerDetails';
-  if (/student|audience|participation|attendance/.test(text)) return 'studentParticipation';
-  if (/group photo|group photograph|team/.test(text)) return 'conclusion';
-  return 'workshopProceedings';
 };
 
 export const resolveWorkshopImages = async (
@@ -41,9 +30,6 @@ export const resolveWorkshopImages = async (
   for (const image of images) {
     const placement = placementMap.get(image.label.toLowerCase());
     const caption = placement?.caption ?? image.caption ?? image.observation ?? image.label;
-    const section =
-      placement?.section ??
-      inferSectionFromCaption(`${caption} ${image.caption ?? ''} ${image.observation ?? ''}`);
 
     let bytes: Buffer | undefined;
     const metadata = image as EventMediaItem & { publicId?: string; contentBase64?: string };
@@ -71,7 +57,7 @@ export const resolveWorkshopImages = async (
       url: image.url,
       caption,
       bytes,
-      section,
+      section: 'evidenceGallery',
     });
   }
 

@@ -55,6 +55,23 @@ export class PendingReviewWorkflowService {
       hasMedia: Boolean(message.media),
     });
 
+    const hasCollectingSession = await eventCorrelationService.hasCollectingSession(
+      message.groupName,
+    );
+
+    if (hasCollectingSession) {
+      const appendedToEventSession = await eventCorrelationService.handleMessage(message);
+      if (appendedToEventSession) {
+        logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {
+          ignored: false,
+          routing: 'ai-event-report-session',
+          appended: true,
+          groupName: message.groupName,
+        });
+        return null;
+      }
+    }
+
     const validationReason = getMessageValidationReason(message);
     if (isNonInstitutionalMessage(message)) {
       logPipelineStage(PIPELINE_STAGES.MESSAGE_VALIDATION, {

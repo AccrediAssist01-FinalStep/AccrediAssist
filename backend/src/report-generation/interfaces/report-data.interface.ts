@@ -13,6 +13,16 @@ export interface CollectedReportData {
   aggregation?: ReportAggregationResult;
   /** Report-specific headline statistics for dashboards and PDF summaries */
   summaryStats?: Record<string, number>;
+  /** Date-sorted tabular register for all student activity sub-modules */
+  dateWiseRegister?: DateWiseActivityRegister;
+}
+
+export interface DateWiseActivityRegister {
+  columns: Array<{ key: string; label: string }>;
+  rows: Record<string, unknown>[];
+  byMonth: Record<string, Record<string, unknown>[]>;
+  totalCount: number;
+  submoduleCounts: Record<string, number>;
 }
 
 export interface ReportDataSection {

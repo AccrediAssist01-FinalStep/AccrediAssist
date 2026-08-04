@@ -58,6 +58,9 @@ export const getPdfInstitutionConfig = (): PdfInstitutionConfig => {
 export const getContentWidth = (): number =>
   PDF_LAYOUT.pageWidth - PDF_LAYOUT.margin * 2;
 
+export const getLandscapeContentWidth = (): number =>
+  PDF_LAYOUT.pageHeight - PDF_LAYOUT.margin * 2;
+
 export const formatReportDate = (value: Date): string =>
   value.toLocaleDateString('en-IN', {
     year: 'numeric',

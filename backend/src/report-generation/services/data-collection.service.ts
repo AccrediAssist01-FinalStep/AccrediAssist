@@ -9,6 +9,7 @@ import {
 } from '../interfaces/report-data.interface';
 import { ReportGenerationFilters } from '../interfaces/report-generation.interface';
 import { mapToAggregationFilters } from '../utils/filter-mapper.util';
+import { buildDateWiseStudentActivityRegister } from '../utils/date-wise-register.util';
 import {
   buildReportSummaryStats,
   buildSectionedReportData,
@@ -49,12 +50,17 @@ export class DataCollectionService {
     const result = await aggregationService.aggregate(aggregationFilters);
     const sections = buildSectionedReportData(reportType, result, filters.keyword);
     const summaryStats = buildReportSummaryStats(reportType, sections, result);
+    const dateWiseRegister =
+      reportType === 'Student Activities'
+        ? buildDateWiseStudentActivityRegister(result, filters.keyword)
+        : undefined;
 
     return {
       reportType,
       filters,
       collectedAt: new Date(result.metadata.generatedAt),
       sections,
+      dateWiseRegister,
       totals: {
         placements: result.statistics.byModule.placements?.totalCount,
         internships: result.statistics.byModule.internships?.totalCount,

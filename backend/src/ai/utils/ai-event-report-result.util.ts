@@ -42,12 +42,15 @@ const normalizeObservations = (
     .filter((item): item is { reference: string; observation: string } => item !== null);
 };
 
-const isWorkshopReportType = (reportType: string): boolean => {
+const isStructuredEventReportType = (reportType: string): boolean => {
   const normalized = reportType.toLowerCase();
   return (
     normalized.includes('workshop') ||
     normalized.includes('training') ||
-    normalized.includes('fdp')
+    normalized.includes('fdp') ||
+    normalized.includes('industrial') ||
+    normalized.includes('field visit') ||
+    normalized.includes('site visit')
   );
 };
 
@@ -59,7 +62,7 @@ export const normalizeAiEventReportResult = (payload: unknown): AiEventReportRes
   const reportType = toNullableString(record.reportType) ?? 'Department Event';
 
   let workshopReportStructured: WorkshopReportStructuredContent | undefined;
-  if (isWorkshopReportType(reportType) || record.workshopReport) {
+  if (isStructuredEventReportType(reportType) || record.workshopReport) {
     workshopReportStructured = buildWorkshopReportFromGemini(record);
   }
 

@@ -20,6 +20,9 @@ export interface GeneratedReportFile {
   sectionsIncluded: string[];
 }
 
+const usesTemplateEventReport = (reportType: GenerationReportType): boolean =>
+  reportType === 'AI Generated Workshop' || reportType === 'AI Generated Industrial Visit';
+
 export class ReportGenerationOrchestrator {
   async generateFile(
     reportType: GenerationReportType,
@@ -29,25 +32,25 @@ export class ReportGenerationOrchestrator {
     let context = createPipelineContext(reportType, filters);
     context = await dataCollectionService.collectForContext(context);
 
-    if (reportType === 'AI Generated Workshop') {
-      const workshopResult = await workshopReportGeneratorService.generateFromPipelineContext(
+    if (usesTemplateEventReport(reportType)) {
+      const eventResult = await workshopReportGeneratorService.generateFromPipelineContext(
         context,
         format === 'docx' ? 'docx' : 'pdf',
       );
 
       if (format === 'docx') {
         return {
-          fileName: workshopResult.docxFileName,
-          filePath: workshopResult.docxFilePath ?? '',
-          fileSizeBytes: workshopResult.docxBuffer?.length ?? 0,
+          fileName: eventResult.docxFileName,
+          filePath: eventResult.docxFilePath ?? '',
+          fileSizeBytes: eventResult.docxBuffer?.length ?? 0,
           sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
         };
       }
 
       return {
-        fileName: workshopResult.pdfFileName,
-        filePath: workshopResult.pdfFilePath ?? '',
-        fileSizeBytes: workshopResult.pdfBuffer?.length ?? 0,
+        fileName: eventResult.pdfFileName,
+        filePath: eventResult.pdfFilePath ?? '',
+        fileSizeBytes: eventResult.pdfBuffer?.length ?? 0,
         sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
       };
     }

@@ -12,12 +12,12 @@ import {
   WORKSHOP_REPORT_TYPOGRAPHY,
 } from '../workshop-report-template.config';
 import { unavailableOr } from '../utils/workshop-report-normalizer.util';
+import { getEventReportLabels } from '../utils/event-report-labels.util';
 import {
   ResolvedWorkshopImage,
   WorkshopReportGeneratorInput,
   WorkshopReportStructuredContent,
 } from '../workshop-report.types';
-import { getImagesForSection } from '../utils/workshop-report-images.util';
 
 const FONT = WORKSHOP_REPORT_TYPOGRAPHY.fontFamily;
 
@@ -108,16 +108,6 @@ const imageParagraphs = (image: ResolvedWorkshopImage): Paragraph[] => {
   return items;
 };
 
-const appendSectionImages = (
-  paragraphs: Paragraph[],
-  images: ResolvedWorkshopImage[],
-  section: ResolvedWorkshopImage['section'],
-): void => {
-  getImagesForSection(images, section).forEach((image) => {
-    imageParagraphs(image).forEach((paragraph) => paragraphs.push(paragraph));
-  });
-};
-
 const buildEventDetails = (structured: WorkshopReportStructuredContent): Paragraph[] => {
   const details = structured.eventDetails;
   return [
@@ -139,12 +129,11 @@ export const buildWorkshopReportDocx = async (
   images: ResolvedWorkshopImage[],
 ): Promise<Buffer> => {
   const structured = input.structured;
+  const labels = getEventReportLabels(input.reportKind);
   const department = unavailableOr(structured.departmentName ?? input.defaultDepartment);
   const title = unavailableOr(
     structured.reportTitle ??
-      (structured.eventDetails.title
-        ? `Workshop Report on ${structured.eventDetails.title}`
-        : null),
+      (structured.eventDetails.title ? labels.buildReportTitle(structured.eventDetails.title) : null),
   );
 
   const children: Paragraph[] = [
@@ -154,8 +143,6 @@ export const buildWorkshopReportDocx = async (
     ...buildEventDetails(structured),
   ];
 
-  appendSectionImages(children, images, 'introduction');
-
   if (structured.introduction.length > 0) {
     children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.introduction));
     structured.introduction.forEach((paragraph) => children.push(bodyParagraph(paragraph)));
@@ -164,17 +151,14 @@ export const buildWorkshopReportDocx = async (
 
   if (structured.objectives.length > 0) {
     children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.objectives));
-    children.push(bodyParagraph('The objectives of the workshop were:'));
+    children.push(bodyParagraph(labels.objectivesLeadIn));
     structured.objectives.forEach((item, index) => children.push(bulletParagraph(item, index + 1)));
     horizontalRule();
   }
 
   if (structured.workshopProceedings.length > 0) {
-    children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.workshopProceedings));
+    children.push(sectionHeading(labels.proceedingsHeading));
     structured.workshopProceedings.forEach((paragraph) => children.push(bodyParagraph(paragraph)));
-    appendSectionImages(children, images, 'workshopProceedings');
-    appendSectionImages(children, images, 'speakerDetails');
-    appendSectionImages(children, images, 'studentParticipation');
     horizontalRule();
   }
 
@@ -192,7 +176,7 @@ export const buildWorkshopReportDocx = async (
 
   if (structured.learningOutcomes.length > 0) {
     children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.learningOutcomes));
-    children.push(bodyParagraph('After attending the workshop, students were able to:'));
+    children.push(bodyParagraph(labels.learningOutcomesLeadIn));
     structured.learningOutcomes.forEach((item, index) => children.push(bulletParagraph(item, index + 1)));
     horizontalRule();
   }
@@ -212,7 +196,6 @@ export const buildWorkshopReportDocx = async (
   if (structured.conclusion.length > 0) {
     children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.conclusion));
     structured.conclusion.forEach((paragraph) => children.push(bodyParagraph(paragraph)));
-    appendSectionImages(children, images, 'conclusion');
     horizontalRule();
   }
 
@@ -225,22 +208,15 @@ export const buildWorkshopReportDocx = async (
   const acknowledgement =
     structured.acknowledgement.length > 0
       ? structured.acknowledgement
-      : [
-          `The ${department} extends its sincere gratitude to the resource person, faculty members, and participating students for their cooperation and active involvement in making the workshop a successful event.`,
-        ];
+      : [labels.defaultAcknowledgement(department)];
 
   children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.acknowledgement));
   acknowledgement.forEach((paragraph) => children.push(bodyParagraph(paragraph)));
   horizontalRule();
 
-  const galleryImages =
-    getImagesForSection(images, 'evidenceGallery').length > 0
-      ? getImagesForSection(images, 'evidenceGallery')
-      : images;
-
-  if (galleryImages.length > 0) {
-    children.push(sectionHeading(WORKSHOP_REPORT_HEADINGS.evidenceGallery));
-    galleryImages.forEach((image) => {
+  if (images.length > 0) {
+    children.push(sectionHeading(labels.photoGalleryHeading));
+    images.forEach((image) => {
       imageParagraphs(image).forEach((paragraph) => children.push(paragraph));
     });
   }

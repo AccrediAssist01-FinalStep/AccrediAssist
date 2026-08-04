@@ -16,6 +16,7 @@ const SECTION_OUTLINES: Record<GenerationReportType, string[]> = {
     'Category-wise Charts',
     'Monthly Activity Charts',
     'Department-wise Charts',
+    'Date-wise Activity Register',
     'Sports',
     'Cultural',
     'Technical',

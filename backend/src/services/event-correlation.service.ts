@@ -13,7 +13,7 @@ import { pendingRecordAutoReviewService } from './pendingRecordAutoReview.servic
 
 const IDLE_FLUSH_MS =
   process.env.NODE_ENV === 'development'
-    ? Number(process.env.EVENT_SESSION_IDLE_FLUSH_MS ?? 45_000)
+    ? Number(process.env.EVENT_SESSION_IDLE_FLUSH_MS ?? 15_000)
     : 3 * 60 * 1000;
 const MAX_SESSION_MS = 90 * 60 * 1000;
 
@@ -29,6 +29,10 @@ export class EventCorrelationService {
   private idleTimers = new Map<string, NodeJS.Timeout>();
   private sessionStartedAt = new Map<string, number>();
   private flushingSessions = new Set<string>();
+
+  async hasCollectingSession(groupName: string): Promise<boolean> {
+    return Boolean(await EventReportSession.exists({ groupName, status: 'collecting' }));
+  }
 
   async handleMessage(message: WhatsAppIncomingMessage): Promise<boolean> {
     const groupName = message.groupName;

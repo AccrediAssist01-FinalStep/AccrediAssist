@@ -43,7 +43,8 @@ const createTemplate = (
 
 export const REPORT_TEMPLATE_DEFINITIONS: Record<GenerationReportType, ReportTemplateDefinition> = {
   'Student Activities': createTemplate('Student Activities', {
-    description: 'Student activity repository with sectioned tables, charts, and executive summary.',
+    description:
+      'Date-wise tabular register of all student sub-modules plus sectioned tables, charts, and executive summary.',
     header: 'Student Activities Report',
   }),
   'Faculty Activities': createTemplate('Faculty Activities', {

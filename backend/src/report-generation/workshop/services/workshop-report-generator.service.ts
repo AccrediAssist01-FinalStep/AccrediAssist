@@ -13,6 +13,12 @@ import {
   getMediaFromCompletedEvent,
 } from '../utils/workshop-report-normalizer.util';
 import {
+  EventReportKind,
+  getEventReportLabels,
+  resolveEventReportKind,
+  resolveEventReportKindFromCategory,
+} from '../utils/event-report-labels.util';
+import {
   WorkshopReportExportResult,
   WorkshopReportGeneratorInput,
   WorkshopReportStructuredContent,
@@ -22,49 +28,65 @@ import { IPendingRecord } from '../../../types/pendingRecord.types';
 import { CompletedEventReport } from '../../../models/CompletedEventReport';
 import { logger } from '../../../utils/logger';
 import { BadRequestError } from '../../../utils/errors';
+import { GenerationReportType } from '../../config/report-types.config';
 
 const sanitizeFileName = (value: string): string =>
   value.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').slice(0, 80);
 
-const isWorkshopEventType = (eventType: unknown): boolean => {
+const resolveKindFromReportType = (reportType: GenerationReportType | string): EventReportKind => {
+  if (reportType === 'AI Generated Industrial Visit') {
+    return 'industrialVisit';
+  }
+  return 'workshop';
+};
+
+const matchesEventKind = (eventType: unknown, kind: EventReportKind): boolean => {
   const normalized = String(eventType ?? '').trim().toLowerCase();
   if (!normalized) {
     return true;
   }
-  return normalized === 'workshop' || normalized.includes('workshop');
+
+  if (kind === 'industrialVisit') {
+    return (
+      normalized.includes('industrial') ||
+      normalized.includes('field visit') ||
+      normalized.includes('site visit')
+    );
+  }
+
+  return normalized.includes('workshop') || normalized.includes('training') || normalized.includes('fdp');
 };
 
-const pickLatestWorkshopEvent = (context: ReportPipelineContext): Record<string, unknown> | null => {
+const pickLatestEvent = (
+  context: ReportPipelineContext,
+  kind: EventReportKind,
+): Record<string, unknown> | null => {
   const records =
     context.collectedData?.aggregation?.records.byModule.completedEventReports ?? [];
 
-  const workshops = records.filter((record) => isWorkshopEventType(record.eventType));
-
-  if (workshops.length === 0) {
+  const filtered = records.filter((record) => matchesEventKind(record.eventType, kind));
+  if (filtered.length === 0) {
     return null;
   }
 
-  return [...workshops].sort((left, right) => {
+  return [...filtered].sort((left, right) => {
     const leftDate = new Date(String(left.date ?? left.createdAt ?? 0)).getTime();
     const rightDate = new Date(String(right.date ?? right.createdAt ?? 0)).getTime();
     return rightDate - leftDate;
   })[0];
 };
 
-const loadLatestApprovedWorkshop = async (): Promise<Record<string, unknown> | null> => {
-  const latest = await CompletedEventReport.findOne({
-    isDeleted: { $ne: true },
-    eventType: { $regex: /workshop/i },
-  })
-    .sort({ date: -1, createdAt: -1 })
-    .lean();
+const loadLatestApprovedEvent = async (kind: EventReportKind): Promise<Record<string, unknown> | null> => {
+  const query =
+    kind === 'industrialVisit'
+      ? { isDeleted: { $ne: true }, eventType: { $regex: /industrial|field visit|site visit/i } }
+      : { isDeleted: { $ne: true }, eventType: { $regex: /workshop|training|fdp/i } };
 
+  const latest = await CompletedEventReport.findOne(query).sort({ date: -1, createdAt: -1 }).lean();
   return latest ? (latest as Record<string, unknown>) : null;
 };
 
-const hydrateWorkshopEvent = async (
-  event: Record<string, unknown>,
-): Promise<Record<string, unknown>> => {
+const hydrateEvent = async (event: Record<string, unknown>): Promise<Record<string, unknown>> => {
   const eventId = event._id;
   if (!eventId) {
     return event;
@@ -79,10 +101,18 @@ export class WorkshopReportGeneratorService {
     const data = record.extractedData ?? {};
 
     if (data.workshopReportStructured && typeof data.workshopReportStructured === 'object') {
-      return data.workshopReportStructured as WorkshopReportStructuredContent;
+      const structured = data.workshopReportStructured as WorkshopReportStructuredContent;
+      if (!structured.reportKind) {
+        structured.reportKind = resolveEventReportKindFromCategory(record.category);
+      }
+      return structured;
     }
 
-    return buildWorkshopReportFromGemini(data as Record<string, unknown>);
+    return buildWorkshopReportFromGemini({
+      ...(data as Record<string, unknown>),
+      reportType: data.reportType ?? record.category,
+      category: record.category,
+    });
   }
 
   getMediaFromPendingRecord(record: IPendingRecord): EventMediaItem[] {
@@ -98,28 +128,31 @@ export class WorkshopReportGeneratorService {
     media: EventMediaItem[],
     coordinator?: string,
     format: 'docx' | 'pdf' | 'both' = 'both',
+    reportKind: EventReportKind = structured.reportKind ?? 'workshop',
   ): Promise<WorkshopReportExportResult> {
     const pdfConfig = getPdfInstitutionConfig();
     const docxConfig = getDocxInstitutionConfig();
     await fs.mkdir(pdfConfig.exportsDirectory, { recursive: true });
     await fs.mkdir(docxConfig.exportsDirectory, { recursive: true });
 
+    const labels = getEventReportLabels(reportKind);
     const input: WorkshopReportGeneratorInput = {
-      structured,
+      structured: { ...structured, reportKind },
       media,
       collegeName: pdfConfig.collegeName,
       defaultDepartment: pdfConfig.departmentName,
       coordinator,
       generatedAt: new Date(),
+      reportKind,
     };
 
     const images = await resolveWorkshopImages(input);
     const baseName = sanitizeFileName(
-      structured.eventDetails.title ?? structured.reportTitle ?? 'workshop-report',
+      structured.eventDetails.title ?? structured.reportTitle ?? labels.filePrefix,
     );
     const timestamp = Date.now();
-    const pdfFileName = `workshop-report-${baseName}-${timestamp}.pdf`;
-    const docxFileName = `workshop-report-${baseName}-${timestamp}.docx`;
+    const pdfFileName = `${labels.filePrefix}-${baseName}-${timestamp}.pdf`;
+    const docxFileName = `${labels.filePrefix}-${baseName}-${timestamp}.docx`;
 
     let pdfBuffer: Buffer | undefined;
     let docxBuffer: Buffer | undefined;
@@ -141,7 +174,8 @@ export class WorkshopReportGeneratorService {
     const docxFilePath =
       docxBuffer !== undefined ? path.join(docxConfig.exportsDirectory, docxFileName) : undefined;
 
-    logger.info('Workshop template report generated', {
+    logger.info('Event template report generated', {
+      reportKind,
       pdfFileName: pdfBuffer ? pdfFileName : undefined,
       docxFileName: docxBuffer ? docxFileName : undefined,
       imageCount: images.length,
@@ -162,15 +196,18 @@ export class WorkshopReportGeneratorService {
   async generateFromCompletedEvent(
     event: Record<string, unknown>,
     format: 'docx' | 'pdf' | 'both' = 'both',
+    reportKind?: EventReportKind,
   ): Promise<WorkshopReportExportResult> {
     const pdfConfig = getPdfInstitutionConfig();
     const structured = buildWorkshopReportFromCompletedEvent(event, pdfConfig.departmentName);
+    const kind = reportKind ?? structured.reportKind ?? resolveEventReportKind(event.eventType);
     const media = getMediaFromCompletedEvent(event);
     return this.generateStructuredReport(
       structured,
       media,
       typeof event.coordinator === 'string' ? event.coordinator : undefined,
       format,
+      kind,
     );
   }
 
@@ -178,15 +215,17 @@ export class WorkshopReportGeneratorService {
     context: ReportPipelineContext,
     format: 'docx' | 'pdf',
   ): Promise<WorkshopReportExportResult> {
-    let event = pickLatestWorkshopEvent(context);
+    const kind = resolveKindFromReportType(context.reportType);
+    let event = pickLatestEvent(context, kind);
 
     if (event) {
-      event = await hydrateWorkshopEvent(event);
+      event = await hydrateEvent(event);
     } else {
-      event = await loadLatestApprovedWorkshop();
+      event = await loadLatestApprovedEvent(kind);
       if (event) {
-        logger.warn('No workshop matched report filters; using latest approved workshop', {
+        logger.warn('No event matched report filters; using latest approved record', {
           reportType: context.reportType,
+          reportKind: kind,
           filters: context.filters,
           eventTitle: event.eventTitle,
         });
@@ -194,18 +233,20 @@ export class WorkshopReportGeneratorService {
     }
 
     if (!event) {
+      const label = kind === 'industrialVisit' ? 'industrial visit' : 'workshop';
       throw new BadRequestError(
-        'No approved workshop report found. Approve a WhatsApp workshop in Pending Review first, or clear Academic Year / date filters that may exclude recent workshops.',
+        `No approved ${label} report found. Approve a WhatsApp ${label} in Pending Review first, or clear Academic Year / date filters that may exclude recent events.`,
       );
     }
 
-    return this.generateFromCompletedEvent(event, format);
+    return this.generateFromCompletedEvent(event, format, kind);
   }
 
   async generateFromPendingRecord(record: IPendingRecord): Promise<WorkshopReportExportResult> {
     const structured = this.buildStructuredFromPendingRecord(record);
     const media = this.getMediaFromPendingRecord(record);
-    return this.generateStructuredReport(structured, media, record.senderName, 'both');
+    const reportKind = structured.reportKind ?? resolveEventReportKindFromCategory(record.category);
+    return this.generateStructuredReport(structured, media, record.senderName, 'both', reportKind);
   }
 }
 

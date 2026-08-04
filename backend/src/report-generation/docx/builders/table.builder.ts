@@ -86,6 +86,23 @@ export class TableBuilder {
 
     return this.build({ headers, rows });
   }
+
+  buildRegisterTable(
+    columnLabels: string[],
+    columnKeys: string[],
+    records: Record<string, unknown>[],
+  ): Table {
+    const rows = records.map((record) =>
+      columnKeys.map((key) => {
+        const value = record[key];
+        if (value === null || value === undefined) return '';
+        if (value instanceof Date) return value.toISOString().slice(0, 10);
+        return String(value);
+      }),
+    );
+
+    return this.build({ headers: columnLabels, rows });
+  }
 }
 
 export const tableBuilder = new TableBuilder();

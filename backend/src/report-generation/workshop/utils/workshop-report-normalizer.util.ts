@@ -8,6 +8,11 @@ import {
   WorkshopReportStructuredContent,
 } from '../workshop-report.types';
 import { EventMediaItem } from '../../../types/eventReportSession.types';
+import {
+  EventReportKind,
+  getEventReportLabels,
+  resolveEventReportKind,
+} from './event-report-labels.util';
 
 const toStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -80,26 +85,30 @@ const normalizeImagePlacements = (value: unknown): WorkshopImagePlacement[] => {
       if (!item || typeof item !== 'object') return null;
       const record = item as Record<string, unknown>;
       const imageReference = toNullableString(record.imageReference ?? record.reference);
-      const section = toNullableString(record.section) as WorkshopImagePlacement['section'] | null;
       const caption = toNullableString(record.caption ?? record.observation);
-      if (!imageReference || !section) return null;
+      if (!imageReference) return null;
       return {
         imageReference,
-        section,
+        section: 'evidenceGallery' as const,
         caption: caption ?? imageReference,
       };
     })
     .filter((item): item is WorkshopImagePlacement => item !== null);
 };
 
-const buildFallbackProceedings = (record: Record<string, unknown>): string[] => {
+const buildFallbackProceedings = (
+  record: Record<string, unknown>,
+  kind: EventReportKind,
+): string[] => {
   const paragraphs: string[] = [];
   const speaker = toNullableString(record.speaker);
   const organization = toNullableString(record.organization);
 
   if (speaker) {
     paragraphs.push(
-      `The workshop featured ${speaker}${organization ? ` from ${organization}` : ''} as the resource person.`,
+      kind === 'industrialVisit'
+        ? `The visit was coordinated with ${speaker}${organization ? ` at ${organization}` : ''}.`
+        : `The workshop featured ${speaker}${organization ? ` from ${organization}` : ''} as the resource person.`,
     );
   }
 
@@ -110,6 +119,10 @@ const buildFallbackProceedings = (record: Record<string, unknown>): string[] => 
 export const buildWorkshopReportFromGemini = (
   payload: Record<string, unknown>,
 ): WorkshopReportStructuredContent => {
+  const reportKind = resolveEventReportKind(
+    payload.reportType ?? payload.eventType ?? payload.category,
+  );
+  const labels = getEventReportLabels(reportKind);
   const workshopReport =
     payload.workshopReport && typeof payload.workshopReport === 'object'
       ? (payload.workshopReport as Record<string, unknown>)
@@ -127,7 +140,7 @@ export const buildWorkshopReportFromGemini = (
   const workshopProceedings =
     toParagraphs(workshopReport.workshopProceedings).length > 0
       ? toParagraphs(workshopReport.workshopProceedings)
-      : buildFallbackProceedings({ ...payload, ...workshopReport });
+      : buildFallbackProceedings({ ...payload, ...workshopReport }, reportKind);
 
   const speakerDetails = toParagraphs(workshopReport.speakerDetails);
   const scheduleSummary = toStringArray(workshopReport.scheduleSummary);
@@ -151,10 +164,11 @@ export const buildWorkshopReportFromGemini = (
   const imagePlacements = normalizeImagePlacements(workshopReport.imagePlacements);
 
   return {
+    reportKind,
     departmentName: department,
     reportTitle:
       toNullableString(workshopReport.reportTitle) ??
-      (title ? `Workshop Report on ${title.replace(/^workshop on\s+/i, '')}` : null),
+      (title ? labels.buildReportTitle(title) : null),
     eventDetails,
     introduction,
     objectives,
@@ -264,14 +278,21 @@ export const buildWorkshopReportFromCompletedEvent = (
   defaultDepartment?: string,
 ): WorkshopReportStructuredContent => {
   if (event.workshopReportStructured && typeof event.workshopReportStructured === 'object') {
-    return event.workshopReportStructured as WorkshopReportStructuredContent;
+    const structured = event.workshopReportStructured as WorkshopReportStructuredContent;
+    if (!structured.reportKind) {
+      structured.reportKind = resolveEventReportKind(event.eventType ?? event.eventTitle);
+    }
+    return structured;
   }
+
+  const reportKind = resolveEventReportKind(event.eventType ?? event.eventTitle);
+  const labels = getEventReportLabels(reportKind);
 
   const description = toNullableString(event.description) ?? toNullableString(event.summary) ?? '';
   const parsedSections = description ? parsePreviewSections(description) : {};
 
   return buildWorkshopReportFromGemini({
-    reportType: 'Workshop',
+    reportType: reportKind === 'industrialVisit' ? 'Industrial Visit' : 'Workshop',
     title: toNullableString(event.eventTitle),
     department: defaultDepartment,
     date: formatEventDate(event.date),
@@ -288,7 +309,7 @@ export const buildWorkshopReportFromCompletedEvent = (
     workshopReport: {
       departmentName: defaultDepartment,
       reportTitle: toNullableString(event.eventTitle)
-        ? `Workshop Report on ${String(event.eventTitle).replace(/^workshop on\s+/i, '')}`
+        ? labels.buildReportTitle(String(event.eventTitle))
         : null,
       introduction: parsedSections.introduction,
       objectives: parsedSections.objectives,

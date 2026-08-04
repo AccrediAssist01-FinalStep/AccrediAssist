@@ -100,6 +100,78 @@ export class TableRenderer {
 
     this.render(doc, state, headers, rows);
   }
+
+  renderRegisterTable(
+    doc: PdfDoc,
+    state: PdfLayoutState,
+    columnLabels: string[],
+    columnKeys: string[],
+    records: Record<string, unknown>[],
+    contentWidth: number,
+  ): void {
+    if (columnLabels.length === 0) return;
+
+    const columnWidth = contentWidth / columnLabels.length;
+    const rowHeight = 20;
+    const headerHeight = 24;
+
+    const drawHeader = (): void => {
+      headerFooterService.ensureSpace(doc, state, headerHeight + rowHeight);
+
+      columnLabels.forEach((header, index) => {
+        const x = PDF_LAYOUT.margin + index * columnWidth;
+        doc.rect(x, state.y, columnWidth, headerHeight).fill(PDF_COLORS.headerBg);
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(7)
+          .fillColor(PDF_COLORS.headerText)
+          .text(header, x + 3, state.y + 6, {
+            width: columnWidth - 6,
+            lineBreak: false,
+            ellipsis: true,
+          });
+      });
+
+      state.y += headerHeight;
+    };
+
+    drawHeader();
+
+    records.forEach((record, rowIndex) => {
+      headerFooterService.ensureSpace(doc, state, rowHeight);
+
+      if (rowIndex > 0 && state.y === PDF_LAYOUT.margin + PDF_LAYOUT.headerHeight) {
+        drawHeader();
+      }
+
+      columnKeys.forEach((key, index) => {
+        const x = PDF_LAYOUT.margin + index * columnWidth;
+        const fill = rowIndex % 2 === 0 ? '#F7F9FC' : '#FFFFFF';
+        const value = record[key];
+        const cell =
+          value === null || value === undefined
+            ? ''
+            : value instanceof Date
+              ? value.toISOString().slice(0, 10)
+              : String(value);
+
+        doc.rect(x, state.y, columnWidth, rowHeight).fill(fill);
+        doc
+          .font('Helvetica')
+          .fontSize(6.5)
+          .fillColor('#333333')
+          .text(cell, x + 3, state.y + 5, {
+            width: columnWidth - 6,
+            lineBreak: false,
+            ellipsis: true,
+          });
+      });
+
+      state.y += rowHeight;
+    });
+
+    state.y += 12;
+  }
 }
 
 export const tableRenderer = new TableRenderer();

@@ -13,10 +13,10 @@ Return JSON with top-level fields:
 - aiGeneratedReport (full preview text, 800-1000 words)
 - validationNotes, imageObservations [{reference, observation}], pdfObservations [{reference, observation}]
 
-Also return workshopReport object (required for Workshop/training events):
+Also return workshopReport object (required for Workshop/training/industrial visit/field visit events):
 {
   "departmentName": "...",
-  "reportTitle": "Workshop Report on ...",
+  "reportTitle": "Workshop Report on ... OR Industrial Visit Report on ...",
   "eventDetails": {
     "title": "...",
     "organizedBy": "...",
@@ -42,7 +42,7 @@ Also return workshopReport object (required for Workshop/training events):
   "acknowledgement": ["paragraph thanking speaker, HOD, faculty, students"],
   "aiExecutiveSummary": "150-200 word summary",
   "imagePlacements": [
-    { "imageReference": "Image 1", "section": "introduction|workshopProceedings|speakerDetails|studentParticipation|conclusion|evidenceGallery", "caption": "..." }
+    { "imageReference": "Image 1", "section": "evidenceGallery", "caption": "..." }
   ],
   "missingFields": ["..."]
 }

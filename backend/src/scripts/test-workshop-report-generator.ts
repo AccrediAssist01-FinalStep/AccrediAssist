@@ -95,8 +95,8 @@ const main = async (): Promise<void> => {
   assert('Structured report preserves objectives', structured.objectives.length === 2);
   assert('Image placements normalized', structured.imagePlacements.length === 2);
   assert(
-    'Image placement section assigned',
-    structured.imagePlacements[0]?.section === 'introduction',
+    'Image placements forced to end gallery section',
+    structured.imagePlacements.every((placement) => placement.section === 'evidenceGallery'),
   );
 
   const preview = composeWorkshopPreviewText(structured);
@@ -131,14 +131,33 @@ const main = async (): Promise<void> => {
     collegeName: 'AccrediAssist College of Engineering',
     defaultDepartment: 'Department of Computer Science and Engineering',
     generatedAt: new Date(),
+    reportKind: 'workshop',
   };
 
   const images = input.media.map((item) => ({
     label: item.label,
     url: item.url,
     caption: item.caption ?? item.label,
-    section: item.label === 'Image 1' ? ('introduction' as const) : ('workshopProceedings' as const),
+    section: 'evidenceGallery' as const,
   }));
+
+  const industrialStructured = buildWorkshopReportFromGemini({
+    reportType: 'Industrial Visit',
+    title: 'Infosys Development Center Pune',
+    workshopReport: {
+      reportTitle: 'Industrial Visit Report on Infosys Development Center Pune',
+      introduction: ['Students visited Infosys to observe software delivery practices.'],
+      objectives: ['Understand industry workflows'],
+      workshopProceedings: ['Students toured the development floor and attended a briefing session.'],
+      learningOutcomes: ['Describe software development lifecycle in industry'],
+      imagePlacements: [{ imageReference: 'Image 1', section: 'introduction', caption: 'Group photo' }],
+    },
+  });
+  assert(
+    'Industrial visit structured title',
+    industrialStructured.reportTitle?.includes('Industrial Visit Report') ?? false,
+  );
+  assert('Industrial visit report kind', industrialStructured.reportKind === 'industrialVisit');
 
   const [docxBuffer, pdfBuffer] = await Promise.all([
     buildWorkshopReportDocx(input, images),

@@ -42,7 +42,7 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
     id: 'student-activities',
     title: 'Student Activities Report',
     description:
-      'Complete student activity repository with sports, cultural, technical, placements, internships, and events.',
+      'Date-wise tabular register of all sub-modules (Sports, Cultural, Technical, Placements, etc.) plus sectioned tables, charts, and summary.',
     icon: GraduationCap,
     backendReportType: 'Student Activities',
     accent: 'from-amber-500/20 to-orange-500/5',
@@ -107,10 +107,11 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     id: 'ai-industrial-visit',
     title: 'Industrial Visit Report',
-    description: 'AI-generated industrial visit analytics with participation metrics and summary.',
+    description: 'AI-generated industrial visit analytics with event details, photos, and executive summary.',
     icon: MapPinned,
     backendReportType: 'AI Generated Industrial Visit',
     accent: 'from-indigo-500/20 to-blue-500/5',
+    defaultFilters: { year: new Date().getFullYear() },
   },
 ];
 
@@ -150,6 +151,7 @@ export const SECTION_LABELS: Record<string, string> = {
   charts: 'Charts & Analytics',
   statistics: 'Statistics',
   tables: 'Data Tables',
+  'date-register': 'Date-wise Activity Register',
   images: 'Event Images',
   recommendations: 'Recommendations',
   appendix: 'Appendix',
