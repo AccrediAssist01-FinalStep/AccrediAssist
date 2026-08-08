@@ -15,6 +15,16 @@ import { toComparableFields, toStringArray, toStringValue } from '../utils/dupli
 
 const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const STUDENT_RECORD_CATEGORIES = [
+  'Student Achievement',
+  'Sports',
+  'Cultural',
+  'Certification',
+  'Research',
+] as const;
+
+const ACTIVE_PENDING_STATUSES = ['Pending', 'Needs Review'] as const;
+
 const mapPendingCategory = (category: string): string | null => {
   const mapping: Record<string, string> = {
     Placement: 'Placement',
@@ -77,6 +87,10 @@ export class DuplicateDetectionRepository {
       case 'Internship':
         return this.findInternshipCandidates(extractedData);
       case 'Student Achievement':
+      case 'Sports':
+      case 'Cultural':
+      case 'Certification':
+      case 'Research':
         return this.findStudentAchievementCandidates(extractedData);
       case 'Faculty Achievement':
         return this.findFacultyAchievementCandidates(extractedData);
@@ -179,7 +193,7 @@ export class DuplicateDetectionRepository {
       filters.length > 0
         ? StudentAchievement.find({ $or: filters }).sort({ createdAt: -1 }).limit(25).lean()
         : [],
-      this.findPendingCandidates('Student Achievement', extractedData),
+      this.findPendingCandidates([...STUDENT_RECORD_CATEGORIES], extractedData),
     ]);
 
     return [
@@ -331,21 +345,50 @@ export class DuplicateDetectionRepository {
   }
 
   private async findPendingCandidates(
-    category: string | null,
+    category: string | string[] | null,
     extractedData: Record<string, unknown>,
   ): Promise<DuplicateRecordCandidate[]> {
-    const query: FilterQuery<typeof PendingRecord> = category ? { category } : {};
+    const query: FilterQuery<typeof PendingRecord> = {
+      status: { $in: [...ACTIVE_PENDING_STATUSES] },
+    };
+
+    if (category) {
+      query.category = Array.isArray(category) ? { $in: category } : category;
+    }
+
     const title =
       toStringValue(extractedData.title) ??
       toStringValue(extractedData.publicationTitle) ??
       toStringValue(extractedData.patentTitle) ??
       toStringValue(extractedData.eventName);
+    const studentName = toStringArray(extractedData.studentNames)?.[0] ?? null;
+    const facultyName = toStringArray(extractedData.facultyNames)?.[0] ?? null;
+
+    const orConditions: FilterQuery<unknown>[] = [];
 
     if (title) {
-      query.$or = [
+      orConditions.push(
         { originalMessage: new RegExp(escapeRegex(title), 'i') },
         { 'extractedData.title': new RegExp(escapeRegex(title), 'i') },
-      ];
+      );
+    }
+
+    if (studentName) {
+      orConditions.push(
+        { 'extractedData.studentNames': new RegExp(escapeRegex(studentName), 'i') },
+        { originalMessage: new RegExp(escapeRegex(studentName), 'i') },
+      );
+    }
+
+    if (facultyName) {
+      orConditions.push(
+        { 'extractedData.facultyNames': new RegExp(escapeRegex(facultyName), 'i') },
+        { originalMessage: new RegExp(escapeRegex(facultyName), 'i') },
+      );
+    }
+
+    if (orConditions.length > 0) {
+      query.$or = orConditions;
     }
 
     const pendingRecords = await PendingRecord.find(query)

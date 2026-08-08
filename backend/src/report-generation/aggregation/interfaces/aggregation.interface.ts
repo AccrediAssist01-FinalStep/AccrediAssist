@@ -27,6 +27,8 @@ export interface AggregationFilters {
   keyword?: string;
   /** Limit aggregation to specific modules (defaults to all) */
   modules?: AggregationModuleKey[];
+  /** Override default latest-record cap (used by template reports that need full datasets) */
+  recordLimit?: number;
 }
 
 export interface ResolvedDateRange {

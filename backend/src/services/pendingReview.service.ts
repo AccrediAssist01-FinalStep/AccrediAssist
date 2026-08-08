@@ -22,28 +22,58 @@ export class PendingReviewService {
   constructor(private readonly repository: PendingRecordRepository = pendingRecordRepository) {}
 
   async createPendingRecord(input: CreatePendingRecordInput): Promise<IPendingRecordResponse> {
+    if (input.whatsappMessageId) {
+      const existingByMessageId = await this.repository.findByWhatsAppMessageId(
+        input.whatsappMessageId,
+      );
+      if (existingByMessageId) {
+        logger.info('Returning existing pending record for WhatsApp message id', {
+          pendingRecordId: existingByMessageId._id,
+          whatsappMessageId: input.whatsappMessageId,
+        });
+        return toPendingRecordResponse(existingByMessageId);
+      }
+    }
+
     logger.info('Creating pending review record', {
       category: input.category,
       status: input.status ?? 'Pending',
     });
 
-    const record = await this.repository.create({
-      originalMessage: input.originalMessage,
-      groupName: input.groupName,
-      senderName: input.senderName,
-      category: input.category,
-      extractedData: input.extractedData ?? {},
-      confidenceScore: input.confidenceScore ?? 0,
-      status: input.status ?? 'Pending',
-    });
+    try {
+      const record = await this.repository.create({
+        originalMessage: input.originalMessage,
+        groupName: input.groupName,
+        senderName: input.senderName,
+        whatsappMessageId: input.whatsappMessageId,
+        category: input.category,
+        extractedData: input.extractedData ?? {},
+        confidenceScore: input.confidenceScore ?? 0,
+        status: input.status ?? 'Pending',
+      });
 
-    const response = toPendingRecordResponse(record);
+      const response = toPendingRecordResponse(record);
 
-    await notificationService.safelyNotify(() =>
-      notificationService.notifyFacultyPendingRecordCreated(response),
-    );
+      await notificationService.safelyNotify(() =>
+        notificationService.notifyFacultyPendingRecordCreated(response),
+      );
 
-    return response;
+      return response;
+    } catch (error) {
+      if (
+        input.whatsappMessageId &&
+        error instanceof Error &&
+        'code' in error &&
+        (error as { code?: number }).code === 11000
+      ) {
+        const existing = await this.repository.findByWhatsAppMessageId(input.whatsappMessageId);
+        if (existing) {
+          return toPendingRecordResponse(existing);
+        }
+      }
+
+      throw error;
+    }
   }
 
   async updatePendingRecord(
@@ -77,6 +107,16 @@ export class PendingReviewService {
     }
 
     return toPendingRecordResponse(record);
+  }
+
+  async findActiveDuplicateByMessage(message: string): Promise<IPendingRecordResponse | null> {
+    const record = await this.repository.findActiveByExactMessage(message);
+    return record ? toPendingRecordResponse(record) : null;
+  }
+
+  async findByWhatsAppMessageId(messageId: string): Promise<IPendingRecordResponse | null> {
+    const record = await this.repository.findByWhatsAppMessageId(messageId);
+    return record ? toPendingRecordResponse(record) : null;
   }
 
   async getAllPendingRecords(

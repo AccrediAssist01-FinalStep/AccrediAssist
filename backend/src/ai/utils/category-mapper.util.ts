@@ -1,7 +1,7 @@
 import { EVENT_TYPES, EventType, RECORD_CATEGORIES, RecordCategory } from '../../database/enums';
 import { ClassificationCategory } from '../interfaces/classification.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
-import { enrichExtractionAchievementType, inferAchievementTypeFromText } from './achievement-inference.util';
+import { enrichExtractionAchievementType, inferAchievementTypeFromText, isFacultySponsoredProjectContext } from './achievement-inference.util';
 import { isIndustrialVisitContext } from './event-inference.util';
 
 const DIRECT_CATEGORY_MAP: Record<ClassificationCategory, RecordCategory> = {
@@ -83,6 +83,10 @@ export const mapClassificationToRecordCategory = (
     classificationCategory === 'Student Achievement' ||
     classificationCategory === 'Faculty Achievement'
   ) {
+    if (classificationCategory === 'Faculty Achievement') {
+      return 'Faculty Achievement';
+    }
+
     const resolved = resolveAchievementCategory(extraction);
     if (resolved) {
       return resolved;
@@ -98,6 +102,9 @@ export const mapClassificationToRecordCategory = (
 
   const fallback = resolveAchievementCategory(extraction);
   if (fallback) {
+    if (isFacultySponsoredProjectContext(extraction) && fallback === 'Research') {
+      return 'Faculty Achievement';
+    }
     return fallback;
   }
 

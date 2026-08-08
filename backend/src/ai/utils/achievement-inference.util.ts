@@ -61,7 +61,20 @@ const RESEARCH_KEYWORDS = [
   'dissertation',
 ];
 
-const HACKATHON_KEYWORDS = ['hackathon', 'startup', 'innovation challenge', 'ideathon'];
+const SPONSORED_PROJECT_KEYWORDS = [
+  'sponsored project',
+  'sponsored research',
+  'funded project',
+  'research grant',
+  'funding from',
+  'received funding',
+  'project grant',
+  'received a grant',
+  'sanctioned project',
+];
+
+const hasFacultyNames = (extraction: ExtractionResult): boolean =>
+  Boolean(extraction.facultyNames?.length);
 
 const collectSearchText = (extraction: ExtractionResult): string =>
   [
@@ -70,6 +83,8 @@ const collectSearchText = (extraction: ExtractionResult): string =>
     extraction.categoryHint,
     extraction.eventName,
     extraction.organization,
+    extraction.publicationTitle,
+    extraction.patentTitle,
   ]
     .filter((value): value is string => Boolean(value?.trim()))
     .join(' ')
@@ -77,6 +92,24 @@ const collectSearchText = (extraction: ExtractionResult): string =>
 
 const matchesKeywords = (text: string, keywords: string[]): boolean =>
   keywords.some((keyword) => text.includes(keyword));
+
+export const isFacultySponsoredProjectContext = (
+  extraction: ExtractionResult,
+  originalMessage = '',
+): boolean => {
+  const text = [originalMessage, collectSearchText(extraction)].join(' ').toLowerCase();
+
+  if (!matchesKeywords(text, SPONSORED_PROJECT_KEYWORDS) && !/\bsponsored\b.*\bproject\b/.test(text)) {
+    return false;
+  }
+
+  return (
+    hasFacultyNames(extraction) ||
+    /\b(prof\.|professor|dr\.|faculty member|faculty)\b/.test(text)
+  );
+};
+
+const HACKATHON_KEYWORDS = ['hackathon', 'startup', 'innovation challenge', 'ideathon'];
 
 export const inferAchievementTypeFromText = (
   extraction: ExtractionResult,
@@ -101,6 +134,10 @@ export const inferAchievementTypeFromText = (
 
   if (matchesKeywords(text, HACKATHON_KEYWORDS)) {
     return 'Hackathon';
+  }
+
+  if (matchesKeywords(text, SPONSORED_PROJECT_KEYWORDS) || /\bsponsored\b.*\bproject\b/.test(text)) {
+    return 'Research';
   }
 
   if (matchesKeywords(text, RESEARCH_KEYWORDS)) {

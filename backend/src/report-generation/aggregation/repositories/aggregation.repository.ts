@@ -143,7 +143,11 @@ export class AggregationRepository {
             ? [{ $match: { _id: null } }]
             : this.withCurrentDateMatch(dateMatch, [
                 { $sort: { normalizedDate: -1, createdAt: -1 } },
-                { $limit: config.latestLimit },
+                ...(filters.recordLimit && filters.recordLimit > 0
+                  ? [{ $limit: filters.recordLimit }]
+                  : config.latestLimit > 0
+                    ? [{ $limit: config.latestLimit }]
+                    : []),
                 { $project: { ...config.latestFields } },
               ]),
         },

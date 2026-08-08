@@ -19,6 +19,7 @@ Module mapping examples:
 - Faculty published paper → Publication (Faculty Activities)
 - Faculty patent → Patent (Faculty Activities)
 - Faculty FDP/workshop/seminar/conference/award → Faculty Achievement (Faculty Activities)
+- Faculty sponsored/funded research project or grant → Faculty Achievement (Faculty Activities → Sponsored Projects)
 - Department workshop/seminar/guest lecture/training → Completed Event Report (Department Activities)
 - Industrial visit or industry visit report (including department visit report completion announcements) → Completed Event Report (Department Activities → Industrial Visit Reports)
 

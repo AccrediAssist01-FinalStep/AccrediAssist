@@ -17,14 +17,15 @@ import {
 } from '../types/pendingRecordApproval.types';
 import {
   mapPendingRecordToTarget,
-  resolveApprovalTargetModule,
+  resolveApprovalTargetModuleForRecord,
 } from '../utils/pendingRecordApproval.mapper';
 import { toPendingRecordResponse } from '../utils/pendingRecord.mapper';
-import { BadRequestError, NotFoundError } from '../utils/errors';
+import { BadRequestError, ConflictError, NotFoundError } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { notificationService } from './notification.service';
 import { aiEventReportExportService } from './ai-event-report-export.service';
 import { workshopReportGeneratorService } from '../report-generation/workshop/services/workshop-report-generator.service';
+import { duplicateDetectionAgent } from '../ai/agents/duplicate-detection.agent';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -52,8 +53,10 @@ export class PendingRecordApprovalService {
 
     this.ensureReviewable(existing);
 
-    const targetModule = resolveApprovalTargetModule(existing.category);
+    const targetModule = resolveApprovalTargetModuleForRecord(existing);
     let payload = mapPendingRecordToTarget(existing, targetModule);
+
+    await this.assertNoApprovedDuplicate(existing, targetModule);
 
     if (
       targetModule === 'CompletedEventReport' &&
@@ -138,6 +141,68 @@ export class PendingRecordApprovalService {
       !REVIEWABLE_STATUSES.includes(record.status as (typeof REVIEWABLE_STATUSES)[number])
     ) {
       throw new BadRequestError(`Cannot approve a record with status "${record.status}"`);
+    }
+  }
+
+  private async assertNoApprovedDuplicate(
+    record: IPendingRecord,
+    targetModule: PendingApprovalTargetModule,
+  ): Promise<void> {
+    const guardModules: PendingApprovalTargetModule[] = [
+      'StudentAchievement',
+      'Placement',
+      'Internship',
+    ];
+
+    if (!guardModules.includes(targetModule)) {
+      return;
+    }
+
+    const duplicateCheck = await duplicateDetectionAgent.detect({
+      category: record.category,
+      extractedData: (record.extractedData ?? {}) as Record<string, unknown>,
+    });
+
+    if (!duplicateCheck.result.duplicate || !duplicateCheck.result.matchingRecordId) {
+      return;
+    }
+
+    const matchingId = duplicateCheck.result.matchingRecordId;
+    if (matchingId === record._id.toString()) {
+      return;
+    }
+
+    const existingApproved = await this.findApprovedRecordById(targetModule, matchingId);
+    if (existingApproved) {
+      throw new ConflictError('A similar student record already exists. Reject this duplicate pending record instead.');
+    }
+
+    const matchingPending = await pendingRecordRepository.findById(matchingId);
+    if (
+      matchingPending &&
+      matchingPending._id.toString() !== record._id.toString() &&
+      matchingPending.status === 'Approved' &&
+      matchingPending.approvedRecordId
+    ) {
+      throw new ConflictError(
+        'A similar pending record was already approved. Reject this duplicate pending record instead.',
+      );
+    }
+  }
+
+  private async findApprovedRecordById(
+    targetModule: PendingApprovalTargetModule,
+    id: string,
+  ): Promise<unknown | null> {
+    switch (targetModule) {
+      case 'StudentAchievement':
+        return StudentAchievement.findById(id).lean();
+      case 'Placement':
+        return Placement.findById(id).lean();
+      case 'Internship':
+        return Internship.findById(id).lean();
+      default:
+        return null;
     }
   }
 

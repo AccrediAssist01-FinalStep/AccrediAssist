@@ -58,6 +58,11 @@ const pendingRecordSchema = new Schema<IPendingRecord>(
       trim: true,
       maxlength: [100, 'Sender name cannot exceed 100 characters'],
     },
+    whatsappMessageId: {
+      type: String,
+      trim: true,
+      maxlength: [200, 'WhatsApp message id cannot exceed 200 characters'],
+    },
     category: {
       type: String,
       enum: enumField(RECORD_CATEGORIES, 'category'),
@@ -116,6 +121,10 @@ pendingRecordSchema.index({ status: 1 });
 pendingRecordSchema.index({ category: 1 });
 pendingRecordSchema.index({ createdAt: -1 });
 pendingRecordSchema.index({ confidenceScore: 1 });
+pendingRecordSchema.index(
+  { whatsappMessageId: 1 },
+  { unique: true, sparse: true, name: 'whatsapp_message_id_unique' },
+);
 
 export const PendingRecord = mongoose.model<IPendingRecord>(
   'PendingRecord',

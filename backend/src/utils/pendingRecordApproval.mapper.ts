@@ -10,6 +10,8 @@ import {
 import { IPendingRecord } from '../types/pendingRecord.types';
 import { PendingApprovalTargetModule } from '../types/pendingRecordApproval.types';
 import { toStringArray, toStringValue } from '../ai/utils/duplicate-similarity.util';
+import { isFacultySponsoredProjectContext } from '../ai/utils/achievement-inference.util';
+import { ExtractionResult } from '../ai/interfaces/extraction.interface';
 import { BadRequestError } from './errors';
 import { NEWS_ARTICLE_CATEGORIES, NewsArticleCategory } from '../types/news.types';
 
@@ -210,7 +212,7 @@ const getPhotoUrls = (data: Record<string, unknown>): string[] => {
 
 const resolveDocumentUrl = (data: Record<string, unknown>): string | undefined =>
   getCertificateUrl(data) ??
-  toStringValue(data.generatedReportUrl) ??
+  sanitizeHttpUrl(data.generatedReportUrl) ??
   undefined;
 
 export const resolveApprovalTargetModule = (
@@ -227,14 +229,50 @@ export const resolveApprovalTargetModule = (
   return targetModule;
 };
 
+const toExtractionResult = (data: Record<string, unknown>): ExtractionResult => ({
+  facultyNames: toStringArray(data.facultyNames),
+  studentNames: toStringArray(data.studentNames),
+  title: toStringValue(data.title) ?? undefined,
+  description: toStringValue(data.description) ?? undefined,
+  organization: toStringValue(data.organization) ?? undefined,
+  achievementType: toStringValue(data.achievementType) ?? undefined,
+  categoryHint: toStringValue(data.categoryHint) ?? undefined,
+  eventName: toStringValue(data.eventName) ?? undefined,
+});
+
+export const resolveApprovalTargetModuleForRecord = (
+  record: IPendingRecord,
+): PendingApprovalTargetModule => {
+  const data = getExtractedData(record);
+
+  if (
+    isFacultySponsoredProjectContext(toExtractionResult(data), record.originalMessage) &&
+    (record.category === 'Research' ||
+      record.category === 'Faculty Achievement' ||
+      record.category === 'Student Achievement')
+  ) {
+    return 'FacultyAchievement';
+  }
+
+  return resolveApprovalTargetModule(record.category);
+};
+
 const inferAchievementTypeFromExtractedData = (
   data: Record<string, unknown>,
   category: RecordCategory,
   fallback: AchievementType,
+  originalMessage = '',
 ): AchievementType => {
   const documentType = toStringValue(data.documentType);
   if (documentType === 'Student Certificate' || documentType === 'Faculty Certificate') {
     return 'Certification';
+  }
+
+  if (
+    isFacultySponsoredProjectContext(toExtractionResult(data), originalMessage) ||
+    /\b(sponsored project|funded project|research grant|funding from)\b/i.test(originalMessage)
+  ) {
+    return 'Research';
   }
 
   return normalizeAchievementType(data.achievementType, category, fallback);
@@ -251,7 +289,12 @@ export const mapPendingRecordToStudentAchievement = (
     rollNumber: toStringValue(data.rollNumber) ?? undefined,
     department:
       toStringValue(data.department) ?? toStringValue(getStructuredData(data).department) ?? undefined,
-    achievementType: inferAchievementTypeFromExtractedData(data, record.category, 'Technical'),
+    achievementType: inferAchievementTypeFromExtractedData(
+      data,
+      record.category,
+      'Technical',
+      record.originalMessage,
+    ),
     title: requireValue(getTitle(record), 'title').slice(0, 300),
     description: toStringValue(data.description)?.slice(0, 2000) ?? undefined,
     organization:
@@ -274,7 +317,12 @@ export const mapPendingRecordToFacultyAchievement = (
   return {
     facultyName: requireValue(getFacultyName(data), 'faculty name'),
     designation: toStringValue(data.designation) ?? undefined,
-    achievementType: inferAchievementTypeFromExtractedData(data, record.category, 'Award'),
+    achievementType: inferAchievementTypeFromExtractedData(
+      data,
+      record.category,
+      'Award',
+      record.originalMessage,
+    ),
     title: requireValue(getTitle(record), 'title').slice(0, 300),
     description: toStringValue(data.description)?.slice(0, 2000) ?? undefined,
     organization:
@@ -301,7 +349,7 @@ export const mapPendingRecordToPlacement = (
     role: toStringValue(data.role) ?? undefined,
     package: toStringValue(data.package) ?? undefined,
     joiningDate: parseDate(data.date) ?? parseDate(data.joiningDate),
-    offerLetter: toStringArray(data.certificates)?.[0] ?? undefined,
+    offerLetter: getCertificateUrl(data),
   };
 };
 
@@ -321,7 +369,7 @@ export const mapPendingRecordToInternship = (
     duration: toStringValue(data.duration) ?? undefined,
     startDate: parseDate(data.startDate) ?? parseDate(data.date),
     endDate: parseDate(data.endDate),
-    certificateUrl: toStringArray(data.certificates)?.[0] ?? undefined,
+    certificateUrl: getCertificateUrl(data),
   };
 };
 
@@ -345,7 +393,7 @@ export const mapPendingRecordToPublication = (
     ],
     doi: toStringValue(data.doi) ?? undefined,
     publicationDate: parseDate(data.publicationDate) ?? parseDate(data.date),
-    documentUrl: toStringArray(data.certificates)?.[0] ?? undefined,
+    documentUrl: getCertificateUrl(data),
   };
 };
 
@@ -365,7 +413,7 @@ export const mapPendingRecordToPatent = (record: IPendingRecord): Record<string,
     patentNumber: toStringValue(data.patentNumber) ?? undefined,
     status: normalizePatentStatus(data.patentStatus ?? data.status),
     filingDate: parseDate(data.filingDate) ?? parseDate(data.date),
-    documentUrl: toStringArray(data.certificates)?.[0] ?? undefined,
+    documentUrl: getCertificateUrl(data),
   };
 };
 

@@ -5,6 +5,7 @@ export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordR
   originalMessage: record.originalMessage,
   groupName: record.groupName,
   senderName: record.senderName,
+  whatsappMessageId: record.whatsappMessageId,
   category: record.category,
   extractedData: record.extractedData,
   confidenceScore: record.confidenceScore,

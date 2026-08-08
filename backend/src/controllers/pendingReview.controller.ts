@@ -4,86 +4,9 @@ import { pendingReviewService } from '../services/pendingReview.service';
 import { pendingRecordEditService } from '../services/pendingRecordEdit.service';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { UnauthorizedError } from '../utils/errors';
-import {
-  signCloudinaryDeliveryUrl,
-  signCloudinaryDeliveryUrls,
-} from '../utils/cloudinary-url.util';
+import { signPendingRecordMedia } from '../utils/pending-record-media.util';
 import { PendingRecordListQuery } from '../validations/pendingRecord.validation';
 import { EditPendingRecordBody } from '../validations/pendingRecordEdit.validation';
-import { IPendingRecordResponse } from '../types/pendingRecord.types';
-
-const signPendingRecordMedia = async (
-  record: IPendingRecordResponse,
-): Promise<IPendingRecordResponse> => {
-  const data = { ...(record.extractedData ?? {}) };
-  const metadata =
-    typeof data.mediaMetadata === 'object' && data.mediaMetadata !== null
-      ? { ...(data.mediaMetadata as Record<string, unknown>) }
-      : null;
-
-  if (typeof data.media === 'string') {
-    data.media = (await signCloudinaryDeliveryUrl(data.media)) ?? data.media;
-  }
-
-  if (Array.isArray(data.mediaReferences)) {
-    data.mediaReferences = await signCloudinaryDeliveryUrls(
-      data.mediaReferences.filter((item): item is string => typeof item === 'string'),
-    );
-  }
-
-  if (Array.isArray(data.certificates)) {
-    data.certificates = await signCloudinaryDeliveryUrls(
-      data.certificates.filter((item): item is string => typeof item === 'string'),
-    );
-  }
-
-  if (typeof data.originalPdfUrl === 'string') {
-    data.originalPdfUrl =
-      (await signCloudinaryDeliveryUrl(data.originalPdfUrl)) ?? data.originalPdfUrl;
-  }
-
-  if (metadata && typeof metadata.secureUrl === 'string') {
-    metadata.secureUrl =
-      (await signCloudinaryDeliveryUrl(metadata.secureUrl)) ?? metadata.secureUrl;
-    data.mediaMetadata = metadata;
-  }
-
-  if (Array.isArray(data.media)) {
-    data.media = await Promise.all(
-      data.media.map(async (item) => {
-        if (!item || typeof item !== 'object') return item;
-        const mediaItem = { ...(item as Record<string, unknown>) };
-        if (typeof mediaItem.url === 'string') {
-          mediaItem.url =
-            (await signCloudinaryDeliveryUrl(mediaItem.url)) ?? mediaItem.url;
-        }
-        return mediaItem;
-      }),
-    );
-  }
-
-  if (Array.isArray(data.evidence)) {
-    data.evidence = await Promise.all(
-      data.evidence.map(async (item) => {
-        if (!item || typeof item !== 'object') return item;
-        const evidenceItem = { ...(item as Record<string, unknown>) };
-        if (typeof evidenceItem.url === 'string') {
-          evidenceItem.url =
-            (await signCloudinaryDeliveryUrl(evidenceItem.url)) ?? evidenceItem.url;
-        }
-        return evidenceItem;
-      }),
-    );
-  }
-
-  if (Array.isArray(data.photoUrls)) {
-    data.photoUrls = await signCloudinaryDeliveryUrls(
-      data.photoUrls.filter((item): item is string => typeof item === 'string'),
-    );
-  }
-
-  return { ...record, extractedData: data };
-};
 
 class PendingReviewController extends BaseController {
   list = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -106,7 +29,9 @@ class PendingReviewController extends BaseController {
       },
     });
 
-    this.paginated(res, 'Pending records retrieved successfully', result.items, result.meta);
+    const items = await Promise.all(result.items.map((record) => signPendingRecordMedia(record)));
+
+    this.paginated(res, 'Pending records retrieved successfully', items, result.meta);
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -122,7 +47,11 @@ class PendingReviewController extends BaseController {
     const userId = this.requireUserId(req);
     const body = req.body as EditPendingRecordBody;
     const record = await pendingRecordEditService.editPendingRecord(req.params.id, userId, body);
-    this.success(res, 'Pending record updated successfully', record);
+    this.success(
+      res,
+      'Pending record updated successfully',
+      await signPendingRecordMedia(record),
+    );
   });
 
   downloadAttachment = asyncHandler(async (req: Request, res: Response): Promise<void> => {

@@ -3,10 +3,9 @@ import { pendingRecordRepository } from '../../repositories/pendingRecord.reposi
 import { IEventReportSession } from '../../types/eventReportSession.types';
 import { AiPipelineResult } from '../interfaces/ai-pipeline.interface';
 import { aiEventReportAgent } from '../agents/ai-event-report.agent';
-import { mapReportTypeToCategory } from '../utils/event-routing.util';
+import { inferCategoryFromEventReport } from '../utils/event-routing.util';
 import { buildConversationTimeline, buildMediaItems } from '../utils/session-media.util';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
-import { RecordCategory } from '../../database/enums';
 import { NotFoundError } from '../../utils/errors';
 import { toPendingRecordResponse } from '../../utils/pendingRecord.mapper';
 
@@ -41,16 +40,26 @@ export class AiEventReportPipelineService {
       };
     });
 
-    const category = mapReportTypeToCategory(
-      agentResponse.result.reportType,
-    ) as RecordCategory;
+    const agentResult = agentResponse.result;
 
-    const originalMessage = buildConversationTimeline(session.messages).slice(0, 8000);
+    const category = inferCategoryFromEventReport({
+      reportType: agentResult.reportType,
+      title: agentResult.title,
+      organization: agentResult.organization,
+      summary: agentResult.summary,
+      aiGeneratedReport: agentResult.aiGeneratedReport,
+      keywords: agentResult.keywords,
+    });
+
     const photoUrls = mediaItems.filter((item) => item.type === 'image').map((item) => item.url);
     const pdfUrls = mediaItems.filter((item) => item.type === 'pdf').map((item) => item.url);
 
-    const agentResult = agentResponse.result;
-    const workshopReportStructured = agentResult.workshopReportStructured;
+    const originalMessage = buildConversationTimeline(session.messages).slice(0, 8000);
+
+    const workshopReportStructured =
+      category === 'Workshop' || category === 'Industrial Visit' || category === 'Seminar'
+        ? agentResult.workshopReportStructured
+        : undefined;
 
     const extractedData: Record<string, unknown> = {
       title: agentResult.title,

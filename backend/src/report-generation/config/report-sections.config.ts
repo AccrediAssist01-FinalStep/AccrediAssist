@@ -21,7 +21,7 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
       key: 'technical',
       label: 'Technical',
       module: 'studentAchievements',
-      categoryMatch: ['Technical', 'Hackathon'],
+      categoryMatch: 'Technical',
     },
     {
       key: 'research',
@@ -59,14 +59,13 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
       key: 'startup-innovation',
       label: 'Startup & Innovation',
       module: 'studentAchievements',
-      categoryMatch: 'Award',
-      titlePattern: /startup|innovation|incubat/i,
+      categoryMatch: 'Hackathon',
     },
     {
       key: 'nss-ncc',
       label: 'NSS / NCC',
       module: 'studentAchievements',
-      titlePattern: /nss|ncc|national service|cadet/i,
+      titlePattern: /nss|ncc|national service scheme|national cadet corps|cadet corps/i,
     },
   ],
   'Faculty Activities': [
@@ -76,8 +75,8 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
     {
       key: 'conferences',
       label: 'Conferences',
-      module: 'publications',
-      titlePattern: /conference/i,
+      module: 'facultyAchievements',
+      categoryMatch: 'Research',
     },
     { key: 'publications', label: 'Publications', module: 'publications' },
     { key: 'patents', label: 'Patents', module: 'patents' },
@@ -97,7 +96,7 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
       key: 'sponsored-projects',
       label: 'Sponsored Projects',
       module: 'facultyAchievements',
-      titlePattern: /sponsored|project grant|research project/i,
+      titlePattern: /sponsored|funded|sanctioned|project grant|research project|grant amount|principal investigator/i,
     },
     {
       key: 'certifications',

@@ -49,6 +49,19 @@ export class PendingReviewWorkflowService {
   async processIncomingWhatsAppMessage(
     message: WhatsAppIncomingMessage,
   ): Promise<AiPipelineResult | null> {
+    if (message.whatsappMessageId) {
+      const existingByMessageId = await pendingReviewService.findByWhatsAppMessageId(
+        message.whatsappMessageId,
+      );
+      if (existingByMessageId) {
+        logger.info('Skipping duplicate WhatsApp delivery; pending record already exists', {
+          pendingRecordId: existingByMessageId._id,
+          whatsappMessageId: message.whatsappMessageId,
+        });
+        return null;
+      }
+    }
+
     logPipelineStage(PIPELINE_STAGES.MESSAGE_RECEIVED, {
       groupName: message.groupName,
       sender: message.sender,
@@ -206,6 +219,7 @@ export class PendingReviewWorkflowService {
         originalMessage: fallbackMessage,
         groupName: message.groupName,
         senderName: message.sender,
+        whatsappMessageId: message.whatsappMessageId,
         category: isImage ? 'News' : 'Research',
         extractedData: {
           message: fallbackMessage,

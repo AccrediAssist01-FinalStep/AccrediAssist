@@ -33,6 +33,8 @@ export class MessageListener {
   private upsertHandler: ((event: MessagesUpsertEvent) => void) | null = null;
   private receivedMessages: WhatsAppIncomingMessage[] = [];
   private baileysUtils: BaileysMessageUtils | null = null;
+  private processedMessageKeys = new Set<string>();
+  private inflightMessageKeys = new Map<string, Promise<void>>();
   private onMessage: IncomingMessageHandler = (message) => {
     logger.info('WhatsApp text message received', toStandardMessageJson(message));
   };
@@ -70,6 +72,10 @@ export class MessageListener {
   }
 
   async start(socket: WASocket, utils?: BaileysMessageUtils): Promise<void> {
+    if (this.listening && this.socket === socket) {
+      return;
+    }
+
     this.stop();
     this.socket = socket;
     this.baileysUtils = utils ?? (await this.loadBaileysUtils());
@@ -94,7 +100,19 @@ export class MessageListener {
     this.upsertHandler = null;
     this.baileysUtils = null;
     this.groupNameCache.clear();
+    this.inflightMessageKeys.clear();
     logger.info('WhatsApp message listener stopped');
+  }
+
+  private buildMessageDedupKey(message: WAMessage): string | null {
+    const messageId = message.key.id?.trim();
+    const groupJid = message.key.remoteJid?.trim();
+
+    if (!messageId || !groupJid) {
+      return null;
+    }
+
+    return `${groupJid}:${messageId}`;
   }
 
   private async handleMessagesUpsert(event: MessagesUpsertEvent): Promise<void> {
@@ -115,6 +133,37 @@ export class MessageListener {
   }
 
   private async processMessage(message: WAMessage): Promise<void> {
+    const dedupKey = this.buildMessageDedupKey(message);
+
+    if (dedupKey) {
+      if (this.processedMessageKeys.has(dedupKey)) {
+        logger.debug('Skipping already processed WhatsApp message', { dedupKey });
+        return;
+      }
+
+      const inflight = this.inflightMessageKeys.get(dedupKey);
+      if (inflight) {
+        logger.debug('Skipping in-flight WhatsApp message', { dedupKey });
+        await inflight;
+        return;
+      }
+    }
+
+    const task = this.processMessageOnce(message, dedupKey);
+    if (dedupKey) {
+      this.inflightMessageKeys.set(dedupKey, task);
+    }
+
+    try {
+      await task;
+    } finally {
+      if (dedupKey) {
+        this.inflightMessageKeys.delete(dedupKey);
+      }
+    }
+  }
+
+  private async processMessageOnce(message: WAMessage, dedupKey: string | null): Promise<void> {
     const remoteJid = message.key.remoteJid;
 
     if (!remoteJid || message.key.fromMe) {
@@ -181,10 +230,19 @@ export class MessageListener {
       timestamp: resolveMessageTimestamp(message),
       media: mediaUrl,
       mediaMetadata,
+      whatsappMessageId: dedupKey ?? message.key.id ?? undefined,
+      groupJid: remoteJid,
     });
 
     this.receivedMessages.push(standardMessage);
     await this.onMessage(standardMessage);
+
+    if (dedupKey) {
+      this.processedMessageKeys.add(dedupKey);
+      if (this.processedMessageKeys.size > 5000) {
+        this.processedMessageKeys.clear();
+      }
+    }
   }
 
   private async refreshGroupCache(socket: WASocket): Promise<void> {

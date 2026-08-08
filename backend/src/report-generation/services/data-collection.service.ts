@@ -29,6 +29,12 @@ const resolveEventTypeForReport = (reportType: GenerationReportType): string | u
   return undefined;
 };
 
+const FULL_RECORD_ACTIVITY_REPORT_TYPES: GenerationReportType[] = [
+  'Student Activities',
+  'Faculty Activities',
+  'Department Activities',
+];
+
 export class DataCollectionService {
   async collect(
     reportType: GenerationReportType,
@@ -39,6 +45,7 @@ export class DataCollectionService {
       ...mapToAggregationFilters(filters),
       modules,
       eventType: resolveEventTypeForReport(reportType),
+      ...(FULL_RECORD_ACTIVITY_REPORT_TYPES.includes(reportType) ? { recordLimit: 10_000 } : {}),
     };
 
     logger.info('Collecting report data via aggregation engine', {

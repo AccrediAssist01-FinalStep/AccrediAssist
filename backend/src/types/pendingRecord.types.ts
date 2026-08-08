@@ -26,6 +26,7 @@ export interface IPendingRecord extends IBaseDocument {
   originalMessage: string;
   groupName?: string;
   senderName?: string;
+  whatsappMessageId?: string;
   category: RecordCategory;
   extractedData?: Record<string, unknown>;
   confidenceScore: number;
@@ -42,6 +43,7 @@ export interface CreatePendingRecordInput {
   originalMessage: string;
   groupName?: string;
   senderName?: string;
+  whatsappMessageId?: string;
   category: RecordCategory;
   extractedData?: Record<string, unknown>;
   confidenceScore?: number;
@@ -66,6 +68,7 @@ export interface IPendingRecordResponse {
   originalMessage: string;
   groupName?: string;
   senderName?: string;
+  whatsappMessageId?: string;
   category: RecordCategory;
   extractedData?: Record<string, unknown>;
   confidenceScore: number;

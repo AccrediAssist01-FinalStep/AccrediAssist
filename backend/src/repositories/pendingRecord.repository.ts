@@ -94,6 +94,30 @@ export class PendingRecordRepository extends BaseRepository<IPendingRecord> {
       reviewedBy,
     );
   }
+
+  async findActiveByExactMessage(message: string): Promise<IPendingRecord | null> {
+    const trimmed = message.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    return this.model
+      .findOne({
+        originalMessage: trimmed,
+        status: { $in: ['Pending', 'Needs Review'] },
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findByWhatsAppMessageId(messageId: string): Promise<IPendingRecord | null> {
+    const trimmed = messageId.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    return this.model.findOne({ whatsappMessageId: trimmed }).sort({ createdAt: -1 }).exec();
+  }
 }
 
 export const pendingRecordRepository = new PendingRecordRepository();

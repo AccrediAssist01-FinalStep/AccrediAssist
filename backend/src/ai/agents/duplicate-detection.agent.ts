@@ -14,10 +14,22 @@ import {
   toStringValue,
 } from '../utils/duplicate-similarity.util';
 
+const STUDENT_DUPLICATE_CATEGORIES = new Set([
+  'Student Achievement',
+  'Sports',
+  'Cultural',
+  'Certification',
+  'Research',
+]);
+
 const resolveDuplicateScoringCategory = (
   category: string,
   extractedData: Record<string, unknown>,
 ): string => {
+  if (STUDENT_DUPLICATE_CATEGORIES.has(category)) {
+    return 'Student Achievement';
+  }
+
   if (category === 'Completed Event Report') {
     return toStringValue(extractedData.eventType) ?? 'Workshop';
   }

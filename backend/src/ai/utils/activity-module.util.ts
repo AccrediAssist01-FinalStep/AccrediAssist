@@ -1,6 +1,6 @@
 import { RecordCategory } from '../../database/enums';
 import { ExtractionResult } from '../interfaces/extraction.interface';
-import { enrichExtractionAchievementType } from './achievement-inference.util';
+import { enrichExtractionAchievementType, isFacultySponsoredProjectContext } from './achievement-inference.util';
 
 export type ActivityModule = 'Student Activities' | 'Faculty Activities' | 'Department Activities' | 'News';
 
@@ -48,8 +48,22 @@ const EVENT_SUBCATEGORY: Record<string, string> = {
 export const resolveActivityClassification = (
   recordCategory: RecordCategory,
   extraction: ExtractionResult,
+  originalMessage = '',
 ): ActivityClassification => {
   const enriched = enrichExtractionAchievementType(extraction);
+
+  if (
+    recordCategory === 'Faculty Achievement' &&
+    (isFacultySponsoredProjectContext(enriched, originalMessage) ||
+      enriched.achievementType?.trim() === 'Research')
+  ) {
+    return { module: 'Faculty Activities', subCategory: 'Sponsored Projects' };
+  }
+
+  if (isFacultySponsoredProjectContext(enriched, originalMessage)) {
+    return { module: 'Faculty Activities', subCategory: 'Sponsored Projects' };
+  }
+
   const base = RECORD_CATEGORY_MODULE_MAP[recordCategory];
 
   const achievementType = enriched.achievementType?.trim();

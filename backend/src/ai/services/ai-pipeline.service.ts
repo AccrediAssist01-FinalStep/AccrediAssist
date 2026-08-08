@@ -25,6 +25,10 @@ import {
 } from '../utils/pipeline-status.util';
 import { logPipelineStage, PIPELINE_STAGES } from '../utils/pipeline-stage-logger.util';
 import { logger } from '../../utils/logger';
+import {
+  buildPendingMessageMediaFields,
+  mergePendingMediaReferences,
+} from '../../utils/pending-record-media.util';
 
 const buildPendingExtractedData = (
   message: WhatsAppIncomingMessage,
@@ -34,26 +38,35 @@ const buildPendingExtractedData = (
   activityModule: string,
   activitySubCategory: string,
   pdfData?: Record<string, unknown>,
-): Record<string, unknown> => ({
-  ...extraction,
-  ...pdfData,
-  media: message.media,
-  mediaMetadata: message.mediaMetadata ?? null,
-  detectedCategory,
-  activityModule,
-  activitySubCategory,
-  aiPipeline: {
-    classification: stages.classification.result,
-    validation: stages.validation.result,
-    duplicateDetection: stages.duplicateDetection.result,
-    pdfDocument: pdfData ?? null,
-    models: {
-      extraction: stages.extraction.model,
-      classification: stages.classification.model,
-      validation: stages.validation.model,
+): Record<string, unknown> => {
+  const messageMedia = buildPendingMessageMediaFields(message);
+
+  return {
+    ...extraction,
+    ...pdfData,
+    media: messageMedia.media ?? message.media,
+    photoUrls: messageMedia.photoUrls.length > 0 ? messageMedia.photoUrls : undefined,
+    mediaReferences: mergePendingMediaReferences(
+      extraction.mediaReferences,
+      messageMedia.mediaReferences,
+    ),
+    mediaMetadata: message.mediaMetadata ?? null,
+    detectedCategory,
+    activityModule,
+    activitySubCategory,
+    aiPipeline: {
+      classification: stages.classification.result,
+      validation: stages.validation.result,
+      duplicateDetection: stages.duplicateDetection.result,
+      pdfDocument: pdfData ?? null,
+      models: {
+        extraction: stages.extraction.model,
+        classification: stages.classification.model,
+        validation: stages.validation.model,
+      },
     },
-  },
-});
+  };
+};
 
 export class AiPipelineService {
   constructor(
@@ -141,8 +154,17 @@ export class AiPipelineService {
       originalMessage,
     });
 
+    let recordCategory = mapClassificationToRecordCategory(
+      correctedClassification.category,
+      extractedData,
+    );
+
+    if (pdfResponse && (pdfResponse.result.confidence ?? 0) >= 60) {
+      recordCategory = mapPdfCategoryToRecordCategory(pdfResponse.result);
+    }
+
     const duplicateDetectionResponse = await this.duplicateDetection.detect({
-      category: correctedClassification.category,
+      category: recordCategory,
       extractedData,
     });
 
@@ -158,16 +180,7 @@ export class AiPipelineService {
       confidenceScore,
     });
 
-    let recordCategory = mapClassificationToRecordCategory(
-      correctedClassification.category,
-      extractedData,
-    );
-
-    if (pdfResponse && (pdfResponse.result.confidence ?? 0) >= 60) {
-      recordCategory = mapPdfCategoryToRecordCategory(pdfResponse.result);
-    }
-
-    const activity = resolveActivityClassification(recordCategory, extractedData);
+    const activity = resolveActivityClassification(recordCategory, extractedData, originalMessage);
     const pdfData = pdfResponse
       ? buildPdfPendingExtractedData(
           pdfResponse.result,
@@ -185,10 +198,31 @@ export class AiPipelineService {
       duplicateDetection: duplicateDetectionResponse,
     };
 
+    const existingPending =
+      (message.whatsappMessageId
+        ? await this.pendingReview.findByWhatsAppMessageId(message.whatsappMessageId)
+        : null) ??
+      (await this.pendingReview.findActiveDuplicateByMessage(originalMessage));
+    if (existingPending) {
+      logger.info('Skipping duplicate pending record for repeated WhatsApp message', {
+        pendingRecordId: existingPending._id,
+        whatsappMessageId: message.whatsappMessageId ?? null,
+      });
+
+      return {
+        pendingRecord: existingPending,
+        stages,
+        recordCategory,
+        pendingStatus: existingPending.status,
+        confidenceScore: existingPending.confidenceScore,
+      };
+    }
+
     const pendingRecord = await this.pendingReview.createPendingRecord({
       originalMessage,
       groupName: message.groupName,
       senderName: message.sender,
+      whatsappMessageId: message.whatsappMessageId,
       category: recordCategory,
       extractedData: buildPendingExtractedData(
         message,

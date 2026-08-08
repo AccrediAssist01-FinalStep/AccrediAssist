@@ -9,12 +9,32 @@ import { documentBuilder } from '../builders/document.builder';
 import { imageInserter } from '../builders/image.inserter';
 import { workshopReportGeneratorService } from '../../workshop/services/workshop-report-generator.service';
 import { WORKSHOP_REPORT_SECTION_ORDER } from '../../workshop/workshop-report-template.config';
+import { studentActivityReportGenerator } from '../../student-activity/services/student-activity-report-generator.service';
+import { facultyActivityReportGenerator } from '../../faculty-activity/services/faculty-activity-report.service';
+import { departmentActivityReportGenerator } from '../../department-activity/services/department-activity-report.service';
+import type { TemplateActivityReportGeneratorService } from '../../template-activity-report/services/template-activity-report-generator.service';
+import type { GenerationReportType } from '../../config/report-types.config';
 
 const sanitizeFileName = (value: string): string =>
   value.replace(/[^a-zA-Z0-9-_]+/g, '-').replace(/-+/g, '-').slice(0, 120);
 
 const usesTemplateEventReport = (reportType: string): boolean =>
   reportType === 'AI Generated Workshop' || reportType === 'AI Generated Industrial Visit';
+
+const resolveTemplateActivityGenerator = (
+  reportType: GenerationReportType,
+): TemplateActivityReportGeneratorService | null => {
+  switch (reportType) {
+    case 'Student Activities':
+      return studentActivityReportGenerator;
+    case 'Faculty Activities':
+      return facultyActivityReportGenerator;
+    case 'Department Activities':
+      return departmentActivityReportGenerator;
+    default:
+      return null;
+  }
+};
 
 export class DocxReportService {
   async generateFromContext(context: ReportPipelineContext): Promise<DocxGenerationResult> {
@@ -31,6 +51,21 @@ export class DocxReportService {
         downloadUrl: eventReport.docxUrl,
         fileSizeBytes: eventReport.docxBuffer?.length ?? 0,
         sectionsIncluded: [...WORKSHOP_REPORT_SECTION_ORDER],
+        generatedAt: new Date(),
+      };
+    }
+
+    const templateGenerator = resolveTemplateActivityGenerator(context.reportType);
+    if (templateGenerator) {
+      const activityReport = await templateGenerator.generateFromPipelineContext(context, 'docx');
+
+      return {
+        buffer: activityReport.docxBuffer ?? Buffer.alloc(0),
+        fileName: activityReport.docxFileName,
+        filePath: activityReport.docxFilePath ?? '',
+        downloadUrl: activityReport.docxUrl,
+        fileSizeBytes: activityReport.docxBuffer?.length ?? 0,
+        sectionsIncluded: templateGenerator.getSectionsIncluded(),
         generatedAt: new Date(),
       };
     }

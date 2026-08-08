@@ -1,0 +1,13 @@
+Generate introduction and conclusion for a Faculty Achievement Report.
+
+Department: {{department}}
+Academic Year: {{academicYear}}
+Total approved records: {{totalRecords}}
+
+Statistics:
+{{statsSummary}}
+
+Module record counts:
+{{moduleSummary}}
+
+Write approximately 200 words for the introduction (3 paragraphs) and approximately 200 words for the conclusion (3 paragraphs).

@@ -13,6 +13,8 @@ export interface WhatsAppIncomingMessage {
   timestamp: Date;
   media: string | null;
   mediaMetadata?: WhatsAppMediaMetadata | null;
+  whatsappMessageId?: string;
+  groupJid?: string;
 }
 
 export type WhatsAppMediaType = 'image' | 'pdf' | 'document';

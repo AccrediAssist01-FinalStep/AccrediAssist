@@ -14,6 +14,8 @@ export interface StandardMessageInput {
   timestamp: Date;
   media?: string | null;
   mediaMetadata?: WhatsAppMediaMetadata | null;
+  whatsappMessageId?: string;
+  groupJid?: string;
 }
 
 export interface WhatsAppIncomingMessageJson {
@@ -132,6 +134,8 @@ export const toStandardMessage = (input: StandardMessageInput): WhatsAppIncoming
   timestamp: input.timestamp,
   media: input.media ?? null,
   mediaMetadata: input.mediaMetadata ?? null,
+  whatsappMessageId: input.whatsappMessageId,
+  groupJid: input.groupJid,
 });
 
 export const toStandardMessageJson = (
