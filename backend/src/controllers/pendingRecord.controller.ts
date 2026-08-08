@@ -63,6 +63,16 @@ class PendingRecordController extends BaseController {
     this.success(res, 'AI event report regenerated successfully', record);
   });
 
+  move = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const record = await pendingRecordService.moveApprovedPendingRecord(
+      req.params.id,
+      userId,
+      req.body,
+    );
+    this.success(res, 'Pending record moved to the selected module successfully', record);
+  });
+
   private requireUserId(req: Request): string {
     if (!req.user) {
       throw new UnauthorizedError();

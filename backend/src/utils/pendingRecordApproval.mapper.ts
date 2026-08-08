@@ -100,11 +100,6 @@ const normalizeAchievementType = (
   category: RecordCategory,
   fallback: AchievementType,
 ): AchievementType => {
-  const raw = toStringValue(value);
-  if (raw && ACHIEVEMENT_TYPE_SET.has(raw)) {
-    return raw as AchievementType;
-  }
-
   if (category === 'Sports') {
     return 'Sports';
   }
@@ -119,6 +114,11 @@ const normalizeAchievementType = (
 
   if (category === 'Research') {
     return 'Research';
+  }
+
+  const raw = toStringValue(value);
+  if (raw && ACHIEVEMENT_TYPE_SET.has(raw)) {
+    return raw as AchievementType;
   }
 
   return fallback;

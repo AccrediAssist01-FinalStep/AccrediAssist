@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { pendingReviewService } from '@/services/pending-review.service';
-import type { EditPendingRecordPayload, RejectPendingRecordPayload } from '@/types/api-models';
+import type { EditPendingRecordPayload, MovePendingRecordPayload, RejectPendingRecordPayload } from '@/types/api-models';
 
 export function usePendingReviewMutations() {
   const queryClient = useQueryClient();
@@ -14,6 +14,7 @@ export function usePendingReviewMutations() {
       queryClient.invalidateQueries({ queryKey: ['pending-record'] }),
       queryClient.invalidateQueries({ queryKey: ['pending-review-stats'] }),
       queryClient.invalidateQueries({ queryKey: ['dashboard-enterprise'] }),
+      queryClient.invalidateQueries({ queryKey: ['feature-records'] }),
     ]);
   };
 
@@ -61,15 +62,34 @@ export function usePendingReviewMutations() {
     onError: () => toast.error('Failed to regenerate AI report. Please try again.'),
   });
 
+  const moveMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: MovePendingRecordPayload }) =>
+      pendingReviewService.move(id, payload),
+    onSuccess: async (record, variables) => {
+      queryClient.setQueryData(['pending-record', variables.id], record);
+      toast.success('Record moved to the selected module');
+      await invalidate();
+    },
+    onError: (error: unknown) => {
+      const message =
+        error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || 'Failed to move record. Please try again.');
+    },
+  });
+
   return {
     editMutation,
     approveMutation,
     rejectMutation,
     regenerateMutation,
+    moveMutation,
     isMutating:
       editMutation.isPending ||
       approveMutation.isPending ||
       rejectMutation.isPending ||
-      regenerateMutation.isPending,
+      regenerateMutation.isPending ||
+      moveMutation.isPending,
   };
 }

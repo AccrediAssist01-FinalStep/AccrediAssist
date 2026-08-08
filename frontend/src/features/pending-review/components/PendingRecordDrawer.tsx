@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Edit3, ExternalLink, RefreshCw, XCircle } from 'lucide-react';
+import { CheckCircle2, Edit3, ExternalLink, RefreshCw, ArrowRightLeft, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import { PendingRecordEditForm, type EditFormValues } from './PendingRecordEditF
 import { PendingRecordMedia } from './PendingRecordMedia';
 import { PendingRecordTimeline } from './PendingRecordTimeline';
 import { AiGeneratedReportPreview } from './AiGeneratedReportPreview';
+import { PendingRecordMoveDialog } from './PendingRecordMoveDialog';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import {
   canApproveOrReject,
@@ -67,8 +68,9 @@ export function PendingRecordDrawer({
 }: PendingRecordDrawerProps) {
   const [mode, setMode] = useState<'preview' | 'edit'>('preview');
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const { editMutation, approveMutation, rejectMutation, regenerateMutation, isMutating } =
+  const { editMutation, approveMutation, rejectMutation, regenerateMutation, moveMutation, isMutating } =
     usePendingReviewMutations();
 
   const handleClose = (nextOpen: boolean) => {
@@ -133,6 +135,15 @@ export function PendingRecordDrawer({
     onActionComplete?.();
   };
 
+  const handleMove = async (payload: { moduleId: 'student' | 'faculty' | 'department'; submoduleId: string }) => {
+    if (!record) return;
+    await moveMutation.mutateAsync({
+      id: record._id,
+      payload,
+    });
+    onActionComplete?.();
+  };
+
   const title = record ? getRecordTitle(record) : 'Record Details';
   const approvedDestination = record ? getApprovedModuleDestination(record) : null;
 
@@ -181,14 +192,25 @@ export function PendingRecordDrawer({
                   {approvedDestination ? (
                     <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
                       <p className="text-sm text-muted-foreground">
-                        This record was stored in the ERP module below after auto-approval.
+                        This record was stored in the ERP module below after approval.
                       </p>
-                      <Button asChild className="mt-3" size="sm">
-                        <Link href={approvedDestination.href}>
-                          <ExternalLink className="size-4" />
-                          Open {approvedDestination.label}
-                        </Link>
-                      </Button>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button asChild size="sm">
+                          <Link href={approvedDestination.href}>
+                            <ExternalLink className="size-4" />
+                            Open {approvedDestination.label}
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setMoveOpen(true)}
+                          disabled={isMutating}
+                        >
+                          <ArrowRightLeft className="size-4" />
+                          Move to Another Module
+                        </Button>
+                      </div>
                     </div>
                   ) : null}
 
@@ -295,6 +317,16 @@ export function PendingRecordDrawer({
             </div>
           </div>
         </div>
+      )}
+
+      {record && (
+        <PendingRecordMoveDialog
+          record={record}
+          open={moveOpen}
+          onOpenChange={setMoveOpen}
+          onConfirm={handleMove}
+          isMoving={moveMutation.isPending}
+        />
       )}
     </>
   );

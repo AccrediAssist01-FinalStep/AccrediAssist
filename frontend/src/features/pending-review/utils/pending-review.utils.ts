@@ -1,5 +1,6 @@
 import type { PendingRecord, RecordCategory } from '@/types/api-models';
 import type { AiInsightSummary, ConfidenceLevel, DateFilter } from '../types';
+import { resolveFacultyName, resolveStudentName } from './extracted-person-fields.util';
 
 export interface ApprovedModuleDestination {
   href: string;
@@ -134,8 +135,8 @@ export function getRecordTitle(record: PendingRecord): string {
     data?.publicationTitle,
     data?.patentTitle,
     data?.company,
-    data?.studentName,
-    data?.facultyName,
+    resolveStudentName(data),
+    resolveFacultyName(data),
   ].filter(Boolean);
 
   if (candidates.length > 0) return String(candidates[0]);
@@ -258,27 +259,27 @@ export function buildAiInsights(record: PendingRecord): AiInsightSummary {
 
 export function getEditableFields(record: PendingRecord): Array<{ key: string; label: string; value: string }> {
   const data = record.extractedData ?? {};
-  const fieldMap: Array<[string, string]> = [
-    ['title', 'Title'],
-    ['description', 'Description'],
-    ['studentName', 'Student Name'],
-    ['facultyName', 'Faculty Name'],
-    ['company', 'Company'],
-    ['organization', 'Organization'],
-    ['eventName', 'Event Name'],
-    ['publicationTitle', 'Publication Title'],
-    ['patentTitle', 'Patent Title'],
-    ['internship', 'Internship'],
-    ['placement', 'Placement'],
-    ['date', 'Date'],
-    ['location', 'Location'],
+  const fieldMap: Array<[string, string, string]> = [
+    ['title', 'Title', data.title != null ? String(data.title) : ''],
+    ['description', 'Description', data.description != null ? String(data.description) : ''],
+    ['studentName', 'Student Name', resolveStudentName(data)],
+    ['facultyName', 'Faculty Name', resolveFacultyName(data)],
+    ['company', 'Company', data.company != null ? String(data.company) : ''],
+    ['organization', 'Organization', data.organization != null ? String(data.organization) : ''],
+    ['eventName', 'Event Name', data.eventName != null ? String(data.eventName) : ''],
+    ['publicationTitle', 'Publication Title', data.publicationTitle != null ? String(data.publicationTitle) : ''],
+    ['patentTitle', 'Patent Title', data.patentTitle != null ? String(data.patentTitle) : ''],
+    ['internship', 'Internship', data.internship != null ? String(data.internship) : ''],
+    ['placement', 'Placement', data.placement != null ? String(data.placement) : ''],
+    ['date', 'Date', data.date != null ? String(data.date) : ''],
+    ['location', 'Location', data.location != null ? String(data.location) : ''],
   ];
 
   return fieldMap
-    .map(([key, label]) => ({
+    .map(([key, label, value]) => ({
       key,
       label,
-      value: data[key] != null ? String(data[key]) : '',
+      value,
     }))
     .filter((field) => field.value || ['title', 'studentName', 'facultyName', 'company'].includes(field.key));
 }

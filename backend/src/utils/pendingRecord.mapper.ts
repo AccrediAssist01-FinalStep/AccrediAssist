@@ -1,4 +1,5 @@
 import { IPendingRecord, IPendingRecordResponse } from '../types/pendingRecord.types';
+import { normalizeExtractedPersonFields } from './extractedPersonFields.util';
 
 export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordResponse => ({
   _id: record._id,
@@ -7,7 +8,9 @@ export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordR
   senderName: record.senderName,
   whatsappMessageId: record.whatsappMessageId,
   category: record.category,
-  extractedData: record.extractedData,
+  extractedData: record.extractedData
+    ? normalizeExtractedPersonFields(record.extractedData)
+    : record.extractedData,
   confidenceScore: record.confidenceScore,
   status: record.status,
   rejectionReason: record.rejectionReason,

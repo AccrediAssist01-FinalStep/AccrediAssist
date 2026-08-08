@@ -29,6 +29,7 @@ import {
   buildPendingMessageMediaFields,
   mergePendingMediaReferences,
 } from '../../utils/pending-record-media.util';
+import { normalizeExtractedPersonFields } from '../../utils/extractedPersonFields.util';
 
 const buildPendingExtractedData = (
   message: WhatsAppIncomingMessage,
@@ -41,7 +42,7 @@ const buildPendingExtractedData = (
 ): Record<string, unknown> => {
   const messageMedia = buildPendingMessageMediaFields(message);
 
-  return {
+  return normalizeExtractedPersonFields({
     ...extraction,
     ...pdfData,
     media: messageMedia.media ?? message.media,
@@ -65,7 +66,7 @@ const buildPendingExtractedData = (
         validation: stages.validation.model,
       },
     },
-  };
+  });
 };
 
 export class AiPipelineService {

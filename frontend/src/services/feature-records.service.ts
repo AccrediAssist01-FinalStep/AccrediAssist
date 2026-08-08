@@ -34,4 +34,13 @@ export const featureRecordsService = {
     const { data } = await apiClient.get<ApiResponse<FeatureRecord>>(`${apiPath}/${id}`);
     return data.data!;
   },
+
+  update: async (
+    apiPath: string,
+    id: string,
+    payload: Record<string, unknown>,
+  ): Promise<FeatureRecord> => {
+    const { data } = await apiClient.put<ApiResponse<FeatureRecord>>(`${apiPath}/${id}`, payload);
+    return data.data!;
+  },
 };

@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import type { PendingRecord } from '@/types/api-models';
 import { RECORD_CATEGORIES } from '../types';
+import { resolveFacultyName, resolveStudentName } from '../utils/extracted-person-fields.util';
 
 const editFormSchema = z.object({
   category: z.string().min(1),
@@ -55,8 +56,8 @@ export function PendingRecordEditForm({ record, onSave, onCancel, isSaving }: Pe
       confidenceScore: record.confidenceScore,
       title: data.title ?? '',
       description: data.description ?? '',
-      studentName: data.studentName ?? '',
-      facultyName: data.facultyName ?? '',
+      studentName: resolveStudentName(data),
+      facultyName: resolveFacultyName(data),
       company: data.company ?? '',
       organization: data.organization ?? '',
       eventName: data.eventName ?? '',
@@ -75,8 +76,8 @@ export function PendingRecordEditForm({ record, onSave, onCancel, isSaving }: Pe
       confidenceScore: record.confidenceScore,
       title: data.title ?? '',
       description: data.description ?? '',
-      studentName: data.studentName ?? '',
-      facultyName: data.facultyName ?? '',
+      studentName: resolveStudentName(data),
+      facultyName: resolveFacultyName(data),
       company: data.company ?? '',
       organization: data.organization ?? '',
       eventName: data.eventName ?? '',

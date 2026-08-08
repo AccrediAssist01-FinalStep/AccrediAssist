@@ -90,9 +90,7 @@ export default function PendingReviewsPage() {
         isLoading={detailQuery.isLoading && !detailQuery.data}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-        onActionComplete={() => {
-          setSelectedId(null);
-        }}
+        onActionComplete={handleRefresh}
       />
 
       {(listQuery.isFetching || statsQuery.isFetching) && !listQuery.isLoading && (

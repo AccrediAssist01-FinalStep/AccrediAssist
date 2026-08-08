@@ -1,6 +1,7 @@
 import { pendingRecordRepository } from '../repositories/pendingRecord.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
 import { pendingRecordApprovalService } from './pendingRecordApproval.service';
+import { pendingRecordMoveService } from './pendingRecordMove.service';
 import { pendingRecordRejectionService } from './pendingRecordRejection.service';
 import { BaseService } from './base.service';
 import {
@@ -17,6 +18,7 @@ import { logger } from '../utils/logger';
 import { PaginationOptions } from '../database/utils/queryHelpers';
 import { PaginatedResult } from '../repositories/base.repository';
 import { UpdatePendingRecordBody } from '../validations/pendingRecord.validation';
+import { MovePendingRecordBody } from '../validations/pendingRecordMove.validation';
 
 const REVIEWABLE_STATUSES = ['Pending', 'Needs Review'] as const;
 const FINAL_STATUSES = ['Approved', 'Rejected'] as const;
@@ -95,6 +97,14 @@ export class PendingRecordService extends BaseService<
     input: RejectPendingRecordInput,
   ): Promise<IPendingRecordResponse> {
     return pendingRecordRejectionService.rejectPendingRecord(id, userId, input);
+  }
+
+  async moveApprovedPendingRecord(
+    id: string,
+    userId: string,
+    input: MovePendingRecordBody,
+  ): Promise<IPendingRecordResponse> {
+    return pendingRecordMoveService.moveApprovedPendingRecord(id, userId, input);
   }
 
   private ensureReviewable(

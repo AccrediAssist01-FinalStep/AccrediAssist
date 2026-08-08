@@ -137,9 +137,12 @@ export function FeatureRecordsView({ config }: FeatureRecordsViewProps) {
         record={detailQuery.data ?? records.find((record) => record._id === selectedId) ?? null}
         columns={config.columns}
         title={config.title}
+        apiPath={config.apiPath}
+        configId={config.id}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
         isLoading={detailQuery.isLoading && !detailQuery.data}
+        onSaved={handleRefresh}
       />
     </PageTransition>
   );

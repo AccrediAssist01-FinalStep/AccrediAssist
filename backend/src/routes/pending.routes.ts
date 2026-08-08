@@ -10,6 +10,7 @@ import {
   rejectPendingRecordSchema,
 } from '../validations/pendingRecord.validation';
 import { editPendingRecordSchema } from '../validations/pendingRecordEdit.validation';
+import { movePendingRecordSchema } from '../validations/pendingRecordMove.validation';
 
 const pendingRouter = Router();
 
@@ -64,6 +65,14 @@ pendingRouter.post(
   authorizePermission('pending_records_review'),
   validateParams(idParamSchema),
   pendingRecordController.regenerate,
+);
+
+pendingRouter.put(
+  '/:id/move',
+  authorizePermission('pending_records_approve'),
+  validateParams(idParamSchema),
+  validate(movePendingRecordSchema),
+  pendingRecordController.move,
 );
 
 export default pendingRouter;

@@ -60,11 +60,14 @@ const extractFacultyNamesFromText = (text: string): string[] => {
     /Congratulations\s+to\s+(?:Dr\.?\/Prof\.?\s+)?([A-Z][a-z]+)/gi,
     /Heartiest congratulations to\s+([A-Z][a-z]+)/gi,
     /,\s*([A-Z][a-z]+)!\s*Keep\s+shining/gi,
+    /faculty\s*name\s*[:\-]\s*((?:Dr\.?|Prof\.?|Professor)\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/gi,
+    /faculty\s*[:\-]\s*((?:Dr\.?|Prof\.?|Professor)\s+)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/gi,
   ];
 
   for (const pattern of patterns) {
-    for (const candidate of collectRegexMatches(text, pattern)) {
-      if (isLikelyPersonName(candidate)) {
+    for (const match of text.matchAll(pattern)) {
+      const candidate = (match[2] ?? match[1])?.trim();
+      if (candidate && isLikelyPersonName(candidate)) {
         names.add(candidate);
       }
     }

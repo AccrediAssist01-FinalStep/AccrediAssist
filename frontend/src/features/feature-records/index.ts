@@ -1,4 +1,5 @@
 export { FeatureRecordsView } from './components/FeatureRecordsView';
+export { useFeatureRecordMutations } from './hooks/use-feature-record-mutations';
 export { SubmoduleActivityView } from './components/SubmoduleActivityView';
 export { ActivitySlugPage } from './components/ActivitySlugPage';
 export { FEATURE_RECORD_CONFIGS, STAT_CARD_ROUTES } from './config';

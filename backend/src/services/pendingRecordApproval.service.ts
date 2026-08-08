@@ -91,7 +91,7 @@ export class PendingRecordApprovalService {
         (existing.extractedData as Record<string, unknown> | undefined)?.detectedCategory ?? null,
     });
 
-    const approvalResult = await this.createTargetRecord(targetModule, payload, userId);
+    const approvalResult = await this.createTargetRecordPublic(targetModule, payload, userId);
 
     const approved = await pendingRecordRepository.update(
       id,
@@ -206,7 +206,7 @@ export class PendingRecordApprovalService {
     }
   }
 
-  private async createTargetRecord(
+  async createTargetRecordPublic(
     targetModule: PendingApprovalTargetModule,
     payload: Record<string, unknown>,
     userId: string,

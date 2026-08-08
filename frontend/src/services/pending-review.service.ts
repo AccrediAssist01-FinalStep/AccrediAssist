@@ -2,6 +2,7 @@ import apiClient from '@/lib/api-client';
 import type { ApiResponse } from '@/types';
 import type {
   EditPendingRecordPayload,
+  MovePendingRecordPayload,
   PendingRecord,
   PendingRecordListResponse,
   PendingRecordQueryParams,
@@ -41,6 +42,11 @@ export const pendingReviewService = {
 
   regenerate: async (id: string): Promise<PendingRecord> => {
     const { data } = await apiClient.post<ApiResponse<PendingRecord>>(`/pending/${id}/regenerate`);
+    return data.data!;
+  },
+
+  move: async (id: string, payload: MovePendingRecordPayload): Promise<PendingRecord> => {
+    const { data } = await apiClient.put<ApiResponse<PendingRecord>>(`/pending/${id}/move`, payload);
     return data.data!;
   },
 

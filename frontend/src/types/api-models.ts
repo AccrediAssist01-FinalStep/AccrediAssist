@@ -257,6 +257,11 @@ export interface RejectPendingRecordPayload {
   reason: string;
 }
 
+export interface MovePendingRecordPayload {
+  moduleId: 'student' | 'faculty' | 'department';
+  submoduleId: string;
+}
+
 export interface ReportFiltersApplied {
   startDate?: string;
   endDate?: string;
