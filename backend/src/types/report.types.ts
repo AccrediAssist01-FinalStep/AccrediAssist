@@ -134,4 +134,6 @@ export interface GenerateReportFilters {
   keyword?: string;
   startDate?: Date;
   endDate?: Date;
+  eventReportId?: string;
+  eventTitle?: string;
 }

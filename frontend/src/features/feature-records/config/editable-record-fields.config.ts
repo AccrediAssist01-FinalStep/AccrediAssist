@@ -5,6 +5,7 @@ export interface EditableRecordField {
   label: string;
   type: EditableFieldType;
   options?: string[];
+  required?: boolean;
 }
 
 const ACHIEVEMENT_TYPE_OPTIONS = [
@@ -30,52 +31,65 @@ const PATENT_STATUS_OPTIONS = ['Filed', 'Published', 'Granted'];
 
 export const EDITABLE_RECORD_FIELDS: Record<string, EditableRecordField[]> = {
   '/event-reports': [
-    { key: 'eventTitle', label: 'Event', type: 'text' },
-    { key: 'eventType', label: 'Type', type: 'select', options: EVENT_TYPE_OPTIONS },
+    { key: 'eventTitle', label: 'Event', type: 'text', required: true },
+    { key: 'eventType', label: 'Type', type: 'select', options: EVENT_TYPE_OPTIONS, required: true },
     { key: 'coordinator', label: 'Coordinator', type: 'text' },
     { key: 'venue', label: 'Venue', type: 'text' },
     { key: 'date', label: 'Date', type: 'date' },
     { key: 'summary', label: 'Summary', type: 'textarea' },
   ],
   '/faculty-achievements': [
-    { key: 'facultyName', label: 'Faculty', type: 'text' },
-    { key: 'achievementType', label: 'Type', type: 'select', options: ACHIEVEMENT_TYPE_OPTIONS },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'facultyName', label: 'Faculty', type: 'text', required: true },
+    {
+      key: 'achievementType',
+      label: 'Type',
+      type: 'select',
+      options: ACHIEVEMENT_TYPE_OPTIONS,
+      required: true,
+    },
+    { key: 'title', label: 'Title', type: 'text', required: true },
     { key: 'organization', label: 'Organization', type: 'text' },
-    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'date', label: 'Date', type: 'date', required: true },
   ],
   '/student-achievements': [
-    { key: 'studentName', label: 'Student', type: 'text' },
-    { key: 'achievementType', label: 'Type', type: 'select', options: ACHIEVEMENT_TYPE_OPTIONS },
-    { key: 'title', label: 'Title', type: 'text' },
+    { key: 'studentName', label: 'Student', type: 'text', required: true },
+    {
+      key: 'achievementType',
+      label: 'Type',
+      type: 'select',
+      options: ACHIEVEMENT_TYPE_OPTIONS,
+      required: true,
+    },
+    { key: 'title', label: 'Title', type: 'text', required: true },
     { key: 'organization', label: 'Organization', type: 'text' },
-    { key: 'date', label: 'Date', type: 'date' },
+    { key: 'date', label: 'Date', type: 'date', required: true },
   ],
   '/placements': [
-    { key: 'studentName', label: 'Student', type: 'text' },
-    { key: 'company', label: 'Company', type: 'text' },
+    { key: 'studentName', label: 'Student', type: 'text', required: true },
+    { key: 'company', label: 'Company', type: 'text', required: true },
     { key: 'role', label: 'Role', type: 'text' },
     { key: 'package', label: 'Package', type: 'text' },
     { key: 'joiningDate', label: 'Joining Date', type: 'date' },
   ],
   '/internships': [
-    { key: 'studentName', label: 'Student', type: 'text' },
-    { key: 'company', label: 'Company', type: 'text' },
+    { key: 'studentName', label: 'Student', type: 'text', required: true },
+    { key: 'company', label: 'Company', type: 'text', required: true },
     { key: 'role', label: 'Role', type: 'text' },
     { key: 'duration', label: 'Duration', type: 'text' },
     { key: 'startDate', label: 'Start Date', type: 'date' },
     { key: 'endDate', label: 'End Date', type: 'date' },
   ],
   '/publications': [
-    { key: 'facultyName', label: 'Faculty', type: 'text' },
-    { key: 'paperTitle', label: 'Paper Title', type: 'text' },
+    { key: 'facultyName', label: 'Faculty', type: 'text', required: true },
+    { key: 'paperTitle', label: 'Paper Title', type: 'text', required: true },
     { key: 'journal', label: 'Journal', type: 'text' },
     { key: 'conference', label: 'Conference', type: 'text' },
     { key: 'publicationDate', label: 'Publication Date', type: 'date' },
   ],
   '/patents': [
-    { key: 'patentTitle', label: 'Patent Title', type: 'text' },
-    { key: 'status', label: 'Status', type: 'select', options: PATENT_STATUS_OPTIONS },
+    { key: 'patentTitle', label: 'Patent Title', type: 'text', required: true },
+    { key: 'status', label: 'Status', type: 'select', options: PATENT_STATUS_OPTIONS, required: true },
+    { key: 'inventors', label: 'Inventors (comma-separated)', type: 'text' },
     { key: 'patentNumber', label: 'Patent Number', type: 'text' },
     { key: 'filingDate', label: 'Filing Date', type: 'date' },
   ],

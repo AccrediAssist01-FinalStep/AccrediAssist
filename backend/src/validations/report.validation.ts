@@ -36,6 +36,8 @@ export const generateReportSchema = z
     keyword: z.string().trim().max(200).optional(),
     startDate: z.coerce.date().optional(),
     endDate: z.coerce.date().optional(),
+    eventReportId: objectIdSchema.optional(),
+    eventTitle: z.string().trim().max(300).optional(),
   })
   .refine(
     (data) => {
@@ -47,6 +49,21 @@ export const generateReportSchema = z
     {
       message: 'End date must be on or after start date',
       path: ['endDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (
+        data.reportType === 'AI Generated Workshop' ||
+        data.reportType === 'AI Generated Industrial Visit'
+      ) {
+        return Boolean(data.eventReportId);
+      }
+      return true;
+    },
+    {
+      message: 'Please select a workshop or industrial visit',
+      path: ['eventReportId'],
     },
   );
 

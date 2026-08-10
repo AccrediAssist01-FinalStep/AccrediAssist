@@ -12,13 +12,8 @@ const toTemplateModuleTables = (
     moduleNumber: module.moduleNumber,
     heading: module.heading,
     sectionKey: module.sectionKey,
-    rows: module.rows.map((row) => [
-      row.studentName,
-      row.type,
-      row.title,
-      row.organization,
-      row.date,
-    ]),
+    headers: module.headers,
+    rows: module.rows,
   }));
 
 export const studentActivityReportGenerator = createTemplateActivityReportGenerator(

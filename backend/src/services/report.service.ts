@@ -58,6 +58,8 @@ const extractFiltersApplied = (input: GenerateReportBody): GenerateReportFilters
   if (input.keyword) filters.keyword = input.keyword;
   if (input.startDate) filters.startDate = input.startDate;
   if (input.endDate) filters.endDate = input.endDate;
+  if (input.eventReportId) filters.eventReportId = input.eventReportId;
+  if (input.eventTitle) filters.eventTitle = input.eventTitle;
 
   return filters;
 };

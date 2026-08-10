@@ -3,7 +3,7 @@ import type {
   TemplateActivityReportInput,
   TemplateModuleTable,
 } from '../template-activity-report.types';
-import { getTemplateColumnWidths } from '../utils/template-table.util';
+import { getTemplateColumnWidths, resolveModuleColumnWeights } from '../utils/template-table.util';
 
 type PdfDoc = InstanceType<typeof PDFDocument>;
 
@@ -71,11 +71,13 @@ const drawTableRow = (
 const writeModuleTable = (
   doc: PdfDoc,
   module: TemplateModuleTable,
-  headers: readonly string[],
-  columnWeights: readonly number[],
+  fallbackHeaders: readonly string[],
+  fallbackWeights: readonly number[],
 ): void => {
   writeHeading(doc, module.heading);
 
+  const headers = module.headers.length > 0 ? module.headers : [...fallbackHeaders];
+  const columnWeights = resolveModuleColumnWeights(headers, fallbackWeights);
   const columnWidths = getTemplateColumnWidths(columnWeights, CONTENT_WIDTH);
   let tableY = doc.y;
 

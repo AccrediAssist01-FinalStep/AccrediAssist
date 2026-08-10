@@ -43,4 +43,13 @@ export const featureRecordsService = {
     const { data } = await apiClient.put<ApiResponse<FeatureRecord>>(`${apiPath}/${id}`, payload);
     return data.data!;
   },
+
+  create: async (apiPath: string, payload: Record<string, unknown>): Promise<FeatureRecord> => {
+    const { data } = await apiClient.post<ApiResponse<FeatureRecord>>(apiPath, payload);
+    return data.data!;
+  },
+
+  delete: async (apiPath: string, id: string): Promise<void> => {
+    await apiClient.delete(`${apiPath}/${id}`);
+  },
 };

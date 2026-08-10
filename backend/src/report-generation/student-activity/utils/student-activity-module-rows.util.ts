@@ -1,24 +1,18 @@
 import { getReportSectionDefinitions, type ReportSectionDefinition } from '../../config/report-sections.config';
+import { getStudentReportModuleColumns } from '../../config/report-module-columns.config';
 import type { ReportAggregationResult } from '../../aggregation/interfaces/aggregation.interface';
-import type {
-  StudentActivityModuleRow,
-  StudentActivityModuleTable,
-} from '../student-activity-report.types';
+import {
+  extractReportRowValues,
+  resolveReportRowSortDate,
+} from '../../utils/report-record-formatter.util';
 
-const formatDate = (value: unknown): string => {
-  if (!value) return '—';
-  const date = value instanceof Date ? value : new Date(String(value));
-  return Number.isNaN(date.getTime())
-    ? '—'
-    : date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-};
-
-const resolveSortableDate = (record: Record<string, unknown>): number => {
-  const raw = record.date ?? record.joiningDate ?? record.startDate ?? record.endDate;
-  if (!raw) return 0;
-  const date = raw instanceof Date ? raw : new Date(String(raw));
-  return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-};
+export interface StudentActivityModuleTable {
+  moduleNumber: number;
+  heading: string;
+  sectionKey: string;
+  headers: string[];
+  rows: string[][];
+}
 
 const getCategoryValue = (record: Record<string, unknown>): string =>
   String(record.achievementType ?? record.eventType ?? record.status ?? '');
@@ -62,56 +56,6 @@ const recordMatchesSection = (
   matchesCategory(record, section.categoryMatch) &&
   matchesTitlePattern(record, section.titlePattern);
 
-const resolveRecordTitle = (
-  record: Record<string, unknown>,
-  section: ReportSectionDefinition,
-): string => {
-  if (section.module === 'placements') {
-    const company = String(record.company ?? '—');
-    const role = String(record.role ?? '').trim();
-    return role ? `${role} at ${company}` : `Placement at ${company}`;
-  }
-
-  if (section.module === 'internships') {
-    const company = String(record.company ?? '—');
-    const role = String(record.role ?? '').trim();
-    return role ? `${role} at ${company}` : `Internship at ${company}`;
-  }
-
-  if (section.module === 'completedEventReports') {
-    return String(record.eventTitle ?? record.title ?? '—');
-  }
-
-  return String(record.title ?? record.eventTitle ?? record.publicationTitle ?? '—');
-};
-
-const mapToModuleRow = (
-  record: Record<string, unknown>,
-  section: ReportSectionDefinition,
-): StudentActivityModuleRow => {
-  const isEventModule = section.module === 'completedEventReports';
-  const sortDate = resolveSortableDate(record);
-
-  return {
-    studentName: isEventModule
-      ? String(record.coordinator ?? record.studentName ?? 'Department Event')
-      : String(record.studentName ?? '—'),
-    type: String(
-      record.achievementType ??
-        record.eventType ??
-        record.role ??
-        (record.package ? 'Placement' : 'Participation'),
-    ),
-    title: resolveRecordTitle(record, section),
-    organization: String(
-      record.organization ?? record.company ?? record.venue ?? record.department ?? '—',
-    ),
-    date: formatDate(record.date ?? record.joiningDate ?? record.startDate),
-    sortDate,
-  };
-};
-
-/** Module numbering aligned with STUDENT ACHIEVEMENT REPORT.docx */
 const MODULE_NUMBER_BY_KEY: Record<string, number> = {
   sports: 1,
   cultural: 2,
@@ -139,7 +83,7 @@ const MODULE_HEADING_BY_KEY: Record<string, string> = {
   seminars: 'Seminar',
   'industrial-visits': 'Industrial Visit',
   'startup-innovation': 'Startup & Innovation',
-  'nss-ncc': 'HSS / NCC',
+  'nss-ncc': 'NSS / NCC',
 };
 
 const STUDENT_ACHIEVEMENT_SECTION_PRIORITY = [
@@ -206,9 +150,16 @@ export const buildStudentActivityModuleTables = (
       );
     }
 
+    const columns = getStudentReportModuleColumns(section.key);
+    const headers = columns.map((column) => column.label);
+
     const rows = sourceRecords
-      .map((record) => mapToModuleRow(record, section))
-      .sort((left, right) => left.sortDate - right.sortDate);
+      .map((record) => ({
+        values: extractReportRowValues(record, columns),
+        sortDate: resolveReportRowSortDate(record, columns),
+      }))
+      .sort((left, right) => left.sortDate - right.sortDate)
+      .map((row) => row.values);
 
     const moduleNumber = MODULE_NUMBER_BY_KEY[section.key] ?? 0;
     const label = MODULE_HEADING_BY_KEY[section.key] ?? section.label;
@@ -217,6 +168,7 @@ export const buildStudentActivityModuleTables = (
       moduleNumber,
       heading: `Module ${moduleNumber}: ${label}`,
       sectionKey: section.key,
+      headers,
       rows,
     };
   });

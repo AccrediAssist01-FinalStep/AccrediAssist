@@ -337,6 +337,8 @@ export interface GenerateReportPayload {
   keyword?: string;
   startDate?: string;
   endDate?: string;
+  eventReportId?: string;
+  eventTitle?: string;
 }
 
 export interface ReportDownloadInfo {

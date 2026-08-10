@@ -21,6 +21,10 @@ export const buildReportTitle = (
   }
 
   const base = buildDefaultReportTitle(reportType);
+  if (filters.eventTitle?.trim()) {
+    return `${filters.eventTitle.trim()} - ${base}`;
+  }
+
   const suffixParts: string[] = [];
 
   if (filters.academicYear) {

@@ -4,7 +4,9 @@ export interface TemplateModuleTable {
   moduleNumber: number;
   heading: string;
   sectionKey: string;
+  headers: string[];
   rows: string[][];
+  columnWeights?: readonly number[];
 }
 
 export interface TemplateActivityReportContent {

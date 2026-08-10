@@ -1,19 +1,11 @@
 import type { ReportGenerationFilters } from '../interfaces/report-generation.interface';
 
-export interface StudentActivityModuleRow {
-  studentName: string;
-  type: string;
-  title: string;
-  organization: string;
-  date: string;
-  sortDate: number;
-}
-
 export interface StudentActivityModuleTable {
   moduleNumber: number;
   heading: string;
   sectionKey: string;
-  rows: StudentActivityModuleRow[];
+  headers: string[];
+  rows: string[][];
 }
 
 export interface StudentActivityReportContent {

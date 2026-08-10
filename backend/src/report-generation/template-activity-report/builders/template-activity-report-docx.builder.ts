@@ -16,7 +16,7 @@ import type {
   TemplateActivityReportInput,
   TemplateModuleTable,
 } from '../template-activity-report.types';
-import { STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA } from '../utils/template-table.util';
+import { STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA, getTemplateColumnWidths, resolveModuleColumnWeights } from '../utils/template-table.util';
 
 const FONT = 'Times New Roman';
 const BODY_SIZE = 22;
@@ -66,34 +66,42 @@ const bodyParagraph = (text: string): Paragraph =>
     children: [new TextRun({ text, font: FONT, size: BODY_SIZE })],
   });
 
-const buildTableCell = (value: string, columnIndex: number, bold = false): TableCell =>
-  new TableCell({
-    borders: TABLE_BORDERS,
-    margins: cellMargins,
-    verticalAlign: VerticalAlign.CENTER,
-    width: {
-      size: STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA[columnIndex] ?? 1800,
-      type: WidthType.DXA,
-    },
-    children: [
-      new Paragraph({
-        alignment: AlignmentType.LEFT,
-        children: [
-          new TextRun({
-            text: value,
-            font: FONT,
-            size: bold ? TABLE_HEADER_SIZE : TABLE_BODY_SIZE,
-            bold,
-          }),
-        ],
-      }),
-    ],
-  });
+const buildModuleTable = (
+  module: TemplateModuleTable,
+  fallbackHeaders: readonly string[],
+  fallbackWeights: readonly number[],
+): Table => {
+  const headers = module.headers.length > 0 ? module.headers : [...fallbackHeaders];
+  const columnWeights = resolveModuleColumnWeights(headers, fallbackWeights);
+  const columnWidths = getTemplateColumnWidths(columnWeights, STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA.reduce((sum, width) => sum + width, 0));
 
-const buildModuleTable = (module: TemplateModuleTable, headers: readonly string[]): Table => {
+  const buildCell = (value: string, columnIndex: number, bold = false): TableCell =>
+    new TableCell({
+      borders: TABLE_BORDERS,
+      margins: cellMargins,
+      verticalAlign: VerticalAlign.CENTER,
+      width: {
+        size: columnWidths[columnIndex] ?? 1800,
+        type: WidthType.DXA,
+      },
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.LEFT,
+          children: [
+            new TextRun({
+              text: value,
+              font: FONT,
+              size: bold ? TABLE_HEADER_SIZE : TABLE_BODY_SIZE,
+              bold,
+            }),
+          ],
+        }),
+      ],
+    });
+
   const headerRow = new TableRow({
     tableHeader: true,
-    children: headers.map((header, index) => buildTableCell(header, index, true)),
+    children: headers.map((header, index) => buildCell(header, index, true)),
   });
 
   const dataRows =
@@ -125,14 +133,14 @@ const buildModuleTable = (module: TemplateModuleTable, headers: readonly string[
       : module.rows.map(
           (row) =>
             new TableRow({
-              children: row.map((value, index) => buildTableCell(value, index)),
+              children: row.map((value, index) => buildCell(value, index)),
             }),
         );
 
   return new Table({
     layout: TableLayoutType.FIXED,
     width: { size: 100, type: WidthType.PERCENTAGE },
-    columnWidths: STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA,
+    columnWidths,
     borders: TABLE_BORDERS,
     rows: [headerRow, ...dataRows],
   });
@@ -155,7 +163,7 @@ export const buildTemplateActivityReportDocx = async (
 
   content.modules.forEach((module) => {
     children.push(moduleHeading(module.heading));
-    children.push(buildModuleTable(module, content.tableHeaders));
+    children.push(buildModuleTable(module, content.tableHeaders, content.columnWeights));
   });
 
   children.push(sectionHeading('Conclusion'));

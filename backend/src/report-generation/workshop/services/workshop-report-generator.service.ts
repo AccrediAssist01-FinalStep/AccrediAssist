@@ -96,6 +96,27 @@ const hydrateEvent = async (event: Record<string, unknown>): Promise<Record<stri
   return fullRecord ? (fullRecord as Record<string, unknown>) : event;
 };
 
+const loadEventById = async (
+  eventReportId: string,
+  kind: EventReportKind,
+): Promise<Record<string, unknown>> => {
+  const event = await CompletedEventReport.findOne({
+    _id: eventReportId,
+    isDeleted: { $ne: true },
+  }).lean();
+
+  if (!event) {
+    throw new BadRequestError('Selected event not found.');
+  }
+
+  if (!matchesEventKind(event.eventType, kind)) {
+    const label = kind === 'industrialVisit' ? 'industrial visit' : 'workshop';
+    throw new BadRequestError(`Selected event is not a valid ${label}.`);
+  }
+
+  return event as Record<string, unknown>;
+};
+
 export class WorkshopReportGeneratorService {
   buildStructuredFromPendingRecord(record: IPendingRecord): WorkshopReportStructuredContent {
     const data = record.extractedData ?? {};
@@ -216,26 +237,33 @@ export class WorkshopReportGeneratorService {
     format: 'docx' | 'pdf',
   ): Promise<WorkshopReportExportResult> {
     const kind = resolveKindFromReportType(context.reportType);
-    let event = pickLatestEvent(context, kind);
+    const eventReportId = context.filters.eventReportId;
+    let event: Record<string, unknown> | null = null;
 
-    if (event) {
-      event = await hydrateEvent(event);
+    if (eventReportId) {
+      event = await loadEventById(eventReportId, kind);
     } else {
-      event = await loadLatestApprovedEvent(kind);
+      event = pickLatestEvent(context, kind);
+
       if (event) {
-        logger.warn('No event matched report filters; using latest approved record', {
-          reportType: context.reportType,
-          reportKind: kind,
-          filters: context.filters,
-          eventTitle: event.eventTitle,
-        });
+        event = await hydrateEvent(event);
+      } else {
+        event = await loadLatestApprovedEvent(kind);
+        if (event) {
+          logger.warn('No event matched report filters; using latest approved record', {
+            reportType: context.reportType,
+            reportKind: kind,
+            filters: context.filters,
+            eventTitle: event.eventTitle,
+          });
+        }
       }
     }
 
     if (!event) {
       const label = kind === 'industrialVisit' ? 'industrial visit' : 'workshop';
       throw new BadRequestError(
-        `No approved ${label} report found. Approve a WhatsApp ${label} in Pending Review first, or clear Academic Year / date filters that may exclude recent events.`,
+        `No approved ${label} report found. Select an event from the list or approve one in Pending Review first.`,
       );
     }
 

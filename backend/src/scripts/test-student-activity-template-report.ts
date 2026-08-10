@@ -26,9 +26,11 @@ async function main() {
     content.modules[0]?.heading === 'Module 1: Sports',
     content.modules[0]?.heading,
   );
+  assert('Internship module uses web app columns', content.modules[4]?.headers.join('|') === 'Student|Company|Role|Duration|Start Date');
+  assert('Placement module uses web app columns', content.modules[5]?.headers.join('|') === 'Student|Company|Role|Package|Joining Date');
   assert(
-    'Module 12 is HSS / NCC',
-    content.modules[11]?.heading === 'Module 12: HSS / NCC',
+    'Module 12 is NSS / NCC',
+    content.modules[11]?.heading === 'Module 12: NSS / NCC',
     content.modules[11]?.heading,
   );
 

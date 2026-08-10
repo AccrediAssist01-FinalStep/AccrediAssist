@@ -98,20 +98,18 @@ export const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     id: 'ai-workshop',
     title: 'Workshop Report',
-    description: 'AI-generated workshop analytics with event details, photos, and executive summary.',
+    description: 'Generate a report for a specific workshop by selecting its name from approved events.',
     icon: CalendarDays,
     backendReportType: 'AI Generated Workshop',
     accent: 'from-emerald-500/20 to-green-500/5',
-    defaultFilters: { year: new Date().getFullYear() },
   },
   {
     id: 'ai-industrial-visit',
     title: 'Industrial Visit Report',
-    description: 'AI-generated industrial visit analytics with event details, photos, and executive summary.',
+    description: 'Generate a report for a specific industrial visit by selecting its name from approved events.',
     icon: MapPinned,
     backendReportType: 'AI Generated Industrial Visit',
     accent: 'from-indigo-500/20 to-blue-500/5',
-    defaultFilters: { year: new Date().getFullYear() },
   },
 ];
 

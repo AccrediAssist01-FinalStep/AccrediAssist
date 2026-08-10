@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Edit3, Save, X } from 'lucide-react';
+import { Edit3, Save, Trash2, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -23,11 +23,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/providers/AuthProvider';
 import type { FeatureColumn, FeatureRecord } from '../types';
-import { getEditableRecordFields, type EditableRecordField } from '../config/editable-record-fields.config';
+import { getEditableRecordFields } from '../config/editable-record-fields.config';
 import { formatRecordValue } from '../utils/format-record-value';
 import { isRecordMediaField } from '../utils/record-media.utils';
 import { useFeatureRecordMutations } from '../hooks/use-feature-record-mutations';
 import { RecordMediaPreview } from './RecordMediaPreview';
+import { buildFormValues, buildRecordPayload } from '../utils/record-form.utils';
 
 interface RecordDetailDrawerProps {
   record: FeatureRecord | null;
@@ -39,6 +40,7 @@ interface RecordDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
   isLoading?: boolean;
   onSaved?: () => void;
+  onDeleted?: () => void;
 }
 
 function getDetailFields(record: FeatureRecord, columns: FeatureColumn[]) {
@@ -58,56 +60,6 @@ function getDetailFields(record: FeatureRecord, columns: FeatureColumn[]) {
   return [...columns, ...extraColumns].filter((field) => !isRecordMediaField(field.key));
 }
 
-const toDateInputValue = (value: unknown): string => {
-  if (!value) return '';
-  const date = value instanceof Date ? value : new Date(String(value));
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toISOString().slice(0, 10);
-};
-
-const buildFormValues = (
-  record: FeatureRecord,
-  editableFields: EditableRecordField[],
-): Record<string, string> => {
-  const values: Record<string, string> = {};
-  for (const field of editableFields) {
-    const raw = record[field.key];
-    if (field.type === 'date') {
-      values[field.key] = toDateInputValue(raw);
-    } else if (raw == null) {
-      values[field.key] = '';
-    } else {
-      values[field.key] = String(raw);
-    }
-  }
-  return values;
-};
-
-const buildUpdatePayload = (
-  formValues: Record<string, string>,
-  editableFields: EditableRecordField[],
-): Record<string, unknown> => {
-  const payload: Record<string, unknown> = {};
-
-  for (const field of editableFields) {
-    const value = formValues[field.key]?.trim() ?? '';
-    if (!value && field.type === 'date') {
-      continue;
-    }
-    if (!value && field.type !== 'date') {
-      payload[field.key] = value;
-      continue;
-    }
-    if (field.type === 'date') {
-      payload[field.key] = new Date(`${value}T00:00:00.000Z`).toISOString();
-    } else {
-      payload[field.key] = value;
-    }
-  }
-
-  return payload;
-};
-
 export function RecordDetailDrawer({
   record,
   columns,
@@ -118,11 +70,12 @@ export function RecordDetailDrawer({
   onOpenChange,
   isLoading,
   onSaved,
+  onDeleted,
 }: RecordDetailDrawerProps) {
   const { hasPermission } = useAuth();
   const canEdit = hasPermission('pending_records_approve');
   const editableFields = useMemo(() => getEditableRecordFields(apiPath), [apiPath]);
-  const { updateMutation } = useFeatureRecordMutations(configId, apiPath);
+  const { updateMutation, deleteMutation } = useFeatureRecordMutations(configId, apiPath);
 
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [formValues, setFormValues] = useState<Record<string, string>>({});
@@ -137,16 +90,31 @@ export function RecordDetailDrawer({
 
   useEffect(() => {
     if (record && editableFields.length > 0) {
-      setFormValues(buildFormValues(record, editableFields));
+      setFormValues(buildFormValues(editableFields, record));
     }
   }, [record, editableFields]);
 
   const handleSave = async () => {
     if (!record) return;
-    const payload = buildUpdatePayload(formValues, editableFields);
+    const payload = buildRecordPayload(formValues, editableFields);
     await updateMutation.mutateAsync({ id: record._id, payload });
     setMode('view');
     onSaved?.();
+  };
+
+  const handleDelete = async () => {
+    if (!record) return;
+
+    const recordLabel =
+      String(record.title ?? record.eventTitle ?? record.studentName ?? record.facultyName ?? 'this record');
+
+    if (!window.confirm(`Delete "${recordLabel}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    await deleteMutation.mutateAsync(record._id);
+    onOpenChange(false);
+    onDeleted?.();
   };
 
   const handleFieldChange = (key: string, value: string) => {
@@ -165,10 +133,22 @@ export function RecordDetailDrawer({
               </DialogDescription>
             </div>
             {canEdit && editableFields.length > 0 && record && mode === 'view' ? (
-              <Button variant="outline" size="sm" onClick={() => setMode('edit')}>
-                <Edit3 className="size-4" />
-                Edit
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setMode('edit')}>
+                  <Edit3 className="size-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:text-destructive"
+                  onClick={handleDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="size-4" />
+                  Delete
+                </Button>
+              </div>
             ) : null}
           </div>
         </DialogHeader>
@@ -226,7 +206,7 @@ export function RecordDetailDrawer({
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setFormValues(buildFormValues(record, editableFields));
+                      setFormValues(buildFormValues(editableFields, record));
                       setMode('view');
                     }}
                     disabled={updateMutation.isPending}

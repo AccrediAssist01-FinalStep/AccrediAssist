@@ -14,6 +14,8 @@ export interface ReportGenerationFilters {
   keyword?: string;
   month?: string;
   year?: number;
+  eventReportId?: string;
+  eventTitle?: string;
 }
 
 /** Lifecycle status for the generation pipeline (architecture only) */

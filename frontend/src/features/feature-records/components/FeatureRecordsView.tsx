@@ -6,6 +6,7 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { Pagination } from '@/components/common/Pagination';
 import { FeaturePageHeader, PageTransition, SectionCard } from '@/components/layout/PageLayout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/providers/AuthProvider';
 import {
   Table,
   TableBody,
@@ -19,20 +20,25 @@ import { useFeatureRecord, useFeatureRecords } from '../hooks/use-feature-record
 import { formatRecordValue } from '../utils/format-record-value';
 import { FeatureRecordsFiltersBar } from './FeatureRecordsFiltersBar';
 import { RecordDetailDrawer } from './RecordDetailDrawer';
+import { AddRecordButton, RecordCreateDialog } from './RecordCreateDialog';
 
 interface FeatureRecordsViewProps {
   config: FeatureRecordConfig;
 }
 
 export function FeatureRecordsView({ config }: FeatureRecordsViewProps) {
+  const { hasPermission } = useAuth();
+  const canManageRecords = hasPermission('pending_records_approve');
   const [filters, setFilters] = useState(() => createDefaultFeatureFilters(config.apiPath));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     setFilters(createDefaultFeatureFilters(config.apiPath));
     setSelectedId(null);
     setDrawerOpen(false);
+    setCreateDialogOpen(false);
   }, [config.apiPath, config.id]);
 
   const updateFilters = useCallback((patch: Partial<typeof filters>) => {
@@ -68,6 +74,9 @@ export function FeatureRecordsView({ config }: FeatureRecordsViewProps) {
             </span>
           ) : undefined
         }
+        action={
+          canManageRecords ? <AddRecordButton onClick={() => setCreateDialogOpen(true)} /> : undefined
+        }
       />
 
       <SectionCard contentClassName="space-y-4">
@@ -94,7 +103,9 @@ export function FeatureRecordsView({ config }: FeatureRecordsViewProps) {
             description={
               filters.search || filters.year !== 'all'
                 ? 'Try changing the year filter or search keywords.'
-                : 'Approved records will appear here after WhatsApp auto-review.'
+                : canManageRecords
+                  ? 'Add a record manually or wait for WhatsApp auto-review.'
+                  : 'Approved records will appear here after WhatsApp auto-review.'
             }
           />
         ) : (
@@ -143,6 +154,20 @@ export function FeatureRecordsView({ config }: FeatureRecordsViewProps) {
         onOpenChange={setDrawerOpen}
         isLoading={detailQuery.isLoading && !detailQuery.data}
         onSaved={handleRefresh}
+        onDeleted={() => {
+          setSelectedId(null);
+          handleRefresh();
+        }}
+      />
+
+      <RecordCreateDialog
+        title={config.title}
+        apiPath={config.apiPath}
+        configId={config.id}
+        listFilters={config.listFilters}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onCreated={handleRefresh}
       />
     </PageTransition>
   );
