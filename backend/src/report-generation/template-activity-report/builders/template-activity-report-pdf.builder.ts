@@ -76,7 +76,7 @@ const writeModuleTable = (
 ): void => {
   writeHeading(doc, module.heading);
 
-  const headers = module.headers.length > 0 ? module.headers : [...fallbackHeaders];
+  const headers = module.headers && module.headers.length > 0 ? module.headers : [...fallbackHeaders];
   const columnWeights = resolveModuleColumnWeights(headers, fallbackWeights);
   const columnWidths = getTemplateColumnWidths(columnWeights, CONTENT_WIDTH);
   let tableY = doc.y;

@@ -71,7 +71,7 @@ const buildModuleTable = (
   fallbackHeaders: readonly string[],
   fallbackWeights: readonly number[],
 ): Table => {
-  const headers = module.headers.length > 0 ? module.headers : [...fallbackHeaders];
+  const headers = module.headers && module.headers.length > 0 ? module.headers : [...fallbackHeaders];
   const columnWeights = resolveModuleColumnWeights(headers, fallbackWeights);
   const columnWidths = getTemplateColumnWidths(columnWeights, STANDARD_TEMPLATE_COLUMN_WIDTHS_DXA.reduce((sum, width) => sum + width, 0));
 
