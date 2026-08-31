@@ -24,7 +24,6 @@ const APPROVED_MODULE_DESTINATIONS: Partial<Record<RecordCategory, ApprovedModul
   Patent: { href: '/faculty-activities/patents', label: 'Patents' },
   Publication: { href: '/faculty-activities/publications', label: 'Publications' },
   Certification: { href: '/student-activities/certifications', label: 'Certifications' },
-  Certification: { href: '/student-activities/certifications', label: 'Certifications' },
   Research: { href: '/student-activities/technical', label: 'Student Achievements' },
 };
 
@@ -51,11 +50,6 @@ export function getApprovedModuleDestination(
 
   if (record.approvedTargetModule === 'CompletedEventReport') {
     if (record.category === 'Industrial Visit') {
-      return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
-    }
-
-    const detectedCategory = record.extractedData?.detectedCategory as string | undefined;
-    if (detectedCategory === 'Completed Event Report' && record.category === 'Industrial Visit') {
       return APPROVED_MODULE_DESTINATIONS['Industrial Visit'] ?? null;
     }
   }

@@ -87,14 +87,14 @@ export const MOVE_MODULE_OPTIONS = ERP_MODULES.map((module) => ({
 }));
 
 export const getMoveDestinationsForModule = (moduleId: ErpModuleId): MoveDestinationOption[] => {
-  const module = ERP_MODULES.find((item) => item.id === moduleId);
+  const erpModule = ERP_MODULES.find((item) => item.id === moduleId);
   const mapping = SUBMODULE_MOVE_MAP[moduleId];
 
-  if (!module || !mapping) {
+  if (!erpModule || !mapping) {
     return [];
   }
 
-  return module.submodules
+  return erpModule.submodules
     .filter((submodule) => submodule.viewType === 'records' && mapping[submodule.id])
     .map((submodule) => ({
       moduleId,
