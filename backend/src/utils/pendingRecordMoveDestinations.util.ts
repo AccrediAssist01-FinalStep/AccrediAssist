@@ -28,6 +28,7 @@ const SUBMODULE_LABELS: Record<MoveModuleId, Record<string, string>> = {
     'industrial-visits': 'Industrial Visits',
     'startup-innovation': 'Startup & Innovation',
     'nss-ncc': 'NSS / NCC',
+    'sponsored-projects': 'Sponsored Projects',
   },
   faculty: {
     fdps: 'FDPs',
@@ -42,6 +43,9 @@ const SUBMODULE_LABELS: Record<MoveModuleId, Record<string, string>> = {
     certifications: 'Certifications',
     awards: 'Awards',
     'guest-lectures': 'Guest Lectures',
+    mous: 'MoUs',
+    'resource-person': 'Faculty as Resource Person',
+    'session-chair-reviewer': 'Session Chair / Reviewer',
   },
   department: {
     events: 'Events',
@@ -72,6 +76,13 @@ const SUBMODULE_MOVE_MAP: Record<MoveModuleId, Record<string, MoveDestinationMet
     'nss-ncc': {
       category: 'Cultural',
       extractedDataPatch: { activitySubCategory: 'NSS / NCC' },
+    },
+    'sponsored-projects': {
+      category: 'Student Achievement',
+      extractedDataPatch: {
+        achievementType: 'Technical',
+        activitySubCategory: 'Student Sponsored Project',
+      },
     },
   },
   faculty: {
@@ -107,6 +118,26 @@ const SUBMODULE_MOVE_MAP: Record<MoveModuleId, Record<string, MoveDestinationMet
     'guest-lectures': {
       category: 'Workshop',
       extractedDataPatch: { eventType: 'Guest Lecture' },
+    },
+    mous: {
+      category: 'Faculty Achievement',
+      extractedDataPatch: { achievementType: 'Award', activitySubCategory: 'MoU' },
+    },
+    'resource-person': {
+      category: 'Faculty Achievement',
+      extractedDataPatch: {
+        achievementType: 'Award',
+        activitySubCategory: 'Resource Person',
+        resourceType: 'Resource Person',
+      },
+    },
+    'session-chair-reviewer': {
+      category: 'Faculty Achievement',
+      extractedDataPatch: {
+        achievementType: 'Award',
+        activitySubCategory: 'Session Chair / Reviewer',
+        sessionRole: 'Session Chair',
+      },
     },
   },
   department: {

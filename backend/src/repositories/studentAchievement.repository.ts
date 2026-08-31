@@ -12,6 +12,7 @@ import {
   StudentAchievementFilters,
   StudentAchievementSort,
 } from '../types/studentAchievement.types';
+import { SPECIALIZED_ACTIVITY_SUBCATEGORIES } from '../ai/utils/specialized-activity.util';
 
 export class StudentAchievementRepository extends BaseRepository<IStudentAchievement> {
   constructor() {
@@ -33,6 +34,12 @@ export class StudentAchievementRepository extends BaseRepository<IStudentAchieve
       query.achievementType = filters.achievementType;
     }
 
+    if (filters.activitySubCategory) {
+      query.activitySubCategory = filters.activitySubCategory;
+    } else {
+      query.activitySubCategory = { $nin: SPECIALIZED_ACTIVITY_SUBCATEGORIES };
+    }
+
     if (filters.fromDate || filters.toDate) {
       query.date = {};
       if (filters.fromDate) {
@@ -52,6 +59,7 @@ export class StudentAchievementRepository extends BaseRepository<IStudentAchieve
         { organization: searchRegex },
         { description: searchRegex },
         { department: searchRegex },
+        { activitySubCategory: searchRegex },
       ];
     }
 

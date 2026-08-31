@@ -9,6 +9,11 @@ export interface TemplateModuleTable {
   columnWeights?: readonly number[];
 }
 
+export interface TemplateActivityReportPhotograph {
+  caption: string;
+  buffer: Buffer;
+}
+
 export interface TemplateActivityReportContent {
   reportTitle: string;
   department: string;
@@ -20,6 +25,7 @@ export interface TemplateActivityReportContent {
   modules: TemplateModuleTable[];
   totalRecords: number;
   narrativeSource: 'gemini' | 'fallback';
+  photographs?: TemplateActivityReportPhotograph[];
 }
 
 export interface TemplateActivityReportInput {
@@ -59,4 +65,8 @@ export interface TemplateReportConfig {
   columnWeights: readonly number[];
   fileNamePrefix: string;
   narrative: TemplateNarrativeConfig;
+  resolvePresentation?: (filters: ReportGenerationFilters) => {
+    reportTitle?: string;
+    fileNamePrefix?: string;
+  };
 }

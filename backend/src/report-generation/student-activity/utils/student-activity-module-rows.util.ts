@@ -12,6 +12,7 @@ export interface StudentActivityModuleTable {
   sectionKey: string;
   headers: string[];
   rows: string[][];
+  sourceRecords: Record<string, unknown>[];
 }
 
 const getCategoryValue = (record: Record<string, unknown>): string =>
@@ -49,12 +50,28 @@ const matchesKeyword = (record: Record<string, unknown>, keyword?: string): bool
   });
 };
 
+const matchesActivitySubCategory = (
+  record: Record<string, unknown>,
+  match?: string,
+): boolean => {
+  if (!match) return true;
+  return String(record.activitySubCategory ?? '') === match;
+};
+
 const recordMatchesSection = (
   record: Record<string, unknown>,
   section: ReportSectionDefinition,
-): boolean =>
-  matchesCategory(record, section.categoryMatch) &&
-  matchesTitlePattern(record, section.titlePattern);
+): boolean => {
+  if (section.activitySubCategoryMatch) {
+    return (
+      matchesActivitySubCategory(record, section.activitySubCategoryMatch) ||
+      (matchesTitlePattern(record, section.titlePattern) &&
+        matchesCategory(record, section.categoryMatch))
+    );
+  }
+
+  return matchesCategory(record, section.categoryMatch) && matchesTitlePattern(record, section.titlePattern);
+};
 
 const MODULE_NUMBER_BY_KEY: Record<string, number> = {
   sports: 1,
@@ -69,6 +86,7 @@ const MODULE_NUMBER_BY_KEY: Record<string, number> = {
   'industrial-visits': 10,
   'startup-innovation': 11,
   'nss-ncc': 12,
+  'sponsored-projects': 13,
 };
 
 const MODULE_HEADING_BY_KEY: Record<string, string> = {
@@ -84,6 +102,7 @@ const MODULE_HEADING_BY_KEY: Record<string, string> = {
   'industrial-visits': 'Industrial Visit',
   'startup-innovation': 'Startup & Innovation',
   'nss-ncc': 'NSS / NCC',
+  'sponsored-projects': 'Sponsored Projects',
 };
 
 const STUDENT_ACHIEVEMENT_SECTION_PRIORITY = [
@@ -93,6 +112,7 @@ const STUDENT_ACHIEVEMENT_SECTION_PRIORITY = [
   'cultural',
   'research',
   'certifications',
+  'sponsored-projects',
   'technical',
 ] as const;
 
@@ -130,11 +150,16 @@ const assignStudentAchievementsToSections = (
 export const buildStudentActivityModuleTables = (
   aggregation: ReportAggregationResult,
   keyword?: string,
+  studentModule?: string,
 ): StudentActivityModuleTable[] => {
-  const definitions = getReportSectionDefinitions('Student Activities');
+  const allDefinitions = getReportSectionDefinitions('Student Activities');
+  const definitions = studentModule
+    ? allDefinitions.filter((section) => section.key === studentModule)
+    : allDefinitions;
+
   const achievementBuckets = assignStudentAchievementsToSections(
     aggregation.records.byModule.studentAchievements ?? [],
-    definitions,
+    allDefinitions,
     keyword,
   );
 
@@ -166,10 +191,11 @@ export const buildStudentActivityModuleTables = (
 
     return {
       moduleNumber,
-      heading: `Module ${moduleNumber}: ${label}`,
+      heading: studentModule ? label : `Module ${moduleNumber}: ${label}`,
       sectionKey: section.key,
       headers,
       rows,
+      sourceRecords,
     };
   });
 };

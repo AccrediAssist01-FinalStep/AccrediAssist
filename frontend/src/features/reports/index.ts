@@ -10,5 +10,8 @@ export { ReportSummaryPanel } from './components/ReportSummaryPanel';
 export { ReportChartsPanel } from './components/ReportChartsPanel';
 export { useReportHistory, useReportDetail, useReportMutations, useReportPreviewInsights, useReportFilePreview } from './hooks/use-reports';
 export { REPORT_TEMPLATES, DEFAULT_REPORTS_FILTERS, GENERATION_REPORT_TYPES } from './types';
+export { STUDENT_MODULE_REPORT_TEMPLATES } from './student-module-reports';
+export { FACULTY_MODULE_REPORT_TEMPLATES } from './faculty-module-reports';
+export { DEPARTMENT_MODULE_REPORT_TEMPLATES } from './department-module-reports';
 export type { ReportTemplate, ReportsFilterState } from './types';
 export { downloadReportBlob, triggerFileDownload } from './utils/reports.utils';

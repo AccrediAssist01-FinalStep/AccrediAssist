@@ -47,6 +47,9 @@ export const buildRecordPayload = (
     }
     if (field.type === 'date') {
       payload[field.key] = new Date(`${value}T00:00:00.000Z`).toISOString();
+    } else if (field.type === 'number') {
+      const parsed = Number(value);
+      payload[field.key] = parsed;
     } else if (field.key === 'inventors') {
       payload[field.key] = value.split(',').map((item) => item.trim()).filter(Boolean);
     } else {
@@ -66,6 +69,18 @@ export const validateRequiredFields = (
     const value = formValues[field.key]?.trim() ?? '';
     if (!value) {
       return `${field.label} is required`;
+    }
+    if (field.type === 'number') {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        return `${field.label} must be a valid amount of 0 or greater`;
+      }
+    }
+    if (field.type === 'date') {
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) {
+        return `${field.label} must be a valid date`;
+      }
     }
   }
   return null;

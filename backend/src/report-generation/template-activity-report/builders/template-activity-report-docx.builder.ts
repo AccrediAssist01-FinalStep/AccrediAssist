@@ -2,6 +2,7 @@ import {
   AlignmentType,
   BorderStyle,
   Document,
+  ImageRun,
   Packer,
   Paragraph,
   Table,
@@ -146,6 +147,35 @@ const buildModuleTable = (
   });
 };
 
+const detectImageType = (buffer: Buffer): 'png' | 'jpg' =>
+  buffer[0] === 0x89 && buffer[1] === 0x50 ? 'png' : 'jpg';
+
+const photographParagraphs = (caption: string, buffer: Buffer): Paragraph[] => [
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 160, after: 80 },
+    children: [
+      new ImageRun({
+        type: detectImageType(buffer),
+        data: buffer,
+        transformation: { width: 420, height: 260 },
+      }),
+    ],
+  }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+    children: [
+      new TextRun({
+        text: caption,
+        font: FONT,
+        size: 20,
+        italics: true,
+      }),
+    ],
+  }),
+];
+
 export const buildTemplateActivityReportDocx = async (
   input: TemplateActivityReportInput,
 ): Promise<Buffer> => {
@@ -168,6 +198,16 @@ export const buildTemplateActivityReportDocx = async (
 
   children.push(sectionHeading('Conclusion'));
   content.conclusion.forEach((paragraph) => children.push(bodyParagraph(paragraph)));
+
+  const photographs = content.photographs ?? [];
+  if (photographs.length > 0) {
+    children.push(sectionHeading('Achievement / Activity Photographs'));
+    photographs.forEach((photograph) => {
+      photographParagraphs(photograph.caption, photograph.buffer).forEach((paragraph) =>
+        children.push(paragraph),
+      );
+    });
+  }
 
   return Packer.toBuffer(new Document({ sections: [{ children }] }));
 };

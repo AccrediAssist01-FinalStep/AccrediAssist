@@ -1,6 +1,13 @@
 import { RecordCategory } from '../../database/enums';
 import { ExtractionResult } from '../interfaces/extraction.interface';
 import { enrichExtractionAchievementType, isFacultySponsoredProjectContext } from './achievement-inference.util';
+import {
+  ACTIVITY_SUBCATEGORY,
+  isFacultyMouContext,
+  isFacultyResourcePersonContext,
+  isSessionChairReviewerContext,
+  isStudentSponsoredProjectContext,
+} from './specialized-activity.util';
 
 export type ActivityModule = 'Student Activities' | 'Faculty Activities' | 'Department Activities' | 'News';
 
@@ -51,6 +58,28 @@ export const resolveActivityClassification = (
   originalMessage = '',
 ): ActivityClassification => {
   const enriched = enrichExtractionAchievementType(extraction);
+
+  if (isFacultyMouContext(enriched, originalMessage)) {
+    return { module: 'Faculty Activities', subCategory: ACTIVITY_SUBCATEGORY.MOU };
+  }
+
+  if (isFacultyResourcePersonContext(enriched, originalMessage)) {
+    return { module: 'Faculty Activities', subCategory: ACTIVITY_SUBCATEGORY.RESOURCE_PERSON };
+  }
+
+  if (isSessionChairReviewerContext(enriched, originalMessage)) {
+    return {
+      module: 'Faculty Activities',
+      subCategory: ACTIVITY_SUBCATEGORY.SESSION_CHAIR_REVIEWER,
+    };
+  }
+
+  if (isStudentSponsoredProjectContext(enriched, originalMessage)) {
+    return {
+      module: 'Student Activities',
+      subCategory: ACTIVITY_SUBCATEGORY.STUDENT_SPONSORED_PROJECT,
+    };
+  }
 
   if (
     recordCategory === 'Faculty Achievement' &&

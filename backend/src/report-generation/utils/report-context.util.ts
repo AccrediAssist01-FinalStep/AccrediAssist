@@ -1,6 +1,9 @@
 import { GenerationReportType } from '../config/report-types.config';
 import { ReportGenerationFilters } from '../interfaces/report-generation.interface';
 import { ReportPipelineContext } from '../interfaces/report-data.interface';
+import { getStudentModuleReportDefinition } from '../student-activity/config/student-module-reports.config';
+import { getFacultyModuleReportDefinition } from '../faculty-activity/config/faculty-module-reports.config';
+import { getDepartmentModuleReportDefinition } from '../department-activity/config/department-module-reports.config';
 import { buildDefaultReportTitle } from './report-type.util';
 
 export const createPipelineContext = (
@@ -20,7 +23,15 @@ export const buildReportTitle = (
     return customTitle.trim();
   }
 
-  const base = buildDefaultReportTitle(reportType);
+  const moduleDefinition =
+    reportType === 'Student Activities'
+      ? getStudentModuleReportDefinition(filters.studentModule)
+      : reportType === 'Faculty Activities'
+        ? getFacultyModuleReportDefinition(filters.facultyModule)
+        : reportType === 'Department Activities'
+          ? getDepartmentModuleReportDefinition(filters.departmentModule)
+          : undefined;
+  const base = moduleDefinition?.displayTitle ?? buildDefaultReportTitle(reportType);
   if (filters.eventTitle?.trim()) {
     return `${filters.eventTitle.trim()} - ${base}`;
   }

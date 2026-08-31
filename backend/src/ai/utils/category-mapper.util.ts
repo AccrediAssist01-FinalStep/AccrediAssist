@@ -3,6 +3,7 @@ import { ClassificationCategory } from '../interfaces/classification.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
 import { enrichExtractionAchievementType, inferAchievementTypeFromText, isFacultySponsoredProjectContext } from './achievement-inference.util';
 import { isIndustrialVisitContext } from './event-inference.util';
+import { isStudentSponsoredProjectContext } from './specialized-activity.util';
 
 const DIRECT_CATEGORY_MAP: Record<ClassificationCategory, RecordCategory> = {
   'Student Achievement': 'Student Achievement',
@@ -74,7 +75,12 @@ export const isRecordCategory = (value: string): value is RecordCategory =>
 export const mapClassificationToRecordCategory = (
   classificationCategory: ClassificationCategory,
   extraction: ExtractionResult,
+  originalMessage = '',
 ): RecordCategory => {
+  if (isStudentSponsoredProjectContext(extraction, originalMessage)) {
+    return 'Student Achievement';
+  }
+
   if (classificationCategory === 'Completed Event Report') {
     return resolveCompletedEventCategory(extraction);
   }

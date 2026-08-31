@@ -7,6 +7,8 @@ export interface ReportSectionDefinition {
   module: AggregationModuleKey;
   /** Match achievementType, eventType, or other category field */
   categoryMatch?: string | string[];
+  /** Match activitySubCategory when records share the same achievementType */
+  activitySubCategoryMatch?: string;
   /** Regex applied to title/description for keyword-style sections */
   titlePattern?: RegExp;
 }
@@ -67,6 +69,13 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
       module: 'studentAchievements',
       titlePattern: /nss|ncc|national service scheme|national cadet corps|cadet corps/i,
     },
+    {
+      key: 'sponsored-projects',
+      label: 'Sponsored Projects',
+      module: 'studentAchievements',
+      activitySubCategoryMatch: 'Student Sponsored Project',
+      titlePattern: /student sponsored project|sponsorship of|project was sponsored/i,
+    },
   ],
   'Faculty Activities': [
     { key: 'fdp', label: 'Faculty Development Programs', module: 'completedEventReports', categoryMatch: 'FDP' },
@@ -110,6 +119,27 @@ export const REPORT_SECTION_DEFINITIONS: Partial<
       label: 'Guest Lectures',
       module: 'completedEventReports',
       categoryMatch: 'Guest Lecture',
+    },
+    {
+      key: 'mous',
+      label: 'MoUs',
+      module: 'facultyAchievements',
+      activitySubCategoryMatch: 'MoU',
+      titlePattern: /\bmou\b|memorandum of understanding/i,
+    },
+    {
+      key: 'resource-person',
+      label: 'Faculty as Resource Person',
+      module: 'facultyAchievements',
+      activitySubCategoryMatch: 'Resource Person',
+      titlePattern: /resource person|invited resource person/i,
+    },
+    {
+      key: 'session-chair-reviewer',
+      label: 'Session Chair / Reviewer',
+      module: 'facultyAchievements',
+      activitySubCategoryMatch: 'Session Chair / Reviewer',
+      titlePattern: /session chair|reviewed research papers|paper reviewer/i,
     },
   ],
   'Department Activities': [

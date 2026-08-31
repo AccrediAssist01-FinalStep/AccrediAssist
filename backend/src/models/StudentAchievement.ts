@@ -51,6 +51,15 @@ const studentAchievementSchema = new Schema<IStudentAchievement>(
       trim: true,
       maxlength: [200, 'Organization cannot exceed 200 characters'],
     },
+    activitySubCategory: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Activity sub-category cannot exceed 100 characters'],
+    },
+    sponsorshipAmount: {
+      type: Number,
+      min: [0, 'Sponsorship amount cannot be negative'],
+    },
     certificateUrl: {
       type: String,
       trim: true,
@@ -84,6 +93,7 @@ applyBaseSchema(studentAchievementSchema);
 
 studentAchievementSchema.index({ studentName: 1 });
 studentAchievementSchema.index({ achievementType: 1 });
+studentAchievementSchema.index({ activitySubCategory: 1 });
 studentAchievementSchema.index({ date: -1 });
 studentAchievementSchema.index({ department: 1 });
 studentAchievementSchema.index(

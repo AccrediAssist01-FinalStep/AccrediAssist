@@ -10,6 +10,8 @@ export interface IStudentAchievement extends IBaseDocument {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  sponsorshipAmount?: number;
   certificateUrl?: string;
   photos: string[];
   date: Date;
@@ -24,6 +26,8 @@ export interface CreateStudentAchievementInput {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  sponsorshipAmount?: number;
   certificateUrl?: string;
   photos?: string[];
   date: Date;
@@ -38,6 +42,8 @@ export interface UpdateStudentAchievementInput {
   title?: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  sponsorshipAmount?: number;
   certificateUrl?: string;
   photos?: string[];
   date?: Date;
@@ -53,6 +59,8 @@ export interface IStudentAchievementResponse {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  sponsorshipAmount?: number;
   certificateUrl?: string;
   photos: string[];
   date: Date;
@@ -66,6 +74,7 @@ export interface StudentAchievementFilters {
   studentName?: string;
   department?: string;
   achievementType?: AchievementType;
+  activitySubCategory?: string;
   fromDate?: Date;
   toDate?: Date;
 }

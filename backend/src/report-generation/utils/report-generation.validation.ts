@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { GENERATION_REPORT_TYPES } from '../config/report-types.config';
+import { STUDENT_MODULE_REPORT_KEYS } from '../student-activity/config/student-module-reports.config';
+import { FACULTY_MODULE_REPORT_KEYS } from '../faculty-activity/config/faculty-module-reports.config';
+import { DEPARTMENT_MODULE_REPORT_KEYS } from '../department-activity/config/department-module-reports.config';
 import { REPORT_TEMPLATE_SECTION_KEYS } from '../template-system/interfaces/report-template.interface';
 
 export const reportTemplateBrandingSchema = z
@@ -67,6 +70,11 @@ export const reportGenerationFiltersSchema = z
     keyword: z.string().trim().max(200).optional(),
     month: z.string().trim().optional(),
     year: z.coerce.number().int().min(2000).max(2100).optional(),
+    eventReportId: z.string().trim().optional(),
+    eventTitle: z.string().trim().max(300).optional(),
+    studentModule: z.enum(STUDENT_MODULE_REPORT_KEYS).optional(),
+    facultyModule: z.enum(FACULTY_MODULE_REPORT_KEYS).optional(),
+    departmentModule: z.enum(DEPARTMENT_MODULE_REPORT_KEYS).optional(),
   })
   .refine(
     (data) => {

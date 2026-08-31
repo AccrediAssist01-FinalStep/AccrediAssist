@@ -126,8 +126,36 @@ export function getLatestReportForTemplate(
   template: ReportTemplate,
   reports: ReportRecord[],
 ): ReportRecord | undefined {
+  const appliedModule = (report: ReportRecord) => ({
+    student:
+      typeof report.filtersApplied?.studentModule === 'string'
+        ? report.filtersApplied.studentModule
+        : undefined,
+    faculty:
+      typeof report.filtersApplied?.facultyModule === 'string'
+        ? report.filtersApplied.facultyModule
+        : undefined,
+    department:
+      typeof report.filtersApplied?.departmentModule === 'string'
+        ? report.filtersApplied.departmentModule
+        : undefined,
+  });
+
   return reports
-    .filter((report) => report.reportType === template.backendReportType)
+    .filter((report) => {
+      if (report.reportType !== template.backendReportType) return false;
+      const applied = appliedModule(report);
+      if (template.studentModule) {
+        return applied.student === template.studentModule;
+      }
+      if (template.facultyModule) {
+        return applied.faculty === template.facultyModule;
+      }
+      if (template.departmentModule) {
+        return applied.department === template.departmentModule;
+      }
+      return !applied.student && !applied.faculty && !applied.department;
+    })
     .sort((a, b) => new Date(b.generatedDate).getTime() - new Date(a.generatedDate).getTime())[0];
 }
 

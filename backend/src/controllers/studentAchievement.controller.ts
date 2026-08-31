@@ -16,6 +16,7 @@ class StudentAchievementController extends BaseController {
         studentName: query.studentName,
         department: query.department,
         achievementType: query.achievementType,
+        activitySubCategory: query.activitySubCategory,
         fromDate: query.fromDate,
         toDate: query.toDate,
       },

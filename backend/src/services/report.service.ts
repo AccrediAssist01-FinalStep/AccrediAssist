@@ -60,6 +60,9 @@ const extractFiltersApplied = (input: GenerateReportBody): GenerateReportFilters
   if (input.endDate) filters.endDate = input.endDate;
   if (input.eventReportId) filters.eventReportId = input.eventReportId;
   if (input.eventTitle) filters.eventTitle = input.eventTitle;
+  if (input.studentModule) filters.studentModule = input.studentModule;
+  if (input.facultyModule) filters.facultyModule = input.facultyModule;
+  if (input.departmentModule) filters.departmentModule = input.departmentModule;
 
   return filters;
 };

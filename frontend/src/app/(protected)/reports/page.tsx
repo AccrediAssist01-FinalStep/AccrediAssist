@@ -22,6 +22,9 @@ import {
   ReportPreviewDrawer,
   ReportsFiltersBarWithActions,
   ReportsHeader,
+  STUDENT_MODULE_REPORT_TEMPLATES,
+  FACULTY_MODULE_REPORT_TEMPLATES,
+  DEPARTMENT_MODULE_REPORT_TEMPLATES,
   useReportDetail,
   useReportHistory,
   useReportMutations,
@@ -174,6 +177,79 @@ export default function ReportsPage() {
           generatingTemplateId={generatingTemplateId}
         />
       )}
+
+      <div className="mt-8 space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Student Module Reports</h2>
+          <p className="text-sm text-muted-foreground">
+            Generate a focused PDF or DOCX for a single student activity module. The eight main reports above are
+            unchanged.
+          </p>
+        </div>
+        {allReportsQuery.isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={`student-module-skeleton-${index}`} className="h-48 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <QuickReportCards
+            templates={STUDENT_MODULE_REPORT_TEMPLATES}
+            reports={allReports}
+            onGenerate={handleGenerateClick}
+            onPreview={handlePreview}
+            generatingTemplateId={generatingTemplateId}
+          />
+        )}
+      </div>
+
+      <div className="mt-8 space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Faculty Module Reports</h2>
+          <p className="text-sm text-muted-foreground">
+            Generate a focused PDF or DOCX for a single faculty activity module.
+          </p>
+        </div>
+        {allReportsQuery.isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={`faculty-module-skeleton-${index}`} className="h-48 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <QuickReportCards
+            templates={FACULTY_MODULE_REPORT_TEMPLATES}
+            reports={allReports}
+            onGenerate={handleGenerateClick}
+            onPreview={handlePreview}
+            generatingTemplateId={generatingTemplateId}
+          />
+        )}
+      </div>
+
+      <div className="mt-8 space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Department Module Reports</h2>
+          <p className="text-sm text-muted-foreground">
+            Generate a focused PDF or DOCX for a single department activity module.
+          </p>
+        </div>
+        {allReportsQuery.isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={`department-module-skeleton-${index}`} className="h-48 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <QuickReportCards
+            templates={DEPARTMENT_MODULE_REPORT_TEMPLATES}
+            reports={allReports}
+            onGenerate={handleGenerateClick}
+            onPreview={handlePreview}
+            generatingTemplateId={generatingTemplateId}
+          />
+        )}
+      </div>
 
       <AIReportPanel latestReport={latestReport} isLoading={allReportsQuery.isLoading} />
 

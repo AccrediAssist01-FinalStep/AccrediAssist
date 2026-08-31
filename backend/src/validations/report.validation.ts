@@ -5,6 +5,9 @@ import {
   REPORT_STATUSES,
   REPORT_TYPES,
 } from '../database/enums';
+import { STUDENT_MODULE_REPORT_KEYS } from '../report-generation/student-activity/config/student-module-reports.config';
+import { FACULTY_MODULE_REPORT_KEYS } from '../report-generation/faculty-activity/config/faculty-module-reports.config';
+import { DEPARTMENT_MODULE_REPORT_KEYS } from '../report-generation/department-activity/config/department-module-reports.config';
 import { normalizeGenerationReportType } from '../report-generation/utils/report-type.util';
 import { objectIdSchema, paginationSchema } from './common.validation';
 
@@ -38,6 +41,9 @@ export const generateReportSchema = z
     endDate: z.coerce.date().optional(),
     eventReportId: objectIdSchema.optional(),
     eventTitle: z.string().trim().max(300).optional(),
+    studentModule: z.enum(STUDENT_MODULE_REPORT_KEYS).optional(),
+    facultyModule: z.enum(FACULTY_MODULE_REPORT_KEYS).optional(),
+    departmentModule: z.enum(DEPARTMENT_MODULE_REPORT_KEYS).optional(),
   })
   .refine(
     (data) => {
@@ -64,6 +70,42 @@ export const generateReportSchema = z
     {
       message: 'Please select a workshop or industrial visit',
       path: ['eventReportId'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.studentModule && data.reportType !== 'Student Activities') {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'studentModule is only valid for Student Activities reports',
+      path: ['studentModule'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.facultyModule && data.reportType !== 'Faculty Activities') {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'facultyModule is only valid for Faculty Activities reports',
+      path: ['facultyModule'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.departmentModule && data.reportType !== 'Department Activities') {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'departmentModule is only valid for Department Activities reports',
+      path: ['departmentModule'],
     },
   );
 

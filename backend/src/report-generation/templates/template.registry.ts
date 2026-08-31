@@ -29,6 +29,7 @@ const SECTION_OUTLINES: Record<GenerationReportType, string[]> = {
     'Industrial Visits',
     'Startup & Innovation',
     'NSS / NCC',
+    'Sponsored Projects',
   ],
   'Faculty Activities': [
     'Executive Summary',
@@ -50,6 +51,9 @@ const SECTION_OUTLINES: Record<GenerationReportType, string[]> = {
     'Certifications',
     'Awards',
     'Guest Lectures',
+    'MoUs',
+    'Faculty as Resource Person',
+    'Session Chair / Reviewer',
   ],
   'Department Activities': [
     'Executive Summary',

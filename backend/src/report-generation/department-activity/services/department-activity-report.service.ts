@@ -2,6 +2,10 @@ import { DEPARTMENT_ACTIVITY_REPORT_CONFIG, DEPARTMENT_ACTIVITY_TABLE_HEADERS } 
 import { createTemplateActivityReportGenerator } from '../../template-activity-report/services/template-activity-report-generator.service';
 import { buildDepartmentActivityModuleTables } from '../utils/department-activity-module-rows.util';
 import type { TemplateModuleTable } from '../../template-activity-report/template-activity-report.types';
+import { isDepartmentModuleReportKey } from '../config/department-module-reports.config';
+import { collectDepartmentModulePhotographCandidates } from '../utils/department-module-photographs.util';
+import { resolveActivityPhotographs } from '../../utils/activity-module-photographs.util';
+import { BadRequestError } from '../../../utils/errors';
 
 const toTemplateModuleTables = (
   tables: ReturnType<typeof buildDepartmentActivityModuleTables>,
@@ -22,12 +26,32 @@ const toTemplateModuleTables = (
 
 export const departmentActivityReportGenerator = createTemplateActivityReportGenerator(
   DEPARTMENT_ACTIVITY_REPORT_CONFIG,
-  (context) => {
+  async (context) => {
     const aggregation = context.collectedData?.aggregation;
     if (!aggregation) return [];
-    return toTemplateModuleTables(
-      buildDepartmentActivityModuleTables(aggregation, context.filters.keyword),
+
+    const departmentModule = context.filters.departmentModule;
+    if (departmentModule && !isDepartmentModuleReportKey(departmentModule)) {
+      throw new BadRequestError(
+        `Unknown department module "${departmentModule}". Use one of the existing department activity modules.`,
+      );
+    }
+
+    const tables = buildDepartmentActivityModuleTables(
+      aggregation,
+      context.filters.keyword,
+      departmentModule,
     );
+    const modules = toTemplateModuleTables(tables);
+
+    if (!departmentModule) {
+      return modules;
+    }
+
+    const photographs = await resolveActivityPhotographs(
+      collectDepartmentModulePhotographCandidates(tables),
+    );
+    return { modules, photographs };
   },
 );
 

@@ -15,6 +15,8 @@ export const toStudentAchievementResponse = (
   title: record.title,
   description: record.description,
   organization: record.organization,
+  activitySubCategory: record.activitySubCategory,
+  sponsorshipAmount: record.sponsorshipAmount,
   certificateUrl: record.certificateUrl,
   photos: record.photos,
   date: record.date,

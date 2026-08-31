@@ -4,6 +4,12 @@ import {
 import { createTemplateActivityReportGenerator } from '../../template-activity-report/services/template-activity-report-generator.service';
 import { buildStudentActivityModuleTables } from '../utils/student-activity-module-rows.util';
 import type { TemplateModuleTable } from '../../template-activity-report/template-activity-report.types';
+import { isStudentModuleReportKey } from '../config/student-module-reports.config';
+import {
+  collectStudentModulePhotographCandidates,
+  resolveStudentModulePhotographs,
+} from '../utils/student-module-photographs.util';
+import { BadRequestError } from '../../../utils/errors';
 
 const toTemplateModuleTables = (
   tables: ReturnType<typeof buildStudentActivityModuleTables>,
@@ -18,12 +24,31 @@ const toTemplateModuleTables = (
 
 export const studentActivityReportGenerator = createTemplateActivityReportGenerator(
   STUDENT_ACTIVITY_REPORT_CONFIG,
-  (context) => {
+  async (context) => {
     const aggregation = context.collectedData?.aggregation;
     if (!aggregation) return [];
-    return toTemplateModuleTables(
-      buildStudentActivityModuleTables(aggregation, context.filters.keyword),
+
+    const studentModule = context.filters.studentModule;
+    if (studentModule && !isStudentModuleReportKey(studentModule)) {
+      throw new BadRequestError(
+        `Unknown student module "${studentModule}". Use one of the existing student activity modules.`,
+      );
+    }
+
+    const tables = buildStudentActivityModuleTables(
+      aggregation,
+      context.filters.keyword,
+      studentModule,
     );
+    const modules = toTemplateModuleTables(tables);
+
+    if (!studentModule) {
+      return modules;
+    }
+
+    const candidates = collectStudentModulePhotographCandidates(tables);
+    const photographs = await resolveStudentModulePhotographs(candidates);
+    return { modules, photographs };
   },
 );
 

@@ -2,6 +2,14 @@ import { z } from 'zod';
 import { ACHIEVEMENT_TYPES } from '../database/enums';
 import { paginationSchema } from './common.validation';
 
+const optionalTrimmedString = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((value) => (value === '' ? undefined : value));
+
 const urlSchema = z
   .string()
   .trim()
@@ -19,6 +27,7 @@ export const facultyAchievementListQuerySchema = paginationSchema.extend({
   facultyName: z.string().trim().optional(),
   designation: z.string().trim().optional(),
   achievementType: z.enum(ACHIEVEMENT_TYPES).optional(),
+  activitySubCategory: z.string().trim().max(100).optional(),
   fromDate: z.coerce.date().optional(),
   toDate: z.coerce.date().optional(),
   sortBy: z
@@ -44,6 +53,13 @@ export const createFacultyAchievementSchema = z.object({
     .max(300, 'Title cannot exceed 300 characters'),
   description: z.string().trim().max(2000).optional(),
   organization: z.string().trim().max(200).optional(),
+  activitySubCategory: optionalTrimmedString(100),
+  benefit: optionalTrimmedString(2000),
+  resourceType: optionalTrimmedString(100),
+  sessionRole: z
+    .union([z.enum(['Session Chair', 'Reviewer']), z.literal('')])
+    .optional()
+    .transform((value) => (value === '' ? undefined : value)),
   certificateUrl: urlSchema,
   photos: photosSchema,
   date: z.coerce.date({ required_error: 'Date is required', invalid_type_error: 'Invalid date' }),

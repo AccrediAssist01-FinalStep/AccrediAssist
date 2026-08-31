@@ -1,6 +1,7 @@
 import path from 'path';
 import type { TemplateReportConfig } from '../template-activity-report/template-activity-report.types';
 import { STANDARD_TEMPLATE_COLUMN_WEIGHTS } from '../template-activity-report/utils/template-table.util';
+import { getDepartmentModuleReportDefinition } from './config/department-module-reports.config';
 
 export const DEPARTMENT_ACTIVITY_TABLE_HEADERS = [
   'Title',
@@ -50,7 +51,21 @@ export const DEPARTMENT_ACTIVITY_REPORT_CONFIG: TemplateReportConfig = {
     promptsDir: path.join(__dirname, 'templates'),
     fallbackIntroduction: DEPARTMENT_FALLBACK_INTRO,
     fallbackConclusion: DEPARTMENT_FALLBACK_CONCLUSION,
-    introTailoring: ({ department, academicYear, totalRecords, activeModules }) =>
-      `The following report presents department activities across all identified modules for ${department} during academic year ${academicYear}. A total of ${totalRecords} approved record(s) are documented across ${activeModules} active module(s). Each module table includes the activity title, category, department, coordinator, and date.`,
+    introTailoring: ({ department, academicYear, totalRecords, activeModules, modules }) => {
+      if (modules.length === 1) {
+        const moduleName = modules[0]?.heading ?? 'this module';
+        return `The following report presents only ${moduleName} records for ${department} during academic year ${academicYear}. A total of ${totalRecords} approved record(s) belonging to this module are documented. Factual details are taken from the institutional repository.`;
+      }
+
+      return `The following report presents department activities across all identified modules for ${department} during academic year ${academicYear}. A total of ${totalRecords} approved record(s) are documented across ${activeModules} active module(s). Each module table includes the activity title, category, department, coordinator, and date.`;
+    },
+  },
+  resolvePresentation: (filters) => {
+    const moduleDefinition = getDepartmentModuleReportDefinition(filters.departmentModule);
+    if (!moduleDefinition) return {};
+    return {
+      reportTitle: moduleDefinition.reportTitle,
+      fileNamePrefix: moduleDefinition.fileNamePrefix,
+    };
   },
 };

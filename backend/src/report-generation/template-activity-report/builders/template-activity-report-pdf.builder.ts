@@ -141,6 +141,33 @@ export const buildTemplateActivityReportPdf = async (
     writeHeading(doc, 'Conclusion');
     content.conclusion.forEach((paragraph) => writeBody(doc, paragraph));
 
+    const photographs = content.photographs ?? [];
+    if (photographs.length > 0) {
+      writeHeading(doc, 'Achievement / Activity Photographs');
+      photographs.forEach((photograph) => {
+        if (doc.y > 520) {
+          doc.addPage();
+        }
+        const imageTop = doc.y;
+        try {
+          doc.image(photograph.buffer, MARGIN, imageTop, {
+            fit: [CONTENT_WIDTH, 260],
+            align: 'center',
+          });
+          doc.y = imageTop + 270;
+        } catch {
+          doc.y = imageTop;
+        }
+        doc.font('Helvetica').fontSize(10).fillColor('#000000').text(
+          photograph.caption,
+          MARGIN,
+          doc.y,
+          { width: CONTENT_WIDTH, align: 'center' },
+        );
+        doc.moveDown(1.2);
+      });
+    }
+
     doc.end();
   });
 };

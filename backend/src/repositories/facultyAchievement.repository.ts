@@ -12,6 +12,7 @@ import {
   FacultyAchievementFilters,
   FacultyAchievementSort,
 } from '../types/facultyAchievement.types';
+import { SPECIALIZED_ACTIVITY_SUBCATEGORIES } from '../ai/utils/specialized-activity.util';
 
 export class FacultyAchievementRepository extends BaseRepository<IFacultyAchievement> {
   constructor() {
@@ -33,6 +34,12 @@ export class FacultyAchievementRepository extends BaseRepository<IFacultyAchieve
       query.achievementType = filters.achievementType;
     }
 
+    if (filters.activitySubCategory) {
+      query.activitySubCategory = filters.activitySubCategory;
+    } else {
+      query.activitySubCategory = { $nin: SPECIALIZED_ACTIVITY_SUBCATEGORIES };
+    }
+
     if (filters.fromDate || filters.toDate) {
       query.date = {};
       if (filters.fromDate) {
@@ -51,6 +58,9 @@ export class FacultyAchievementRepository extends BaseRepository<IFacultyAchieve
         { title: searchRegex },
         { organization: searchRegex },
         { description: searchRegex },
+        { benefit: searchRegex },
+        { resourceType: searchRegex },
+        { activitySubCategory: searchRegex },
       ];
     }
 

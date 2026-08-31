@@ -11,6 +11,15 @@ import { IPendingRecord } from '../types/pendingRecord.types';
 import { PendingApprovalTargetModule } from '../types/pendingRecordApproval.types';
 import { toStringArray, toStringValue } from '../ai/utils/duplicate-similarity.util';
 import { isFacultySponsoredProjectContext } from '../ai/utils/achievement-inference.util';
+import {
+  ACTIVITY_SUBCATEGORY,
+  isFacultyMouContext,
+  isFacultyResourcePersonContext,
+  isSessionChairReviewerContext,
+  isStudentSponsoredProjectContext,
+  resolveSessionRoleType,
+  resolveSpecializedActivitySubCategory,
+} from '../ai/utils/specialized-activity.util';
 import { ExtractionResult } from '../ai/interfaces/extraction.interface';
 import { BadRequestError } from './errors';
 import { NEWS_ARTICLE_CATEGORIES, NewsArticleCategory } from '../types/news.types';
@@ -255,9 +264,23 @@ export const resolveApprovalTargetModuleForRecord = (
   record: IPendingRecord,
 ): PendingApprovalTargetModule => {
   const data = getExtractedData(record);
+  const extraction = toExtractionResult(data);
+  const originalMessage = record.originalMessage;
 
   if (
-    isFacultySponsoredProjectContext(toExtractionResult(data), record.originalMessage) &&
+    isFacultyMouContext(extraction, originalMessage) ||
+    isFacultyResourcePersonContext(extraction, originalMessage) ||
+    isSessionChairReviewerContext(extraction, originalMessage)
+  ) {
+    return 'FacultyAchievement';
+  }
+
+  if (isStudentSponsoredProjectContext(extraction, originalMessage)) {
+    return 'StudentAchievement';
+  }
+
+  if (
+    isFacultySponsoredProjectContext(extraction, originalMessage) &&
     (record.category === 'Research' ||
       record.category === 'Faculty Achievement' ||
       record.category === 'Student Achievement')
@@ -279,8 +302,26 @@ const inferAchievementTypeFromExtractedData = (
     return 'Certification';
   }
 
+  const extraction = toExtractionResult(data);
+
+  if (isFacultyMouContext(extraction, originalMessage)) {
+    return 'Award';
+  }
+
+  if (isFacultyResourcePersonContext(extraction, originalMessage)) {
+    return 'Award';
+  }
+
+  if (isSessionChairReviewerContext(extraction, originalMessage)) {
+    return 'Award';
+  }
+
+  if (isStudentSponsoredProjectContext(extraction, originalMessage)) {
+    return 'Technical';
+  }
+
   if (
-    isFacultySponsoredProjectContext(toExtractionResult(data), originalMessage) ||
+    isFacultySponsoredProjectContext(extraction, originalMessage) ||
     /\b(sponsored project|funded project|research grant|funding from)\b/i.test(originalMessage)
   ) {
     return 'Research';
@@ -289,11 +330,72 @@ const inferAchievementTypeFromExtractedData = (
   return normalizeAchievementType(data.achievementType, category, fallback);
 };
 
+const parseSponsorshipAmount = (value: unknown): number | undefined => {
+  if (typeof value === 'number' && Number.isFinite(value) && value >= 0) {
+    return value;
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const digits = value.replace(/[^0-9.]/g, '');
+    if (!digits) {
+      return undefined;
+    }
+    const parsed = Number(digits);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+      return parsed;
+    }
+  }
+
+  return undefined;
+};
+
+const resolveSpecializedTitle = (
+  record: IPendingRecord,
+  data: Record<string, unknown>,
+  organization: string | undefined,
+): string => {
+  const existing = getTitle(record);
+  if (existing) {
+    return existing.slice(0, 300);
+  }
+
+  const subCategory =
+    toStringValue(data.activitySubCategory) ??
+    resolveSpecializedActivitySubCategory(toExtractionResult(data), record.originalMessage);
+
+  if (subCategory === ACTIVITY_SUBCATEGORY.MOU) {
+    return `MoU with ${organization ?? 'Organization'}`.slice(0, 300);
+  }
+  if (subCategory === ACTIVITY_SUBCATEGORY.RESOURCE_PERSON) {
+    const resourceType = toStringValue(data.resourceType) ?? 'Resource Person';
+    return `${resourceType} at ${organization ?? 'Organization'}`.slice(0, 300);
+  }
+  if (subCategory === ACTIVITY_SUBCATEGORY.SESSION_CHAIR_REVIEWER) {
+    const role =
+      resolveSessionRoleType(toExtractionResult(data), record.originalMessage) ?? 'Session Chair';
+    return `${role} at ${organization ?? 'Organization'}`.slice(0, 300);
+  }
+  if (subCategory === ACTIVITY_SUBCATEGORY.STUDENT_SPONSORED_PROJECT) {
+    return requireValue(getTitle(record), 'project name').slice(0, 300);
+  }
+
+  return requireValue(getTitle(record), 'title').slice(0, 300);
+};
+
 export const mapPendingRecordToStudentAchievement = (
   record: IPendingRecord,
 ): Record<string, unknown> => {
   const data = getExtractedData(record);
   const photoUrls = getPhotoUrls(data);
+  const organization =
+    toStringValue(data.organization) ??
+    toStringValue(data.company) ??
+    toStringValue(getStructuredData(data).organization) ??
+    undefined;
+  const specializedSubCategory =
+    toStringValue(data.activitySubCategory) ??
+    resolveSpecializedActivitySubCategory(toExtractionResult(data), record.originalMessage);
+  const isStudentSponsored = specializedSubCategory === ACTIVITY_SUBCATEGORY.STUDENT_SPONSORED_PROJECT;
 
   return {
     studentName: requireValue(getStudentName(data), 'student name'),
@@ -306,13 +408,17 @@ export const mapPendingRecordToStudentAchievement = (
       'Technical',
       record.originalMessage,
     ),
-    title: requireValue(getTitle(record), 'title').slice(0, 300),
+    title: isStudentSponsored
+      ? resolveSpecializedTitle(record, data, organization)
+      : requireValue(getTitle(record), 'title').slice(0, 300),
     description: toStringValue(data.description)?.slice(0, 2000) ?? undefined,
-    organization:
-      toStringValue(data.organization) ??
-      toStringValue(data.company) ??
-      toStringValue(getStructuredData(data).organization) ??
-      undefined,
+    organization,
+    activitySubCategory: isStudentSponsored
+      ? ACTIVITY_SUBCATEGORY.STUDENT_SPONSORED_PROJECT
+      : toStringValue(data.activitySubCategory) ?? undefined,
+    sponsorshipAmount: isStudentSponsored
+      ? parseSponsorshipAmount(data.sponsorshipAmount ?? data.amount ?? data.package)
+      : undefined,
     certificateUrl: getCertificateUrl(data),
     photos: photoUrls.length > 0 ? photoUrls : undefined,
     date: resolveRecordDate(data),
@@ -324,6 +430,18 @@ export const mapPendingRecordToFacultyAchievement = (
 ): Record<string, unknown> => {
   const data = getExtractedData(record);
   const photoUrls = getPhotoUrls(data);
+  const organization =
+    toStringValue(data.organization) ??
+    toStringValue(data.company) ??
+    toStringValue(getStructuredData(data).organization) ??
+    undefined;
+  const specializedSubCategory =
+    toStringValue(data.activitySubCategory) ??
+    resolveSpecializedActivitySubCategory(toExtractionResult(data), record.originalMessage);
+  const isSpecializedFaculty =
+    specializedSubCategory === ACTIVITY_SUBCATEGORY.MOU ||
+    specializedSubCategory === ACTIVITY_SUBCATEGORY.RESOURCE_PERSON ||
+    specializedSubCategory === ACTIVITY_SUBCATEGORY.SESSION_CHAIR_REVIEWER;
 
   return {
     facultyName: requireValue(getFacultyName(data), 'faculty name'),
@@ -334,13 +452,26 @@ export const mapPendingRecordToFacultyAchievement = (
       'Award',
       record.originalMessage,
     ),
-    title: requireValue(getTitle(record), 'title').slice(0, 300),
+    title: isSpecializedFaculty
+      ? resolveSpecializedTitle(record, data, organization)
+      : requireValue(getTitle(record), 'title').slice(0, 300),
     description: toStringValue(data.description)?.slice(0, 2000) ?? undefined,
-    organization:
-      toStringValue(data.organization) ??
-      toStringValue(data.company) ??
-      toStringValue(getStructuredData(data).organization) ??
-      undefined,
+    organization,
+    activitySubCategory: isSpecializedFaculty ? specializedSubCategory : toStringValue(data.activitySubCategory),
+    benefit:
+      specializedSubCategory === ACTIVITY_SUBCATEGORY.MOU
+        ? toStringValue(data.benefit) ?? toStringValue(data.description)?.slice(0, 2000)
+        : undefined,
+    resourceType:
+      specializedSubCategory === ACTIVITY_SUBCATEGORY.RESOURCE_PERSON
+        ? toStringValue(data.resourceType) ?? 'Resource Person'
+        : undefined,
+    sessionRole:
+      specializedSubCategory === ACTIVITY_SUBCATEGORY.SESSION_CHAIR_REVIEWER
+        ? resolveSessionRoleType(toExtractionResult(data), record.originalMessage) ??
+          (toStringValue(data.sessionRole) as 'Session Chair' | 'Reviewer' | null) ??
+          'Session Chair'
+        : undefined,
     certificateUrl: getCertificateUrl(data),
     photos: photoUrls.length > 0 ? photoUrls : undefined,
     date: resolveRecordDate(data),

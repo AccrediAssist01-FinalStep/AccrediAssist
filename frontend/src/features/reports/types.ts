@@ -18,6 +18,9 @@ export interface ReportTemplate {
   icon: LucideIcon;
   backendReportType: BackendReportType;
   accent: string;
+  studentModule?: string;
+  facultyModule?: string;
+  departmentModule?: string;
   defaultFilters?: {
     academicYear?: string;
     month?: string;
@@ -151,6 +154,7 @@ export const SECTION_LABELS: Record<string, string> = {
   tables: 'Data Tables',
   'date-register': 'Date-wise Activity Register',
   images: 'Event Images',
+  photographs: 'Achievement / Activity Photographs',
   recommendations: 'Recommendations',
   appendix: 'Appendix',
 };

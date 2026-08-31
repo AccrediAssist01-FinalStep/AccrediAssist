@@ -16,6 +16,7 @@ class FacultyAchievementController extends BaseController {
         facultyName: query.facultyName,
         designation: query.designation,
         achievementType: query.achievementType,
+        activitySubCategory: query.activitySubCategory,
         fromDate: query.fromDate,
         toDate: query.toDate,
       },

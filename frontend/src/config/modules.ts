@@ -8,11 +8,14 @@ import {
   ClipboardList,
   FileText,
   GraduationCap,
+  Handshake,
   Landmark,
   LayoutDashboard,
   Lightbulb,
   LogOut,
   Newspaper,
+  Presentation,
+  Scale,
   Search,
   Settings,
   ShieldCheck,
@@ -82,6 +85,12 @@ const studentColumns = {
     { key: 'venue', label: 'Venue' },
     { key: 'date', label: 'Date', format: 'date' as const },
   ],
+  sponsoredProject: [
+    { key: 'studentName', label: 'Student' },
+    { key: 'title', label: 'Project Name' },
+    { key: 'organization', label: 'Sponsored Organization' },
+    { key: 'sponsorshipAmount', label: 'Sponsorship Amount' },
+  ],
 };
 
 const facultyColumns = {
@@ -107,6 +116,24 @@ const facultyColumns = {
     { key: 'filingDate', label: 'Filing Date', format: 'date' as const },
   ],
   event: studentColumns.event,
+  mou: [
+    { key: 'facultyName', label: 'Faculty' },
+    { key: 'organization', label: 'Company / Organization' },
+    { key: 'date', label: 'Date of MoU', format: 'date' as const },
+    { key: 'benefit', label: 'Benefit' },
+  ],
+  resourcePerson: [
+    { key: 'facultyName', label: 'Faculty' },
+    { key: 'organization', label: 'College / University / Organization' },
+    { key: 'resourceType', label: 'Resource Type' },
+    { key: 'date', label: 'Date', format: 'date' as const },
+  ],
+  sessionChairReviewer: [
+    { key: 'facultyName', label: 'Faculty' },
+    { key: 'organization', label: 'Organization' },
+    { key: 'sessionRole', label: 'Type' },
+    { key: 'date', label: 'Date', format: 'date' as const },
+  ],
 };
 
 const studentSubmodule = (
@@ -259,6 +286,14 @@ export const ERP_MODULES: ErpModuleConfig[] = [
         viewType: 'records',
         description: 'NSS and NCC social service and leadership activities.',
       }),
+      studentSubmodule('sponsored-projects', 'Sponsored Projects', 'sponsored-projects', Landmark, {
+        apiPath: '/student-achievements',
+        listFilters: { achievementType: 'Technical', activitySubCategory: 'Student Sponsored Project' },
+        columns: studentColumns.sponsoredProject,
+        searchPlaceholder: 'Search student sponsored projects...',
+        viewType: 'records',
+        description: 'Student projects sponsored by organizations.',
+      }),
     ],
   },
   {
@@ -360,6 +395,30 @@ export const ERP_MODULES: ErpModuleConfig[] = [
         searchPlaceholder: 'Search guest lecture records...',
         viewType: 'records',
         description: 'Guest lectures delivered or organized.',
+      }),
+      facultySubmodule('mous', 'MoUs', 'mous', Handshake, {
+        apiPath: '/faculty-achievements',
+        listFilters: { achievementType: 'Award', activitySubCategory: 'MoU' },
+        columns: facultyColumns.mou,
+        searchPlaceholder: 'Search faculty MoUs...',
+        viewType: 'records',
+        description: 'Memoranda of Understanding signed with companies and organizations.',
+      }),
+      facultySubmodule('resource-person', 'Faculty as Resource Person', 'resource-person', Presentation, {
+        apiPath: '/faculty-achievements',
+        listFilters: { achievementType: 'Award', activitySubCategory: 'Resource Person' },
+        columns: facultyColumns.resourcePerson,
+        searchPlaceholder: 'Search resource person records...',
+        viewType: 'records',
+        description: 'Faculty participation as resource persons, invited experts, and related roles.',
+      }),
+      facultySubmodule('session-chair-reviewer', 'Session Chair / Reviewer', 'session-chair-reviewer', Scale, {
+        apiPath: '/faculty-achievements',
+        listFilters: { achievementType: 'Award', activitySubCategory: 'Session Chair / Reviewer' },
+        columns: facultyColumns.sessionChairReviewer,
+        searchPlaceholder: 'Search session chair and reviewer records...',
+        viewType: 'records',
+        description: 'Faculty participation as session chair or reviewer.',
       }),
     ],
   },

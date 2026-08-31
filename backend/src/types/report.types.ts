@@ -136,4 +136,7 @@ export interface GenerateReportFilters {
   endDate?: Date;
   eventReportId?: string;
   eventTitle?: string;
+  studentModule?: string;
+  facultyModule?: string;
+  departmentModule?: string;
 }

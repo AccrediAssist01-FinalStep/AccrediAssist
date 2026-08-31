@@ -16,6 +16,12 @@ export interface ReportGenerationFilters {
   year?: number;
   eventReportId?: string;
   eventTitle?: string;
+  /** When set with Student Activities, generate a single-module student report */
+  studentModule?: string;
+  /** When set with Faculty Activities, generate a single-module faculty report */
+  facultyModule?: string;
+  /** When set with Department Activities, generate a single-module department report */
+  departmentModule?: string;
 }
 
 /** Lifecycle status for the generation pipeline (architecture only) */

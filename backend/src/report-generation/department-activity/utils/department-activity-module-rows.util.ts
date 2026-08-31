@@ -15,6 +15,7 @@ export interface DepartmentActivityModuleTable {
   heading: string;
   sectionKey: string;
   rows: DepartmentActivityModuleRow[];
+  sourceRecords: Record<string, unknown>[];
 }
 
 const formatDate = (value: unknown): string => {
@@ -135,12 +136,16 @@ const assignExclusiveRecords = (
 export const buildDepartmentActivityModuleTables = (
   aggregation: ReportAggregationResult,
   keyword?: string,
+  departmentModule?: string,
 ): DepartmentActivityModuleTable[] => {
-  const definitions = getReportSectionDefinitions('Department Activities');
+  const allDefinitions = getReportSectionDefinitions('Department Activities');
+  const definitions = departmentModule
+    ? allDefinitions.filter((section) => section.key === departmentModule)
+    : allDefinitions;
 
   const eventBuckets = assignExclusiveRecords(
     aggregation.records.byModule.completedEventReports ?? [],
-    definitions,
+    allDefinitions,
     ['industrial-visits'],
     'department-events',
     keyword,
@@ -148,7 +153,7 @@ export const buildDepartmentActivityModuleTables = (
 
   const facultyAchievementBuckets = assignExclusiveRecords(
     aggregation.records.byModule.facultyAchievements ?? [],
-    definitions,
+    allDefinitions,
     ['accreditation-activities'],
     'department-achievements',
     keyword,
@@ -177,9 +182,10 @@ export const buildDepartmentActivityModuleTables = (
 
     return {
       moduleNumber,
-      heading: `Module ${moduleNumber}: ${label}`,
+      heading: departmentModule ? label : `Module ${moduleNumber}: ${label}`,
       sectionKey: section.key,
       rows,
+      sourceRecords,
     };
   });
 };

@@ -20,7 +20,7 @@ async function main() {
   assert('Report title matches template', content.reportTitle === 'STUDENT ACHIEVEMENT REPORT');
   assert('Has introduction paragraphs', content.introduction.length >= 2);
   assert('Has conclusion paragraphs', content.conclusion.length >= 2);
-  assert('Has 12 modules', content.modules.length === 12, String(content.modules.length));
+  assert('Has 13 modules', content.modules.length === 13, String(content.modules.length));
   assert(
     'Module 1 is Sports',
     content.modules[0]?.heading === 'Module 1: Sports',
@@ -32,6 +32,11 @@ async function main() {
     'Module 12 is NSS / NCC',
     content.modules[11]?.heading === 'Module 12: NSS / NCC',
     content.modules[11]?.heading,
+  );
+  assert(
+    'Module 13 is Sponsored Projects',
+    content.modules[12]?.heading === 'Module 13: Sponsored Projects',
+    content.modules[12]?.heading,
   );
 
   const introWords = content.introduction.join(' ').split(/\s+/).length;

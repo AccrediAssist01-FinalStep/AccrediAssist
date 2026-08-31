@@ -48,7 +48,7 @@ export function RecordCreateDialog({
   onOpenChange,
   onCreated,
 }: RecordCreateDialogProps) {
-  const editableFields = useMemo(() => getEditableRecordFields(apiPath), [apiPath]);
+  const editableFields = useMemo(() => getEditableRecordFields(apiPath, configId), [apiPath, configId]);
   const { createMutation } = useFeatureRecordMutations(configId, apiPath);
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
@@ -73,6 +73,16 @@ export function RecordCreateDialog({
       ...buildRecordPayload(formValues, editableFields),
       ...listFilters,
     };
+
+    if (!payload.title && typeof payload.organization === 'string') {
+      if (configId === 'mous') {
+        payload.title = `MoU with ${payload.organization}`;
+      } else if (configId === 'resource-person') {
+        payload.title = `${formValues.resourceType || 'Resource Person'} at ${payload.organization}`;
+      } else if (configId === 'session-chair-reviewer') {
+        payload.title = `${formValues.sessionRole || 'Session Chair'} at ${payload.organization}`;
+      }
+    }
 
     await createMutation.mutateAsync(payload);
     onOpenChange(false);
@@ -131,7 +141,10 @@ export function RecordCreateDialog({
                 ) : (
                   <Input
                     id={`create-${field.key}`}
-                    type={field.type === 'date' ? 'date' : 'text'}
+                    type={
+                      field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'
+                    }
+                    min={field.type === 'number' ? 0 : undefined}
                     value={formValues[field.key] ?? ''}
                     onChange={(event) => handleFieldChange(field.key, event.target.value)}
                     disabled={isLocked}

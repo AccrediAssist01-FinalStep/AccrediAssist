@@ -61,7 +61,7 @@ const resolveCategory = (
   );
   return {
     corrected: corrected.category,
-    recordCategory: mapClassificationToRecordCategory(corrected.category, extracted as never),
+    recordCategory: mapClassificationToRecordCategory(corrected.category, extracted as never, message),
   };
 };
 
@@ -74,6 +74,7 @@ const textModules: Array<{
   extracted: Record<string, unknown>;
   expectedRecord: string;
   expectedModule: string;
+  expectedSub?: string;
 }> = [
   {
     label: 'Placement',
@@ -158,6 +159,73 @@ const textModules: Array<{
     expectedModule: 'Faculty Activities',
   },
   {
+    label: 'Faculty MoU',
+    text: 'Prof. ABC signed an MoU with XYZ Pvt Ltd on 20 August 2026. The MoU provides internship opportunities for students.',
+    geminiCategory: 'Internship',
+    extracted: {
+      facultyNames: ['Prof. ABC'],
+      organization: 'XYZ Pvt Ltd',
+      title: 'MoU with XYZ Pvt Ltd',
+      description: 'The MoU provides internship opportunities for students.',
+    },
+    expectedRecord: 'Faculty Achievement',
+    expectedModule: 'Faculty Activities',
+    expectedSub: 'MoU',
+  },
+  {
+    label: 'Student Sponsored Project',
+    text: "Student Rahul's project was sponsored by ABC Industries with sponsorship of ₹50,000.",
+    geminiCategory: 'Student Achievement',
+    extracted: {
+      studentNames: ['Rahul'],
+      title: 'Sponsored student project',
+      organization: 'ABC Industries',
+      description: 'sponsorship of ₹50,000',
+    },
+    expectedRecord: 'Student Achievement',
+    expectedModule: 'Student Activities',
+    expectedSub: 'Student Sponsored Project',
+  },
+  {
+    label: 'Faculty Resource Person',
+    text: 'Prof. ABC was invited as a resource person at XYZ University for a technical session.',
+    geminiCategory: 'Completed Event Report',
+    extracted: {
+      facultyNames: ['Prof. ABC'],
+      organization: 'XYZ University',
+      title: 'Invited as resource person',
+    },
+    expectedRecord: 'Faculty Achievement',
+    expectedModule: 'Faculty Activities',
+    expectedSub: 'Resource Person',
+  },
+  {
+    label: 'Session Chair',
+    text: 'Prof. ABC served as a session chair at XYZ Conference on 25 August 2026.',
+    geminiCategory: 'Faculty Achievement',
+    extracted: {
+      facultyNames: ['Prof. ABC'],
+      organization: 'XYZ Conference',
+      title: 'Session chair',
+    },
+    expectedRecord: 'Faculty Achievement',
+    expectedModule: 'Faculty Activities',
+    expectedSub: 'Session Chair / Reviewer',
+  },
+  {
+    label: 'Reviewer',
+    text: 'Prof. ABC reviewed research papers for XYZ conference.',
+    geminiCategory: 'Publication',
+    extracted: {
+      facultyNames: ['Prof. ABC'],
+      organization: 'XYZ conference',
+      title: 'Reviewed research papers',
+    },
+    expectedRecord: 'Faculty Achievement',
+    expectedModule: 'Faculty Activities',
+    expectedSub: 'Session Chair / Reviewer',
+  },
+  {
     label: 'Workshop Attended (Faculty)',
     text: 'Prof. Sneha Kulkarni attended a 3-day workshop on Generative AI organized by IIT Bombay.',
     geminiCategory: 'Workshop Attended',
@@ -204,7 +272,9 @@ for (const test of textModules) {
   );
   const activity = resolveActivityClassification(recordCategory, test.extracted as never, test.text);
   const pass =
-    recordCategory === test.expectedRecord && activity.module === test.expectedModule;
+    recordCategory === test.expectedRecord &&
+    activity.module === test.expectedModule &&
+    (!test.expectedSub || activity.subCategory === test.expectedSub);
   assert(
     `Text → ${test.label}`,
     pass,

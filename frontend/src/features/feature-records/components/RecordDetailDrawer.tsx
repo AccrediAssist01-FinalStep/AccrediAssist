@@ -74,7 +74,7 @@ export function RecordDetailDrawer({
 }: RecordDetailDrawerProps) {
   const { hasPermission } = useAuth();
   const canEdit = hasPermission('pending_records_approve');
-  const editableFields = useMemo(() => getEditableRecordFields(apiPath), [apiPath]);
+  const editableFields = useMemo(() => getEditableRecordFields(apiPath, configId), [apiPath, configId]);
   const { updateMutation, deleteMutation } = useFeatureRecordMutations(configId, apiPath);
 
   const [mode, setMode] = useState<'view' | 'edit'>('view');
@@ -194,7 +194,10 @@ export function RecordDetailDrawer({
                     ) : (
                       <Input
                         id={`edit-${field.key}`}
-                        type={field.type === 'date' ? 'date' : 'text'}
+                        type={
+                          field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'
+                        }
+                        min={field.type === 'number' ? 0 : undefined}
                         value={formValues[field.key] ?? ''}
                         onChange={(event) => handleFieldChange(field.key, event.target.value)}
                       />

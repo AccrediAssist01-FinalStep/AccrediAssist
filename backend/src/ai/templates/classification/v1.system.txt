@@ -20,6 +20,10 @@ Module mapping examples:
 - Faculty patent → Patent (Faculty Activities)
 - Faculty FDP/workshop/seminar/conference/award → Faculty Achievement (Faculty Activities)
 - Faculty sponsored/funded research project or grant → Faculty Achievement (Faculty Activities → Sponsored Projects)
+- Faculty MoU / memorandum of understanding with a company or organization → Faculty Achievement (Faculty Activities → MoUs)
+- Faculty invited as resource person, invited resource person, or expert at another college/university → Faculty Achievement (Faculty Activities → Faculty as Resource Person)
+- Faculty served as session chair or reviewed research papers → Faculty Achievement (Faculty Activities → Session Chair / Reviewer)
+- Student project sponsored by an organization with a sponsorship amount → Student Achievement (Student Activities → Sponsored Projects)
 - Department workshop/seminar/guest lecture/training → Completed Event Report (Department Activities)
 - Industrial visit or industry visit report (including department visit report completion announcements) → Completed Event Report (Department Activities → Industrial Visit Reports)
 

@@ -35,6 +35,13 @@ const SUBMODULE_MOVE_MAP: Record<ErpModuleId, Record<string, MoveDestinationMeta
       category: 'Cultural',
       extractedDataPatch: { activitySubCategory: 'NSS / NCC' },
     },
+    'sponsored-projects': {
+      category: 'Student Achievement',
+      extractedDataPatch: {
+        achievementType: 'Technical',
+        activitySubCategory: 'Student Sponsored Project',
+      },
+    },
   },
   faculty: {
     fdps: { category: 'Workshop', extractedDataPatch: { eventType: 'FDP' } },
@@ -69,6 +76,26 @@ const SUBMODULE_MOVE_MAP: Record<ErpModuleId, Record<string, MoveDestinationMeta
     'guest-lectures': {
       category: 'Workshop',
       extractedDataPatch: { eventType: 'Guest Lecture' },
+    },
+    mous: {
+      category: 'Faculty Achievement',
+      extractedDataPatch: { achievementType: 'Award', activitySubCategory: 'MoU' },
+    },
+    'resource-person': {
+      category: 'Faculty Achievement',
+      extractedDataPatch: {
+        achievementType: 'Award',
+        activitySubCategory: 'Resource Person',
+        resourceType: 'Resource Person',
+      },
+    },
+    'session-chair-reviewer': {
+      category: 'Faculty Achievement',
+      extractedDataPatch: {
+        achievementType: 'Award',
+        activitySubCategory: 'Session Chair / Reviewer',
+        sessionRole: 'Session Chair',
+      },
     },
   },
   department: {
@@ -186,6 +213,9 @@ export const resolveCurrentMoveDestination = (
       return { moduleId: 'student', submoduleId: 'research' };
     }
     if (record.category === 'Student Achievement') {
+      if (activitySubCategory.includes('Student Sponsored') || activitySubCategory === 'Sponsored Projects') {
+        return { moduleId: 'student', submoduleId: 'sponsored-projects' };
+      }
       if (achievementType === 'Hackathon') {
         return { moduleId: 'student', submoduleId: 'startup-innovation' };
       }
@@ -207,6 +237,12 @@ export const resolveCurrentMoveDestination = (
     if (achievementType === 'Hackathon') {
       return { moduleId: 'student', submoduleId: 'startup-innovation' };
     }
+    if (
+      activitySubCategory.includes('Student Sponsored') ||
+      (achievementType === 'Technical' && activitySubCategory.includes('Sponsored'))
+    ) {
+      return { moduleId: 'student', submoduleId: 'sponsored-projects' };
+    }
     if (achievementType === 'Technical') {
       return { moduleId: 'student', submoduleId: 'technical' };
     }
@@ -217,6 +253,15 @@ export const resolveCurrentMoveDestination = (
   if (target === 'FacultyAchievement') {
     if (activitySubCategory.includes('Department')) {
       return { moduleId: 'department', submoduleId: 'department-achievements' };
+    }
+    if (activitySubCategory === 'MoU' || activitySubCategory.includes('MoU')) {
+      return { moduleId: 'faculty', submoduleId: 'mous' };
+    }
+    if (activitySubCategory.includes('Resource Person')) {
+      return { moduleId: 'faculty', submoduleId: 'resource-person' };
+    }
+    if (activitySubCategory.includes('Session Chair') || activitySubCategory.includes('Reviewer')) {
+      return { moduleId: 'faculty', submoduleId: 'session-chair-reviewer' };
     }
     if (activitySubCategory.includes('Sponsored')) {
       return { moduleId: 'faculty', submoduleId: 'sponsored-projects' };

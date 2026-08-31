@@ -46,6 +46,25 @@ const facultyAchievementSchema = new Schema<IFacultyAchievement>(
       trim: true,
       maxlength: [200, 'Organization cannot exceed 200 characters'],
     },
+    activitySubCategory: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Activity sub-category cannot exceed 100 characters'],
+    },
+    benefit: {
+      type: String,
+      trim: true,
+      maxlength: [2000, 'Benefit cannot exceed 2000 characters'],
+    },
+    resourceType: {
+      type: String,
+      trim: true,
+      maxlength: [100, 'Resource type cannot exceed 100 characters'],
+    },
+    sessionRole: {
+      type: String,
+      enum: ['Session Chair', 'Reviewer'],
+    },
     certificateUrl: {
       type: String,
       trim: true,
@@ -79,6 +98,7 @@ applyBaseSchema(facultyAchievementSchema);
 
 facultyAchievementSchema.index({ facultyName: 1 });
 facultyAchievementSchema.index({ achievementType: 1 });
+facultyAchievementSchema.index({ activitySubCategory: 1 });
 facultyAchievementSchema.index({ date: -1 });
 facultyAchievementSchema.index(
   {

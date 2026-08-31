@@ -143,6 +143,9 @@ export function GenerateReportDialog({
       keyword: values.keyword || undefined,
       startDate: values.startDate || undefined,
       endDate: values.endDate || undefined,
+      studentModule: template.studentModule,
+      facultyModule: template.facultyModule,
+      departmentModule: template.departmentModule,
     });
   };
 
@@ -162,10 +165,16 @@ export function GenerateReportDialog({
             ) : (
               <>
                 Configure filters and export format. AI summary, charts, and document generation start immediately.
-                {template?.backendReportType === 'Student Activities' && (
+                {template?.backendReportType === 'Student Activities' && !template?.studentModule && (
                   <span className="mt-2 block text-xs">
                     Includes a date-wise tabular register of all sub-modules (Sports, Cultural, Technical, Placements,
                     Workshops, etc.). Use Start/End Date or Academic Year to filter the date range.
+                  </span>
+                )}
+                {(template?.studentModule || template?.facultyModule || template?.departmentModule) && (
+                  <span className="mt-2 block text-xs">
+                    Generates a module-wise report for {template.title.replace(/ Report$/, '')} only. Existing year,
+                    department, and name filters still apply.
                   </span>
                 )}
               </>

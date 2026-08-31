@@ -9,6 +9,10 @@ export interface IFacultyAchievement extends IBaseDocument {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  benefit?: string;
+  resourceType?: string;
+  sessionRole?: 'Session Chair' | 'Reviewer';
   certificateUrl?: string;
   photos: string[];
   date: Date;
@@ -22,6 +26,10 @@ export interface CreateFacultyAchievementInput {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  benefit?: string;
+  resourceType?: string;
+  sessionRole?: 'Session Chair' | 'Reviewer';
   certificateUrl?: string;
   photos?: string[];
   date: Date;
@@ -35,6 +43,10 @@ export interface UpdateFacultyAchievementInput {
   title?: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  benefit?: string;
+  resourceType?: string;
+  sessionRole?: 'Session Chair' | 'Reviewer';
   certificateUrl?: string;
   photos?: string[];
   date?: Date;
@@ -49,6 +61,10 @@ export interface IFacultyAchievementResponse {
   title: string;
   description?: string;
   organization?: string;
+  activitySubCategory?: string;
+  benefit?: string;
+  resourceType?: string;
+  sessionRole?: 'Session Chair' | 'Reviewer';
   certificateUrl?: string;
   photos: string[];
   date: Date;
@@ -62,6 +78,7 @@ export interface FacultyAchievementFilters {
   facultyName?: string;
   designation?: string;
   achievementType?: AchievementType;
+  activitySubCategory?: string;
   fromDate?: Date;
   toDate?: Date;
 }

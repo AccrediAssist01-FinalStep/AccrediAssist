@@ -12,6 +12,7 @@ export interface FacultyActivityModuleTable {
   sectionKey: string;
   headers: string[];
   rows: string[][];
+  sourceRecords: Record<string, unknown>[];
 }
 
 const getCategoryValue = (record: Record<string, unknown>): string =>
@@ -53,12 +54,28 @@ const matchesKeyword = (record: Record<string, unknown>, keyword?: string): bool
   });
 };
 
+const matchesActivitySubCategory = (
+  record: Record<string, unknown>,
+  match?: string,
+): boolean => {
+  if (!match) return true;
+  return String(record.activitySubCategory ?? '') === match;
+};
+
 const recordMatchesSection = (
   record: Record<string, unknown>,
   section: ReportSectionDefinition,
-): boolean =>
-  matchesCategory(record, section.categoryMatch) &&
-  matchesTitlePattern(record, section.titlePattern);
+): boolean => {
+  if (section.activitySubCategoryMatch) {
+    return (
+      matchesActivitySubCategory(record, section.activitySubCategoryMatch) ||
+      (matchesTitlePattern(record, section.titlePattern) &&
+        matchesCategory(record, section.categoryMatch))
+    );
+  }
+
+  return matchesCategory(record, section.categoryMatch) && matchesTitlePattern(record, section.titlePattern);
+};
 
 const MODULE_NUMBER_BY_KEY: Record<string, number> = {
   fdp: 1,
@@ -73,6 +90,9 @@ const MODULE_NUMBER_BY_KEY: Record<string, number> = {
   certifications: 10,
   awards: 11,
   'guest-lectures': 12,
+  mous: 13,
+  'resource-person': 14,
+  'session-chair-reviewer': 15,
 };
 
 const MODULE_HEADING_BY_KEY: Record<string, string> = {
@@ -88,9 +108,15 @@ const MODULE_HEADING_BY_KEY: Record<string, string> = {
   certifications: 'Certifications',
   awards: 'Awards',
   'guest-lectures': 'Guest Lectures',
+  mous: 'MoUs',
+  'resource-person': 'Faculty as Resource Person',
+  'session-chair-reviewer': 'Session Chair / Reviewer',
 };
 
 const FACULTY_ACHIEVEMENT_SECTION_PRIORITY = [
+  'mous',
+  'resource-person',
+  'session-chair-reviewer',
   'sponsored-projects',
   'consultancy',
   'certifications',
@@ -130,12 +156,16 @@ const assignExclusiveRecords = (
 export const buildFacultyActivityModuleTables = (
   aggregation: ReportAggregationResult,
   keyword?: string,
+  facultyModule?: string,
 ): FacultyActivityModuleTable[] => {
-  const definitions = getReportSectionDefinitions('Faculty Activities');
+  const allDefinitions = getReportSectionDefinitions('Faculty Activities');
+  const definitions = facultyModule
+    ? allDefinitions.filter((section) => section.key === facultyModule)
+    : allDefinitions;
 
   const facultyAchievementBuckets = assignExclusiveRecords(
     aggregation.records.byModule.facultyAchievements ?? [],
-    definitions,
+    allDefinitions,
     FACULTY_ACHIEVEMENT_SECTION_PRIORITY,
     'awards',
     keyword,
@@ -143,7 +173,7 @@ export const buildFacultyActivityModuleTables = (
 
   const publicationBuckets = assignExclusiveRecords(
     aggregation.records.byModule.publications ?? [],
-    definitions,
+    allDefinitions,
     ['book-chapters'],
     'publications',
     keyword,
@@ -179,10 +209,11 @@ export const buildFacultyActivityModuleTables = (
 
     return {
       moduleNumber,
-      heading: `Module ${moduleNumber}: ${label}`,
+      heading: facultyModule ? label : `Module ${moduleNumber}: ${label}`,
       sectionKey: section.key,
       headers,
       rows,
+      sourceRecords,
     };
   });
 };

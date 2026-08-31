@@ -158,6 +158,7 @@ export class AiPipelineService {
     let recordCategory = mapClassificationToRecordCategory(
       correctedClassification.category,
       extractedData,
+      originalMessage,
     );
 
     if (pdfResponse && (pdfResponse.result.confidence ?? 0) >= 60) {
