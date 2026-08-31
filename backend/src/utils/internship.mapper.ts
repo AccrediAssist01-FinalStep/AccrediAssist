@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IInternship, IInternshipResponse } from '../types/internship.types';
 
 export const toInternshipResponse = (record: IInternship): IInternshipResponse => ({
@@ -10,7 +11,7 @@ export const toInternshipResponse = (record: IInternship): IInternshipResponse =
   startDate: record.startDate,
   endDate: record.endDate,
   certificateUrl: record.certificateUrl,
-  approvedBy: record.approvedBy,
+  approvedBy: record.approvedBy as Types.ObjectId | undefined,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });

@@ -84,6 +84,7 @@ const imageParagraphs = (image: ResolvedWorkshopImage): Paragraph[] => {
         spacing: { before: 120, after: 80 },
         children: [
           new ImageRun({
+            type: 'jpg',
             data: image.bytes,
             transformation: { width: 450, height: 280 },
           }),

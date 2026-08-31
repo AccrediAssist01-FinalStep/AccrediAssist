@@ -18,6 +18,7 @@ export interface ExtractionResult {
   date: string | null;
   location: string | null;
   confidence: number | null;
+  [key: string]: unknown;
 }
 
 export interface ExtractionAgentResponse {

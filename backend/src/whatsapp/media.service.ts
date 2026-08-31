@@ -9,7 +9,7 @@ import {
   CloudinaryUploadHandler,
   cloudinaryService,
 } from '../services/cloudinary.service';
-import { loadBaileys } from './baileys.loader';
+import { BaileysModule, loadBaileys } from './baileys.loader';
 import { mediaConfig } from './whatsapp.config';
 import { DetectedWhatsAppMedia, WhatsAppMediaMetadata, WhatsAppMediaType } from './types';
 
@@ -215,9 +215,13 @@ export class MediaService {
 }
 
 export const defaultMediaBufferDownloader: MediaBufferDownloader = async (message, socket) => {
+  if (!message.key) {
+    throw new BadRequestError('WhatsApp media message is missing a key');
+  }
+
   const baileys = await loadBaileys();
   const downloaded = await baileys.downloadMediaMessage(
-    message,
+    message as Parameters<BaileysModule['downloadMediaMessage']>[0],
     'buffer',
     {},
     {

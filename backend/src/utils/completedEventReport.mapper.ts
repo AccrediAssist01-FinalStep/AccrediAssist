@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import {
   ICompletedEventReport,
   ICompletedEventReportResponse,
@@ -17,7 +18,7 @@ export const toCompletedEventReportResponse = (
   description: record.description,
   photoUrls: record.photoUrls,
   generatedReportUrl: record.generatedReportUrl,
-  approvedBy: record.approvedBy,
+  approvedBy: record.approvedBy as Types.ObjectId | undefined,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });

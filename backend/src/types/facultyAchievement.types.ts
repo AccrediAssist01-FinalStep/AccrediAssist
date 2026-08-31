@@ -12,7 +12,7 @@ export interface IFacultyAchievement extends IBaseDocument {
   certificateUrl?: string;
   photos: string[];
   date: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface CreateFacultyAchievementInput {
@@ -25,7 +25,7 @@ export interface CreateFacultyAchievementInput {
   certificateUrl?: string;
   photos?: string[];
   date: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface UpdateFacultyAchievementInput {
@@ -38,7 +38,7 @@ export interface UpdateFacultyAchievementInput {
   certificateUrl?: string;
   photos?: string[];
   date?: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface IFacultyAchievementResponse {

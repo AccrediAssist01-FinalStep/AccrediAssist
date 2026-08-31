@@ -1,10 +1,15 @@
 import { DetectedWhatsAppMedia, WhatsAppIncomingMessage, WhatsAppMediaMetadata } from './types';
 
 type WAMessage = import('@whiskeysockets/baileys').proto.IWebMessageInfo;
+type IMessage = import('@whiskeysockets/baileys').proto.IMessage;
 
 export interface BaileysMessageUtils {
-  extractMessageContent: (message: NonNullable<WAMessage['message']>) => Record<string, unknown> | null | undefined;
-  getContentType: (content: Record<string, unknown> | null | undefined) => string | undefined;
+  extractMessageContent: (
+    message: IMessage | null | undefined,
+  ) => IMessage | Record<string, unknown> | null | undefined;
+  getContentType: (
+    content: IMessage | Record<string, unknown> | null | undefined,
+  ) => string | undefined;
 }
 
 export interface StandardMessageInput {
@@ -169,12 +174,12 @@ export const resolveSenderLabel = (message: WAMessage): string => {
     return pushName;
   }
 
-  const participant = message.key.participant ?? message.key.remoteJid ?? 'Unknown Sender';
+  const participant = message.key?.participant ?? message.key?.remoteJid ?? 'Unknown Sender';
   return participant.split('@')[0] ?? participant;
 };
 
 export const createTestMessageUtils = (): BaileysMessageUtils => ({
-  extractMessageContent: (message) => message as Record<string, unknown>,
+  extractMessageContent: (message) => message as unknown as Record<string, unknown>,
   getContentType: (content) => {
     if (!content) {
       return undefined;

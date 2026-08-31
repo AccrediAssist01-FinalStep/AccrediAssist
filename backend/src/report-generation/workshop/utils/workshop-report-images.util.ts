@@ -2,6 +2,8 @@ import { ensureCloudinaryConfigured, isCloudinaryConfigured } from '../../../con
 import { EventMediaItem } from '../../../types/eventReportSession.types';
 import {
   ResolvedWorkshopImage,
+  WorkshopImagePlacement,
+  WorkshopImageSection,
   WorkshopReportGeneratorInput,
 } from '../workshop-report.types';
 

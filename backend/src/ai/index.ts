@@ -5,6 +5,7 @@ export { extractionAgent, ExtractionAgent } from './agents/extraction.agent';
 export { classificationAgent, ClassificationAgent } from './agents/classification.agent';
 export { validationAgent, ValidationAgent } from './agents/validation.agent';
 export { duplicateDetectionAgent, DuplicateDetectionAgent } from './agents/duplicate-detection.agent';
+export { pdfDocumentAgent, PdfDocumentAgent } from './agents/pdf-document.agent';
 export { smartSearchAgent, SmartSearchAgent } from '../search/agents/smart-search.agent';
 export { duplicateDetectionRepository, DuplicateDetectionRepository } from './repositories/duplicate-detection.repository';
 export { getAiConfig, isGeminiConfigured } from './utils/ai-config.util';

@@ -16,7 +16,7 @@ export interface ICompletedEventReport extends IBaseDocument {
   docxReportUrl?: string;
   workshopReportStructured?: Record<string, unknown>;
   media?: unknown[];
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface CreateCompletedEventReportInput {
@@ -30,7 +30,7 @@ export interface CreateCompletedEventReportInput {
   description?: string;
   photoUrls?: string[];
   generatedReportUrl?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface UpdateCompletedEventReportInput {
@@ -44,7 +44,7 @@ export interface UpdateCompletedEventReportInput {
   description?: string;
   photoUrls?: string[];
   generatedReportUrl?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface ICompletedEventReportResponse {

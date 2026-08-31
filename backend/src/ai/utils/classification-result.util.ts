@@ -7,6 +7,8 @@ import {
   LEGACY_CLASSIFICATION_CATEGORIES,
 } from '../interfaces/classification.interface';
 
+export { CLASSIFICATION_CATEGORIES, LEGACY_CLASSIFICATION_CATEGORIES };
+
 const nullableString = z.preprocess(
   (value) => (value === '' || value === undefined ? null : value),
   z.string().nullable(),

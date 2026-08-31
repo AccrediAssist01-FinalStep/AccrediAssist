@@ -122,42 +122,6 @@ export class ChartRenderer {
     });
   }
 
-  private renderBarChart(
-    doc: PdfDoc,
-    labels: string[],
-    data: number[],
-    left: number,
-    top: number,
-    width: number,
-    height: number,
-    maxValue: number,
-  ): void {
-    this.drawGrid(doc, left, top, width, height);
-
-    const barCount = labels.length;
-    const barGap = 6;
-    const barWidth = (width - barGap * (barCount + 1)) / Math.max(barCount, 1);
-
-    labels.forEach((label, index) => {
-      const value = data[index] ?? 0;
-      const barHeight = (value / maxValue) * (height - 20);
-      const x = left + barGap + index * (barWidth + barGap);
-      const y = top + height - barHeight - 10;
-
-      doc.rect(x, y, barWidth, barHeight).fill(PDF_COLORS.chartBar);
-
-      doc
-        .font('Helvetica')
-        .fontSize(7)
-        .fillColor(PDF_COLORS.secondary)
-        .text(label.slice(0, 12), x - 4, top + height - 4, {
-          width: barWidth + 8,
-          align: 'center',
-          lineBreak: false,
-        });
-    });
-  }
-
   private renderLineChart(
     doc: PdfDoc,
     labels: string[],

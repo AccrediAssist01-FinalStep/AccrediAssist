@@ -13,7 +13,7 @@ import { normalizeNewsDetectionResult } from '../ai/utils/news-detection-result.
 import { mapPdfCategoryToRecordCategory } from '../ai/utils/pdf-document-mapper.util';
 import { News } from '../models/News';
 import { SMART_SEARCH_COLLECTIONS } from '../search/config/search-collections.config';
-import { GENERATION_REPORT_TYPES } from '../report-generation/config/report-types.config';
+import { LEGACY_GENERATION_REPORT_TYPES } from '../report-generation/config/report-types.config';
 
 const results: Array<{ name: string; ok: boolean; detail: string }> = [];
 
@@ -137,8 +137,8 @@ async function main() {
 
   record(
     'Reports include News type',
-    GENERATION_REPORT_TYPES.includes('News'),
-    GENERATION_REPORT_TYPES.join(', '),
+    (LEGACY_GENERATION_REPORT_TYPES as readonly string[]).includes('News'),
+    LEGACY_GENERATION_REPORT_TYPES.join(', '),
   );
 
   const failed = results.filter((item) => !item.ok);

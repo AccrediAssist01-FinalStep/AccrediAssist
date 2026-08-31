@@ -13,7 +13,7 @@ export interface IStudentAchievement extends IBaseDocument {
   certificateUrl?: string;
   photos: string[];
   date: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface CreateStudentAchievementInput {
@@ -27,7 +27,7 @@ export interface CreateStudentAchievementInput {
   certificateUrl?: string;
   photos?: string[];
   date: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface UpdateStudentAchievementInput {
@@ -41,7 +41,7 @@ export interface UpdateStudentAchievementInput {
   certificateUrl?: string;
   photos?: string[];
   date?: Date;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface IStudentAchievementResponse {

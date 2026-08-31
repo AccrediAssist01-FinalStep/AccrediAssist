@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IReport, IReportResponse } from '../types/report.types';
 
 const buildDownloadPath = (reportId: string): string =>
@@ -18,7 +19,7 @@ export const toReportResponse = (record: IReport): IReportResponse => {
     _id: record._id,
     reportTitle: record.reportTitle,
     reportType: record.reportType,
-    generatedBy: record.generatedBy,
+    generatedBy: record.generatedBy as Types.ObjectId,
     generatedDate: record.generatedDate,
     fileUrl: record.fileUrl,
     fileName: record.fileName,

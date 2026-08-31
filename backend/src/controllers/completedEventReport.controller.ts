@@ -29,7 +29,7 @@ class CompletedEventReportController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await completedEventReportService.getById(req.params.id);
+    const record = await completedEventReportService.getById(req.params.id as string);
     this.success(res, 'Event report retrieved successfully', await withSignedCloudinaryMedia(record));
   });
 
@@ -45,7 +45,7 @@ class CompletedEventReportController extends BaseController {
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await completedEventReportService.updateCompletedEventReport(
-      req.params.id,
+      req.params.id as string,
       req.body,
       userId,
     );
@@ -54,7 +54,7 @@ class CompletedEventReportController extends BaseController {
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await completedEventReportService.deleteCompletedEventReport(req.params.id, userId);
+    await completedEventReportService.deleteCompletedEventReport(req.params.id as string, userId);
     this.success(res, 'Event report deleted successfully');
   });
 

@@ -21,7 +21,7 @@ export interface SearchCollectionConfig {
 
 export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchCollectionConfig> = {
   placements: {
-    model: Placement as Model<IBaseDocument>,
+    model: Placement as unknown as Model<IBaseDocument>,
     dateField: 'joiningDate',
     defaultSortField: 'createdAt',
     textSearchFields: ['studentName', 'rollNumber', 'department', 'company', 'role', 'package'],
@@ -39,7 +39,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['studentName', 'company', 'role'],
   },
   internships: {
-    model: Internship as Model<IBaseDocument>,
+    model: Internship as unknown as Model<IBaseDocument>,
     dateField: 'endDate',
     defaultSortField: 'createdAt',
     textSearchFields: ['studentName', 'rollNumber', 'company', 'role', 'duration'],
@@ -57,7 +57,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['studentName', 'company', 'role'],
   },
   student_achievements: {
-    model: StudentAchievement as Model<IBaseDocument>,
+    model: StudentAchievement as unknown as Model<IBaseDocument>,
     dateField: 'date',
     defaultSortField: 'createdAt',
     textSearchFields: [
@@ -83,7 +83,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['studentName', 'title', 'achievementType'],
   },
   faculty_achievements: {
-    model: FacultyAchievement as Model<IBaseDocument>,
+    model: FacultyAchievement as unknown as Model<IBaseDocument>,
     dateField: 'date',
     defaultSortField: 'createdAt',
     textSearchFields: [
@@ -107,7 +107,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['facultyName', 'title', 'achievementType'],
   },
   completed_event_reports: {
-    model: CompletedEventReport as Model<IBaseDocument>,
+    model: CompletedEventReport as unknown as Model<IBaseDocument>,
     dateField: 'date',
     defaultSortField: 'createdAt',
     textSearchFields: [
@@ -131,7 +131,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['eventTitle', 'eventType', 'venue'],
   },
   publications: {
-    model: Publication as Model<IBaseDocument>,
+    model: Publication as unknown as Model<IBaseDocument>,
     dateField: 'publicationDate',
     defaultSortField: 'createdAt',
     textSearchFields: [
@@ -155,7 +155,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['facultyName', 'paperTitle', 'journal'],
   },
   patents: {
-    model: Patent as Model<IBaseDocument>,
+    model: Patent as unknown as Model<IBaseDocument>,
     dateField: 'filingDate',
     defaultSortField: 'createdAt',
     textSearchFields: ['patentTitle', 'inventors', 'patentNumber', 'status'],
@@ -171,7 +171,7 @@ export const SEARCH_COLLECTION_CONFIG: Record<SmartSearchCollection, SearchColle
     summaryFields: ['patentTitle', 'status'],
   },
   news: {
-    model: News as Model<IBaseDocument>,
+    model: News as unknown as Model<IBaseDocument>,
     dateField: 'publicationDate',
     defaultSortField: 'createdAt',
     textSearchFields: [

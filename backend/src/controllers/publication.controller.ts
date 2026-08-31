@@ -26,7 +26,7 @@ class PublicationController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await publicationService.getById(req.params.id);
+    const record = await publicationService.getById(req.params.id as string);
     this.success(res, 'Publication retrieved successfully', record);
   });
 
@@ -38,13 +38,13 @@ class PublicationController extends BaseController {
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await publicationService.updatePublication(req.params.id, req.body, userId);
+    const record = await publicationService.updatePublication(req.params.id as string, req.body, userId);
     this.success(res, 'Publication updated successfully', record);
   });
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await publicationService.deletePublication(req.params.id, userId);
+    await publicationService.deletePublication(req.params.id as string, userId);
     this.success(res, 'Publication deleted successfully');
   });
 

@@ -24,7 +24,7 @@ class InternshipController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await internshipService.getById(req.params.id);
+    const record = await internshipService.getById(req.params.id as string);
     this.success(res, 'Internship retrieved successfully', record);
   });
 
@@ -36,13 +36,13 @@ class InternshipController extends BaseController {
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await internshipService.updateInternship(req.params.id, req.body, userId);
+    const record = await internshipService.updateInternship(req.params.id as string, req.body, userId);
     this.success(res, 'Internship updated successfully', record);
   });
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await internshipService.deleteInternship(req.params.id, userId);
+    await internshipService.deleteInternship(req.params.id as string, userId);
     this.success(res, 'Internship deleted successfully');
   });
 

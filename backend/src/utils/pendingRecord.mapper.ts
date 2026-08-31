@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IPendingRecord, IPendingRecordResponse } from '../types/pendingRecord.types';
 import { normalizeExtractedPersonFields } from './extractedPersonFields.util';
 
@@ -14,9 +15,9 @@ export const toPendingRecordResponse = (record: IPendingRecord): IPendingRecordR
   confidenceScore: record.confidenceScore,
   status: record.status,
   rejectionReason: record.rejectionReason,
-  reviewedBy: record.reviewedBy,
+  reviewedBy: record.reviewedBy as Types.ObjectId | undefined,
   reviewedAt: record.reviewedAt,
-  approvedRecordId: record.approvedRecordId,
+  approvedRecordId: record.approvedRecordId as Types.ObjectId | undefined,
   approvedTargetModule: record.approvedTargetModule,
   editHistory: record.editHistory ?? [],
   createdAt: record.createdAt,

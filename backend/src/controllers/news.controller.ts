@@ -33,7 +33,7 @@ class NewsController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await newsService.getById(req.params.id);
+    const record = await newsService.getById(req.params.id as string);
     this.success(res, 'News article retrieved successfully', await withSignedCloudinaryMedia(record));
   });
 
@@ -45,13 +45,13 @@ class NewsController extends BaseController {
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await newsService.updateNews(req.params.id, req.body, userId);
+    const record = await newsService.updateNews(req.params.id as string, req.body, userId);
     this.success(res, 'News article updated successfully', record);
   });
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await newsService.deleteNews(req.params.id, userId);
+    await newsService.deleteNews(req.params.id as string, userId);
     this.success(res, 'News article deleted successfully');
   });
 

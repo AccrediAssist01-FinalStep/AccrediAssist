@@ -372,7 +372,15 @@ const testExecuteApi = async (): Promise<void> => {
   });
 
   assert(login.status === 200, 'Admin login succeeds for search execution API');
-  adminToken = (login.body.data as { token: string }).token;
+  const loginData: unknown = login.body.data;
+  if (!loginData || typeof loginData !== 'object' || !('token' in loginData)) {
+    throw new Error('FAIL: Admin login response missing token');
+  }
+  const loginToken = (loginData as { token: unknown }).token;
+  if (typeof loginToken !== 'string') {
+    throw new Error('FAIL: Admin login response missing token');
+  }
+  adminToken = loginToken;
 
   const execute = await request(
     'POST',
@@ -394,7 +402,7 @@ const testExecuteApi = async (): Promise<void> => {
   assert(execute.body.data?.results.items.length === 2, 'Execute API returns matching records');
   assert(execute.body.data?.results.meta.total === 2, 'Execute API returns pagination meta');
   assert(
-    execute.body.data?.results.items.every((item) => item.data && 'studentName' in item.data),
+    execute.body.data?.results.items.every((item) => item.data && 'studentName' in item.data) === true,
     'Execute API returns projected record data',
   );
 

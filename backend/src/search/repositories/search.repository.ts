@@ -2,13 +2,13 @@ import { FilterQuery } from 'mongoose';
 import {
   buildPaginationMeta,
   getPagination,
-  PaginationOptions,
+  PaginationOptions as _PaginationOptions,
   withActiveFilter,
 } from '../../database/utils/queryHelpers';
 import { BadRequestError } from '../../utils/errors';
 import { SmartSearchCollection } from '../config/search-collections.config';
 import { SEARCH_COLLECTION_CONFIG } from '../config/search-execution.config';
-import { SmartSearchSort } from '../config/search-fields.config';
+import { SmartSearchSort as _SmartSearchSort } from '../config/search-fields.config';
 import {
   SearchExecuteRequest,
   SearchExecutionResult,
@@ -107,7 +107,7 @@ export class SearchRepository {
 
     const [records, total] = await Promise.all([
       model
-        .find(query, findProjection)
+        .find(query, findProjection as never)
         .sort(sortSpec)
         .skip(pagination.skip)
         .limit(pagination.limit)

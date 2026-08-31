@@ -1,7 +1,7 @@
 import { INews, INewsResponse } from '../types/news.types';
 
 export const toNewsResponse = (record: INews & { language?: string }): INewsResponse => ({
-  _id: record._id,
+  _id: record._id.toString(),
   headline: record.headline,
   articleText: record.articleText,
   articleLanguage: record.articleLanguage ?? record.language ?? 'Unknown',

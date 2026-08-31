@@ -63,7 +63,7 @@ export class DocxReportService {
         buffer: activityReport.docxBuffer ?? Buffer.alloc(0),
         fileName: activityReport.docxFileName,
         filePath: activityReport.docxFilePath ?? '',
-        downloadUrl: activityReport.docxUrl,
+        downloadUrl: activityReport.docxUrl ?? '',
         fileSizeBytes: activityReport.docxBuffer?.length ?? 0,
         sectionsIncluded: templateGenerator.getSectionsIncluded(),
         generatedAt: new Date(),

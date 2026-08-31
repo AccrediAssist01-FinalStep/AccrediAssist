@@ -10,7 +10,6 @@ import type {
 import {
   getStudentActivityColumnWidths,
   getStudentActivityTableHeaders,
-  toStudentActivityRowValues,
 } from '../utils/student-activity-table.util';
 
 type PdfDoc = InstanceType<typeof PDFDocument>;
@@ -112,7 +111,7 @@ const writeModuleTable = (doc: PdfDoc, module: StudentActivityModuleTable): void
       tableY = drawTableRow(doc, tableY, columnWidths, headers, { header: true, minRowHeight: 24 });
     }
 
-    tableY = drawTableRow(doc, tableY, columnWidths, toStudentActivityRowValues(row), {
+    tableY = drawTableRow(doc, tableY, columnWidths, row, {
       minRowHeight: 22,
     });
   });

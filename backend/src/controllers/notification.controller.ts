@@ -26,7 +26,7 @@ class NotificationController extends BaseController {
 
   markAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const notification = await notificationService.markAsRead(req.params.id, userId);
+    const notification = await notificationService.markAsRead(req.params.id as string, userId);
     this.success(res, 'Notification marked as read', notification);
   });
 

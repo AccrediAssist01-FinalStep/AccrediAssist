@@ -25,7 +25,7 @@ class PatentController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await patentService.getById(req.params.id);
+    const record = await patentService.getById(req.params.id as string);
     this.success(res, 'Patent retrieved successfully', record);
   });
 
@@ -37,13 +37,13 @@ class PatentController extends BaseController {
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await patentService.updatePatent(req.params.id, req.body, userId);
+    const record = await patentService.updatePatent(req.params.id as string, req.body, userId);
     this.success(res, 'Patent updated successfully', record);
   });
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await patentService.deletePatent(req.params.id, userId);
+    await patentService.deletePatent(req.params.id as string, userId);
     this.success(res, 'Patent deleted successfully');
   });
 

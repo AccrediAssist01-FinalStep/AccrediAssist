@@ -20,7 +20,7 @@ const valuesEqual = (left: unknown, right: unknown): boolean =>
 
 const buildExtractedDataChanges = (
   previousData: Record<string, unknown>,
-  nextData: Record<string, unknown>,
+  _nextData: Record<string, unknown>,
   editedFields: Record<string, unknown>,
 ): PendingRecordEditChange[] => {
   const changes: PendingRecordEditChange[] = [];

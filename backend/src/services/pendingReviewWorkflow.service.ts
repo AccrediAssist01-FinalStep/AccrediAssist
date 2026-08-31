@@ -144,7 +144,7 @@ export class PendingReviewWorkflowService {
           );
 
           const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
-            result.pendingRecord._id,
+            String(result.pendingRecord._id),
             result.confidenceScore,
           );
 
@@ -179,7 +179,7 @@ export class PendingReviewWorkflowService {
       const result = await this.aiPipeline.processWhatsAppMessage(message);
 
       const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
-        result.pendingRecord._id,
+        String(result.pendingRecord._id),
         result.confidenceScore,
       );
 
@@ -252,7 +252,7 @@ export class PendingReviewWorkflowService {
       }
 
       const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
-        pendingRecord._id,
+        String(pendingRecord._id),
         0,
       );
 

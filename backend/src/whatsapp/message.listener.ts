@@ -1,5 +1,8 @@
 import { logger } from '../utils/logger';
-import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
+import {
+  logPipelineStage as _logPipelineStage,
+  PIPELINE_STAGES as _PIPELINE_STAGES,
+} from '../ai/utils/pipeline-stage-logger.util';
 import { loadBaileys } from './baileys.loader';
 import { groupFilter } from './group.filter';
 import {
@@ -105,8 +108,8 @@ export class MessageListener {
   }
 
   private buildMessageDedupKey(message: WAMessage): string | null {
-    const messageId = message.key.id?.trim();
-    const groupJid = message.key.remoteJid?.trim();
+    const messageId = message.key?.id?.trim();
+    const groupJid = message.key?.remoteJid?.trim();
 
     if (!messageId || !groupJid) {
       return null;
@@ -125,7 +128,7 @@ export class MessageListener {
         await this.processMessage(message);
       } catch (error) {
         logger.warn('Failed to process WhatsApp message', {
-          messageId: message.key.id,
+          messageId: message.key?.id,
           error,
         });
       }
@@ -164,9 +167,9 @@ export class MessageListener {
   }
 
   private async processMessageOnce(message: WAMessage, dedupKey: string | null): Promise<void> {
-    const remoteJid = message.key.remoteJid;
+    const remoteJid = message.key?.remoteJid;
 
-    if (!remoteJid || message.key.fromMe) {
+    if (!remoteJid || message.key?.fromMe) {
       return;
     }
 
@@ -207,7 +210,7 @@ export class MessageListener {
         mediaMetadata = processedMedia.metadata;
       } catch (error) {
         logger.warn('Failed to process WhatsApp media message', {
-          messageId: message.key.id,
+          messageId: message.key?.id,
           mediaType: mediaInfo.mediaType,
           error,
         });
@@ -230,7 +233,7 @@ export class MessageListener {
       timestamp: resolveMessageTimestamp(message),
       media: mediaUrl,
       mediaMetadata,
-      whatsappMessageId: dedupKey ?? message.key.id ?? undefined,
+      whatsappMessageId: dedupKey ?? message.key?.id ?? undefined,
       groupJid: remoteJid,
     });
 
@@ -294,12 +297,21 @@ export class MessageListener {
     }
 
     const baileys = await loadBaileys();
-    this.baileysUtils = {
+    const utils: BaileysMessageUtils = {
       extractMessageContent: baileys.extractMessageContent,
-      getContentType: baileys.getContentType,
-    };
+      getContentType: (content) => {
+        if (!content) {
+          return undefined;
+        }
 
-    return this.baileysUtils;
+        return baileys.getContentType(
+          content as import('@whiskeysockets/baileys').proto.IMessage,
+        );
+      },
+    };
+    this.baileysUtils = utils;
+
+    return utils;
   }
 }
 

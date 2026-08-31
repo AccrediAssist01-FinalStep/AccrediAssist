@@ -3,6 +3,7 @@ import { resolveActivityClassification } from '../ai/utils/activity-module.util'
 import { mapClassificationToRecordCategory } from '../ai/utils/category-mapper.util';
 import { correctClassificationForExtraction } from '../ai/utils/classification-correction.util';
 import { enrichExtractionFields } from '../ai/utils/extraction-enrichment.util';
+import { normalizeExtractionResult } from '../ai/utils/extraction-result.util';
 import { calculatePipelineConfidenceScore } from '../ai/utils/pipeline-status.util';
 
 const message = `Congratulations on the Successful Department Industry Visit Report!
@@ -23,7 +24,10 @@ const raw = {
   confidence: 95,
 };
 
-const enriched = enrichExtractionFields(enrichExtractionAchievementType(raw), message);
+const enriched = enrichExtractionFields(
+  enrichExtractionAchievementType(normalizeExtractionResult(raw)),
+  message,
+);
 const classification = correctClassificationForExtraction(
   { category: 'Student Achievement', confidence: 60, reasoning: 'wrong' },
   enriched,

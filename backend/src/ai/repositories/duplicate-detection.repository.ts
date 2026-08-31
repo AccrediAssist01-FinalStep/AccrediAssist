@@ -201,7 +201,7 @@ export class DuplicateDetectionRepository {
         toCandidate(record._id, 'student_achievements', {
           studentNames: [record.studentName],
           title: record.title,
-          eventName: record.eventName ?? record.title,
+          eventName: (record as unknown as { eventName?: string }).eventName ?? record.title,
           achievementType: record.achievementType,
           date: record.date?.toISOString() ?? null,
         }),

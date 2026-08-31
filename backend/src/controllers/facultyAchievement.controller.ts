@@ -29,7 +29,7 @@ class FacultyAchievementController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await facultyAchievementService.getById(req.params.id);
+    const record = await facultyAchievementService.getById(req.params.id as string);
     this.success(
       res,
       'Faculty achievement retrieved successfully',
@@ -46,7 +46,7 @@ class FacultyAchievementController extends BaseController {
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await facultyAchievementService.updateFacultyAchievement(
-      req.params.id,
+      req.params.id as string,
       req.body,
       userId,
     );
@@ -55,7 +55,7 @@ class FacultyAchievementController extends BaseController {
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await facultyAchievementService.deleteFacultyAchievement(req.params.id, userId);
+    await facultyAchievementService.deleteFacultyAchievement(req.params.id as string, userId);
     this.success(res, 'Faculty achievement deleted successfully');
   });
 

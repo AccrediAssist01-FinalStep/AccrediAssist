@@ -37,13 +37,13 @@ class ReportController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const report = await reportService.getReportById(req.params.id);
+    const report = await reportService.getReportById(req.params.id as string);
     this.success(res, 'Report retrieved successfully', report);
   });
 
   download = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const query = req.query as unknown as ReportDownloadQuery;
-    const downloadInfo = await reportService.getDownloadInfo(req.params.id);
+    const downloadInfo = await reportService.getDownloadInfo(req.params.id as string);
 
     if (query.redirect) {
       if (!isAllowedExternalDownloadUrl(downloadInfo.downloadUrl)) {
@@ -59,7 +59,7 @@ class ReportController extends BaseController {
   });
 
   downloadFile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const streamInfo = await reportService.getStreamInfo(req.params.id);
+    const streamInfo = await reportService.getStreamInfo(req.params.id as string);
     res.setHeader('Content-Type', streamInfo.contentType);
     res.setHeader('Content-Disposition', `attachment; filename="${streamInfo.fileName}"`);
     res.download(streamInfo.filePath, streamInfo.fileName);
@@ -67,7 +67,7 @@ class ReportController extends BaseController {
 
   delete = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await reportService.deleteReport(req.params.id, userId);
+    await reportService.deleteReport(req.params.id as string, userId);
     this.noContent(res);
   });
 

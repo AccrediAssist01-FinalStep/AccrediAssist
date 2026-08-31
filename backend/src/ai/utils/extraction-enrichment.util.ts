@@ -33,24 +33,6 @@ const isLikelyPersonName = (value: string): boolean => {
   return /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?$/.test(name);
 };
 
-const collectRegexMatches = (text: string, pattern: RegExp, groupIndex = 1): string[] => {
-  const matches: string[] = [];
-
-  if (pattern.global) {
-    for (const match of text.matchAll(pattern)) {
-      const candidate = match[groupIndex]?.trim();
-      if (candidate) {
-        matches.push(candidate);
-      }
-    }
-    return matches;
-  }
-
-  const match = text.match(pattern);
-  const candidate = match?.[groupIndex]?.trim();
-  return candidate ? [candidate] : [];
-};
-
 const extractFacultyNamesFromText = (text: string): string[] => {
   const names = new Set<string>();
 

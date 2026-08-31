@@ -21,7 +21,9 @@ const toSessionMessage = (message: WhatsAppIncomingMessage): EventReportSessionM
   text: [message.message, message.mediaMetadata?.caption].filter(Boolean).join('\n').trim(),
   sender: message.sender,
   media: message.media ?? message.mediaMetadata?.secureUrl ?? undefined,
-  mediaMetadata: message.mediaMetadata ?? null,
+  mediaMetadata: message.mediaMetadata
+    ? { ...message.mediaMetadata }
+    : null,
   receivedAt: message.timestamp ?? new Date(),
 });
 
@@ -162,7 +164,7 @@ export class EventCorrelationService {
       const result = await aiEventReportPipelineService.processSession(session);
 
       const autoReview = await pendingRecordAutoReviewService.resolveByConfidence(
-        result.pendingRecord._id,
+        String(result.pendingRecord._id),
         result.confidenceScore,
       );
 

@@ -7,6 +7,8 @@ import {
   ValidationResult,
 } from '../interfaces/validation.interface';
 
+export { VALIDATION_ERROR_CODES, VALIDATION_STATUSES };
+
 const nullableString = z.preprocess(
   (value) => (value === '' || value === undefined ? null : value),
   z.string().nullable(),

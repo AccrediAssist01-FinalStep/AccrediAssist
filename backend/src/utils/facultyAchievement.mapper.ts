@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import {
   IFacultyAchievement,
   IFacultyAchievementResponse,
@@ -16,7 +17,7 @@ export const toFacultyAchievementResponse = (
   certificateUrl: record.certificateUrl,
   photos: record.photos,
   date: record.date,
-  approvedBy: record.approvedBy,
+  approvedBy: record.approvedBy as Types.ObjectId | undefined,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });

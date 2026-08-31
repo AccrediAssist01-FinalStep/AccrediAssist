@@ -138,7 +138,7 @@ const runTests = async (): Promise<void> => {
 
     assert(isPdfBuffer(result.buffer), `${reportType}: buffer is valid PDF`);
     assert(result.fileSizeBytes > 3000, `${reportType}: file size is substantial (${result.fileSizeBytes} bytes)`);
-    assert(result.pageCount >= 3, `${reportType}: has multiple pages (${result.pageCount})`);
+    assert(result.pageCount !== undefined && result.pageCount >= 3, `${reportType}: has multiple pages (${result.pageCount})`);
     assert(result.downloadUrl.includes('/downloads/'), `${reportType}: download URL returned`);
     assert(result.sectionsIncluded.includes('executive-summary'), `${reportType}: includes executive summary`);
     assert(result.sectionsIncluded.includes('charts'), `${reportType}: includes charts section`);

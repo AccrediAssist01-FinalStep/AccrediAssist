@@ -50,8 +50,8 @@ const run = async (): Promise<void> => {
 
   const groups = await groupService.getGroupDetectionStatus();
   console.log('\nJoined groups matching config:');
-  groups.joinedAllowedGroups.forEach((group) => {
-    console.log(`  ✓ ${group.name} (${group.participantCount} members)`);
+  groups.monitoredGroups.forEach((group) => {
+    console.log(`  ✓ ${group.name} (${group.id})`);
   });
 
   if (groups.missingAllowedGroups.length > 0) {

@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { IBaseDocument } from './base.types';
 
 export interface IAuditLog extends IBaseDocument {
-  userId?: Types.ObjectId;
+  userId?: Types.ObjectId | string;
   action: string;
   module: string;
   description?: string;

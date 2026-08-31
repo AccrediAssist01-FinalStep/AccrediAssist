@@ -32,6 +32,7 @@ export interface WhatsAppMediaMetadata {
   localPath?: string;
   caption?: string;
   contentBase64?: string;
+  [key: string]: unknown;
 }
 
 export interface DetectedWhatsAppMedia {

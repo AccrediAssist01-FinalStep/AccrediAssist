@@ -1,4 +1,5 @@
-import { Schema, SchemaOptions } from 'mongoose';
+import { Schema } from 'mongoose';
+import type { SchemaOptions } from 'mongoose';
 import { IBaseDocument } from '../types/base.types';
 import { softDeletePlugin } from './plugins/softDelete.plugin';
 
@@ -18,9 +19,9 @@ export const baseFieldDefinition = {
     default: false,
     index: true,
   },
-} as const;
+};
 
-export const baseSchemaOptions: SchemaOptions = {
+export const baseSchemaOptions = {
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -35,31 +36,26 @@ export const baseSchemaOptions: SchemaOptions = {
   },
 };
 
-/**
- * Apply base fields and common plugins to a schema.
- */
 export const applyBaseSchema = <T extends IBaseDocument>(schema: Schema<T>): Schema<T> => {
-  schema.add(baseFieldDefinition);
-  schema.plugin(softDeletePlugin);
+  (schema as unknown as Schema).add(baseFieldDefinition as never);
+  (schema as unknown as Schema).plugin(softDeletePlugin);
   return schema;
 };
 
-/**
- * Create a new schema with base configuration applied.
- */
 export const createBaseSchema = <T extends IBaseDocument>(
   definition: Record<string, unknown>,
   options: SchemaOptions = {},
 ): Schema<T> => {
-  const schema = new Schema<T>(definition, {
+  const mergedOptions = {
     ...baseSchemaOptions,
     ...options,
-  });
+  } as unknown as SchemaOptions;
+
+  const schema = new Schema<T>(definition as never, mergedOptions as never);
 
   return applyBaseSchema(schema);
 };
 
-// Backward-compatible exports
 export const addBaseFields = applyBaseSchema;
 
 export type { UserRole } from './enums';

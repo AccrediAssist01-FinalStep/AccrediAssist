@@ -5,7 +5,6 @@
 
 import dotenv from 'dotenv';
 import dns from 'dns';
-import mongoose from 'mongoose';
 import { connectDatabase, disconnectDatabase } from '../database/connection';
 import { PendingRecord } from '../models/PendingRecord';
 import { CompletedEventReport } from '../models/CompletedEventReport';

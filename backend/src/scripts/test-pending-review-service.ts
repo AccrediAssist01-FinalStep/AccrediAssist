@@ -81,6 +81,7 @@ const seedRecords = async (): Promise<{
     confidenceScore: 88,
     status: 'Pending',
   });
+  assert(Boolean(internship._id), 'Internship pending record is seeded');
 
   const approved = await PendingRecord.create({
     originalMessage: `${TEST_PREFIX} Approved internship record.`,

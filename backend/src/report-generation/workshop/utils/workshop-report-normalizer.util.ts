@@ -87,11 +87,12 @@ const normalizeImagePlacements = (value: unknown): WorkshopImagePlacement[] => {
       const imageReference = toNullableString(record.imageReference ?? record.reference);
       const caption = toNullableString(record.caption ?? record.observation);
       if (!imageReference) return null;
-      return {
+      const placement: WorkshopImagePlacement = {
         imageReference,
-        section: 'evidenceGallery' as const,
+        section: 'evidenceGallery',
         caption: caption ?? imageReference,
       };
+      return placement;
     })
     .filter((item): item is WorkshopImagePlacement => item !== null);
 };
@@ -348,6 +349,7 @@ export const getMediaFromCompletedEvent = (event: Record<string, unknown>): Even
     type: 'image' as const,
     url,
     label: `Image ${index + 1}`,
-    uploadedAt: new Date(),
+    uploadedAt: new Date().toISOString(),
+    sourceMessageIndex: index,
   }));
 };

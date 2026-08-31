@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { IPlacement, IPlacementResponse } from '../types/placement.types';
 
 export const toPlacementResponse = (record: IPlacement): IPlacementResponse => ({
@@ -10,7 +11,7 @@ export const toPlacementResponse = (record: IPlacement): IPlacementResponse => (
   package: record.package,
   joiningDate: record.joiningDate,
   offerLetter: record.offerLetter,
-  approvedBy: record.approvedBy,
+  approvedBy: record.approvedBy as Types.ObjectId | undefined,
   createdAt: record.createdAt,
   updatedAt: record.updatedAt,
 });

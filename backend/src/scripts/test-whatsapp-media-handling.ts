@@ -162,7 +162,7 @@ const testMediaDownloadAndMetadata = async (): Promise<void> => {
   };
 
   const mediaService = new MediaService(async (message) => {
-    const messageId = message.key.id ?? '';
+    const messageId = message.key?.id ?? '';
     const payload = payloads[messageId];
 
     if (!payload) {
@@ -197,12 +197,16 @@ const testMediaDownloadAndMetadata = async (): Promise<void> => {
       assert(metadata.mimeType === mediaInfo.mimeType, `${label} metadata includes mime type`);
       assert(metadata.fileName === mediaInfo.fileName, `${label} metadata includes file name`);
       assert(metadata.fileSize > 0, `${label} metadata includes file size`);
-      assert(metadata.localPath.startsWith(tempRoot), `${label} metadata includes temp local path`);
+      assert(Boolean(metadata.localPath?.startsWith(tempRoot)), `${label} metadata includes temp local path`);
       assert(Boolean(metadata.tempFileId), `${label} metadata includes temp file id`);
       assert(metadata.downloadedAt instanceof Date, `${label} metadata includes downloadedAt`);
 
+      if (!metadata.localPath) {
+        throw new Error(`FAIL: ${label} metadata is missing localPath`);
+      }
+
       const fileContents = await fs.readFile(metadata.localPath);
-      assert(fileContents.equals(payloads[message.key.id ?? '']), `${label} file is saved temporarily`);
+      assert(fileContents.equals(payloads[message.key?.id ?? '']), `${label} file is saved temporarily`);
 
       await mediaService.deleteTempMedia(metadata.tempFileId);
       await assertFileMissing(metadata.localPath, `${label} temp file is deleted after cleanup`);
@@ -249,7 +253,7 @@ const testListenerMediaIntegration = async (): Promise<void> => {
   const originalUpload = singletonMediaService['uploadToCloudinary'].bind(singletonMediaService);
 
   singletonMediaService['downloadBuffer'] = async (message) => {
-    if (message.key.id === 'TEST_PDF_ID') {
+    if (message.key?.id === 'TEST_PDF_ID') {
       return Buffer.from('%PDF-1.4 listener pdf');
     }
 

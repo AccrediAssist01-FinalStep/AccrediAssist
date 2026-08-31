@@ -20,7 +20,7 @@ export interface ReportFiltersApplied {
 export interface IReport extends IBaseDocument {
   reportTitle: string;
   reportType: ReportType;
-  generatedBy: Types.ObjectId;
+  generatedBy: Types.ObjectId | string;
   generatedDate: Date;
   fileUrl?: string;
   filePath?: string;
@@ -37,7 +37,7 @@ export interface IReport extends IBaseDocument {
 export interface CreateReportInput {
   reportTitle: string;
   reportType: ReportType;
-  generatedBy: Types.ObjectId;
+  generatedBy: Types.ObjectId | string;
   generatedDate?: Date;
   fileUrl?: string;
   filePath?: string;
@@ -54,7 +54,7 @@ export interface CreateReportInput {
 export interface UpdateReportInput {
   reportTitle?: string;
   reportType?: ReportType;
-  generatedBy?: Types.ObjectId;
+  generatedBy?: Types.ObjectId | string;
   generatedDate?: Date;
   fileUrl?: string;
   filePath?: string;

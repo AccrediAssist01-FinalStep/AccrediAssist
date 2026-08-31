@@ -24,7 +24,6 @@ import type {
 import {
   getStudentActivityTableHeaders,
   STUDENT_ACTIVITY_TABLE_COLUMN_WIDTHS_DXA,
-  toStudentActivityRowValues,
 } from '../utils/student-activity-table.util';
 
 const FONT = STUDENT_ACTIVITY_REPORT_TYPOGRAPHY.fontFamily;
@@ -145,7 +144,7 @@ const buildModuleTable = (module: StudentActivityModuleTable): Table => {
       : module.rows.map(
           (row) =>
             new TableRow({
-              children: toStudentActivityRowValues(row).map((value, index) =>
+              children: row.map((value, index) =>
                 buildTableCell(value, index),
               ),
             }),

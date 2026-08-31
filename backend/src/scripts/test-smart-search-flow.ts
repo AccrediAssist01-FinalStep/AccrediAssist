@@ -383,7 +383,15 @@ const testApiFlow = async (): Promise<void> => {
   });
 
   assert(login.status === 200, 'Admin login succeeds for smart search flow API');
-  adminToken = (login.body.data as { token: string }).token;
+  const loginData: unknown = login.body.data;
+  if (!loginData || typeof loginData !== 'object' || !('token' in loginData)) {
+    throw new Error('FAIL: Admin login response missing token');
+  }
+  const loginToken = (loginData as { token: unknown }).token;
+  if (typeof loginToken !== 'string') {
+    throw new Error('FAIL: Admin login response missing token');
+  }
+  adminToken = loginToken;
 
   for (const [index, scenario] of FLOW_SCENARIOS.entries()) {
     scenarioIndex = index;

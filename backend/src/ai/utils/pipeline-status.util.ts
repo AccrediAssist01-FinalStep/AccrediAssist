@@ -31,9 +31,9 @@ export const calculatePipelineConfidenceScore = (
       Boolean(extraction.facultyNames?.length) ||
       Boolean(extraction.organization?.trim());
 
-    if (classification.confidence >= 85 && hasRecoverableContent) {
+    if (classificationConfidence >= 85 && hasRecoverableContent) {
       score = Math.max(score - 5, getConfidenceThreshold());
-    } else if (hasRecoverableContent && classification.confidence >= 70) {
+    } else if (hasRecoverableContent && classificationConfidence >= 70) {
       score = Math.max(score - 10, getConfidenceThreshold() - 5);
     } else {
       score = Math.min(score, Math.max(getConfidenceThreshold() - 5, 0));

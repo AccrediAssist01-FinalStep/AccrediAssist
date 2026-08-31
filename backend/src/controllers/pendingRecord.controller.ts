@@ -27,14 +27,14 @@ class PendingRecordController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await pendingRecordService.getById(req.params.id);
+    const record = await pendingRecordService.getById(req.params.id as string);
     this.success(res, 'Pending record retrieved successfully', record);
   });
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await pendingRecordService.updatePendingRecord(
-      req.params.id,
+      req.params.id as string,
       req.body,
       userId,
     );
@@ -43,14 +43,14 @@ class PendingRecordController extends BaseController {
 
   approve = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await pendingRecordService.approvePendingRecord(req.params.id, userId);
+    const record = await pendingRecordService.approvePendingRecord(req.params.id as string, userId);
     this.success(res, 'Pending record approved successfully', record);
   });
 
   reject = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await pendingRecordService.rejectPendingRecord(
-      req.params.id,
+      req.params.id as string,
       userId,
       req.body,
     );
@@ -59,14 +59,14 @@ class PendingRecordController extends BaseController {
 
   regenerate = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     this.requireUserId(req);
-    const record = await pendingRecordRegenerateService.regenerateAiEventReport(req.params.id);
+    const record = await pendingRecordRegenerateService.regenerateAiEventReport(req.params.id as string);
     this.success(res, 'AI event report regenerated successfully', record);
   });
 
   move = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await pendingRecordService.moveApprovedPendingRecord(
-      req.params.id,
+      req.params.id as string,
       userId,
       req.body,
     );

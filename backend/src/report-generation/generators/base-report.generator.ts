@@ -31,5 +31,8 @@ export abstract class BaseReportGenerator {
     ];
   }
 
-  abstract getGeneratorNotes(): string;
+  getGeneratorNotes(): string {
+    const definition = this.getDefinition();
+    return `${definition.label} uses template ${definition.templateId}.`;
+  }
 }

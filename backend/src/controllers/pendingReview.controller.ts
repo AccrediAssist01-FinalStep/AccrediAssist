@@ -35,7 +35,7 @@ class PendingReviewController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await pendingReviewService.getPendingRecordById(req.params.id);
+    const record = await pendingReviewService.getPendingRecordById(req.params.id as string);
     this.success(
       res,
       'Pending record retrieved successfully',
@@ -46,7 +46,7 @@ class PendingReviewController extends BaseController {
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const body = req.body as EditPendingRecordBody;
-    const record = await pendingRecordEditService.editPendingRecord(req.params.id, userId, body);
+    const record = await pendingRecordEditService.editPendingRecord(req.params.id as string, userId, body);
     this.success(
       res,
       'Pending record updated successfully',
@@ -56,7 +56,7 @@ class PendingReviewController extends BaseController {
 
   downloadAttachment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     this.requireUserId(req);
-    const record = await pendingReviewService.getPendingRecordById(req.params.id);
+    const record = await pendingReviewService.getPendingRecordById(req.params.id as string);
     const extracted = record.extractedData ?? {};
     const metadata =
       typeof extracted.mediaMetadata === 'object' && extracted.mediaMetadata !== null

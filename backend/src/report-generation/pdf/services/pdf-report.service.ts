@@ -63,7 +63,7 @@ export class PdfReportService {
         buffer: activityReport.pdfBuffer ?? Buffer.alloc(0),
         fileName: activityReport.pdfFileName,
         filePath: activityReport.pdfFilePath ?? '',
-        downloadUrl: activityReport.pdfUrl,
+        downloadUrl: activityReport.pdfUrl ?? '',
         fileSizeBytes: activityReport.pdfBuffer?.length ?? 0,
         sectionsIncluded: templateGenerator.getSectionsIncluded(),
         pageCount: undefined,

@@ -33,7 +33,7 @@ import { PendingRecord } from '../models/PendingRecord';
 import { Placement } from '../models/Placement';
 import { Publication } from '../models/Publication';
 import { StudentAchievement } from '../models/StudentAchievement';
-import { GENERATION_REPORT_TYPES } from '../report-generation/config/report-types.config';
+import { GENERATION_REPORT_TYPES, LEGACY_GENERATION_REPORT_TYPES } from '../report-generation/config/report-types.config';
 import { SMART_SEARCH_COLLECTIONS } from '../search/config/search-collections.config';
 import { whatsappAllowedGroups } from '../config/env';
 import { createTestUser, cleanupTestUser } from './test-helpers';
@@ -133,10 +133,11 @@ const startApiServer = async (): Promise<void> => {
   });
 
   server = http.createServer(app);
+  const httpServer = server;
   await new Promise<void>((resolve) => {
-    server.listen(0, resolve);
+    httpServer.listen(0, resolve);
   });
-  const address = server.address();
+  const address = httpServer.address();
   if (!address || typeof address === 'string') {
     throw new Error('Failed to bind ephemeral test server');
   }
@@ -154,8 +155,9 @@ const startApiServer = async (): Promise<void> => {
 
 const stopApiServer = async (): Promise<void> => {
   if (!server) return;
+  const httpServer = server;
   await new Promise<void>((resolve, reject) => {
-    server.close((error) => (error ? reject(error) : resolve()));
+    httpServer.close((error) => (error ? reject(error) : resolve()));
   });
   await cleanupTestUser(ADMIN_EMAIL);
   await disconnectDatabase();
@@ -480,7 +482,7 @@ const testDepartmentAndDashboard = async (): Promise<void> => {
     'Live MongoDB counts vs /dashboard/summary',
     'Dashboard returns aggregated statistics',
     summary.status === 200
-      ? `API summary keys: ${Object.keys(summaryData ?? {}).join(', ')}; DB student achievements: ${dbStudentCount}`
+      ? `API summary keys: ${Object.keys(summaryData ?? {}).join(', ')}; API student total: ${apiStudentTotal}; DB student achievements: ${dbStudentCount}`
       : `HTTP ${summary.status}`,
   );
 
@@ -728,7 +730,7 @@ const testInfrastructure = async (): Promise<void> => {
   record(
     'Reports — News report type',
     'Report Generation',
-    GENERATION_REPORT_TYPES.includes('News'),
+    (LEGACY_GENERATION_REPORT_TYPES as readonly string[]).includes('News'),
     'GENERATION_REPORT_TYPES config',
     'News report type available',
     GENERATION_REPORT_TYPES.join(', '),

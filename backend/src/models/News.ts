@@ -31,7 +31,7 @@ const newsSchema = new Schema<INews>(
     language: {
       type: String,
       trim: true,
-      maxlength: [50],
+      maxlength: 50,
     },
     newspaperName: {
       type: String,

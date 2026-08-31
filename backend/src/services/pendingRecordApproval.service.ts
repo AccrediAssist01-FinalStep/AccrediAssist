@@ -216,7 +216,7 @@ export class PendingRecordApprovalService {
     const storeRecord = async (
       module: PendingApprovalTargetModule,
       createdRecordId: string,
-    ): PendingApprovalResult => {
+    ): Promise<PendingApprovalResult> => {
       logPipelineStage(PIPELINE_STAGES.FINAL_DATABASE_STORAGE, {
         targetModule: module,
         createdRecordId,

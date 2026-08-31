@@ -8,12 +8,12 @@ import { mapClassificationToRecordCategory } from '../ai/utils/category-mapper.u
 import {
   inferCategoryFromEventReport,
   resolvePipelineRoute,
-  shouldStartEventReportSession,
 } from '../ai/utils/event-routing.util';
 import {
   mapPdfCategoryToRecordCategory,
-  resolveRecordCategoryWithPdf,
+  mergePdfExtractionIntoResult,
 } from '../ai/utils/pdf-document-mapper.util';
+import { normalizeExtractionResult } from '../ai/utils/extraction-result.util';
 import { resolveActivityClassification } from '../ai/utils/activity-module.util';
 import { WhatsAppIncomingMessage } from '../whatsapp/types';
 import { PdfDocumentExtractionResult } from '../ai/interfaces/pdf-document.interface';
@@ -289,12 +289,8 @@ assert(
   `got ${corrected.category}`,
 );
 
-const finalCategory = resolveRecordCategoryWithPdf(
-  mapClassificationToRecordCategory('Student Achievement', extracted as never),
-  'Student Achievement',
-  extracted as never,
-  studentResearchPdf,
-);
+mergePdfExtractionIntoResult(normalizeExtractionResult(extracted), studentResearchPdf);
+const finalCategory = mapPdfCategoryToRecordCategory(studentResearchPdf);
 assert(
   'Final record → Student research PDF resolves to Research',
   finalCategory === 'Research',

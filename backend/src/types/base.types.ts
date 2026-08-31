@@ -5,16 +5,16 @@ import { Document, Types } from 'mongoose';
  */
 export interface IBaseDocument extends Document {
   _id: Types.ObjectId;
-  createdBy?: Types.ObjectId;
-  updatedBy?: Types.ObjectId;
+  createdBy?: Types.ObjectId | string;
+  updatedBy?: Types.ObjectId | string;
   isDeleted: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface SoftDeleteMethods {
-  softDelete(updatedBy?: Types.ObjectId): Promise<this>;
-  restore(updatedBy?: Types.ObjectId): Promise<this>;
+  softDelete(updatedBy?: Types.ObjectId | string): Promise<this>;
+  restore(updatedBy?: Types.ObjectId | string): Promise<this>;
 }
 
 export type BaseDocument = IBaseDocument & SoftDeleteMethods;

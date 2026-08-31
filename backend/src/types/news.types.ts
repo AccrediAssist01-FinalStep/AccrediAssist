@@ -13,6 +13,7 @@ export interface INews extends IBaseDocument {
   headline: string;
   articleText: string;
   articleLanguage: string;
+  language?: string;
   newspaperName?: string;
   publicationDate?: Date;
   peopleMentioned: string[];

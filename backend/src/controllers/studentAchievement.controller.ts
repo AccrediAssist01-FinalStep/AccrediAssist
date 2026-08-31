@@ -29,7 +29,7 @@ class StudentAchievementController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await studentAchievementService.getById(req.params.id);
+    const record = await studentAchievementService.getById(req.params.id as string);
     this.success(
       res,
       'Student achievement retrieved successfully',
@@ -46,7 +46,7 @@ class StudentAchievementController extends BaseController {
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const record = await studentAchievementService.updateStudentAchievement(
-      req.params.id,
+      req.params.id as string,
       req.body,
       userId,
     );
@@ -55,7 +55,7 @@ class StudentAchievementController extends BaseController {
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await studentAchievementService.deleteStudentAchievement(req.params.id, userId);
+    await studentAchievementService.deleteStudentAchievement(req.params.id as string, userId);
     this.success(res, 'Student achievement deleted successfully');
   });
 

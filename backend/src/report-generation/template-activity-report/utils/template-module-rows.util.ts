@@ -94,6 +94,7 @@ export const buildTemplateModuleTables = (
       heading: `Module ${moduleNumber}: ${label}`,
       sectionKey: section.key,
       rows: filtered.map((record) => mapRecordToRow(record, section)),
+      headers: [],
     };
   });
 };

@@ -1,9 +1,9 @@
-export const ACTIVE_MATCH = { isDeleted: { $ne: true } } as const;
+export const ACTIVE_MATCH = { isDeleted: { $ne: true } };
 
 export const countPipeline = [
   { $match: ACTIVE_MATCH },
   { $count: 'total' },
-] as const;
+];
 
 export const buildMonthDateRange = (year: number, month: number): { start: Date; end: Date } => {
   const start = new Date(Date.UTC(year, month - 1, 1));
@@ -30,4 +30,4 @@ export const studentNameProjectionPipeline = [
       },
     },
   },
-] as const;
+];

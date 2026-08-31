@@ -39,7 +39,7 @@ export interface PdfGenerationResult {
   downloadUrl: string;
   fileSizeBytes: number;
   sectionsIncluded: string[];
-  pageCount: number;
+  pageCount?: number;
   generatedAt: Date;
 }
 

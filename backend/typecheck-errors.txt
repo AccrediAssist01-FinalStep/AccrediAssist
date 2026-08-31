@@ -1,0 +1,212 @@
+﻿src/ai/utils/extraction-enrichment.util.ts(36,7): error TS6133: '_collectRegexMatches' is declared but its value is never read.
+src/database/base.schema.ts(54,53): error TS2345: Argument of type 'SchemaOptions<unknown, {}, {}, {}, {}, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }, Model<unknown, {}, {}, {}, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { ...; }, any>>' is not assignable to parameter of type 'DefaultSchemaOptions | SchemaOptions<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, ... 5 more ..., IfEquals<...>> | undefined'.
+  Type 'SchemaOptions<unknown, {}, {}, {}, {}, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }, Model<unknown, {}, {}, {}, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { ...; }, any>>' is not assignable to type 'SchemaOptions<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, {}, {}, {}, IfAny<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, any, Document<...> & ... 1 more ... & { ...; }>, IfEquals<...>>'.
+    Types of property 'toJSON' are incompatible.
+      Type 'ToObjectOptions<unknown, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }> | undefined' is not assignable to type 'ToObjectOptions<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, IfAny<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, any, Document<...> & ... 1 more ... & { ...; }>> | undefined'.
+        Type 'ToObjectOptions<unknown, Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }>' is not assignable to type 'ToObjectOptions<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, IfAny<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, any, Document<...> & ... 1 more ... & { ...; }>>'.
+          Type 'IfAny<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, any, Document<unknown, {}, FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, DefaultSchemaOptions> & Require_id<...> & { ...; }>' is not assignable to type 'Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }'.
+            Type 'Document<unknown, {}, FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, DefaultSchemaOptions> & Require_id<...> & { ...; }' is not assignable to type 'Document<unknown, {}, unknown, {}, {}> & { _id: ObjectId; } & { __v: number; }'.
+              Type 'Document<unknown, {}, FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, DefaultSchemaOptions> & Require_id<...> & { ...; }' is not assignable to type 'Document<unknown, {}, unknown, {}, {}>'.
+                Type 'IfAny<FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, any, Document<unknown, {}, FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, DefaultSchemaOptions> & Require_id<...> & { ...; }>' is not assignable to type 'Document<unknown, {}, unknown, {}, {}>'.
+                  Type 'Document<unknown, {}, FlatRecord<ObtainDocumentType<any, T, DefaultSchemaOptions>>, {}, DefaultSchemaOptions> & Require_id<...> & { ...; }' is not assignable to type 'Document<unknown, {}, unknown, {}, {}>'.
+src/database/base.schema.ts(56,26): error TS2345: Argument of type 'Schema<T, Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<RawDocType> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ... 6 more ..., IfAny<...>>' is not assignable to parameter of type 'Schema<T, Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { __v?: infer U | undefined; } ? { __v?: U | undefined; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ... 6 more ..., IfAny<...>>'.
+  The types of 'discriminator(...).static' are incompatible between these types.
+    Type '{ <K extends never>(name: K, fn: {}[K]): Schema<T, Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<...> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ... 6 more ..., IfAny<...>>; (obj: Partial<...> & { ...; }): Sc...' is not assignable to type '{ <K extends never>(name: K, fn: {}[K]): Schema<T, Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ... 6 more ..., IfAny<...>>; (obj: Partial<...> & { ...; }): Schema<...>; (name: string, fn:...'.
+      Types of parameters 'obj' and 'obj' are incompatible.
+        Type 'Partial<{}> & { [name: string]: (this: Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any; }' is not assignable to type 'Partial<{}> & { [name: string]: (this: Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<...> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any; }'.
+          Type 'Partial<{}> & { [name: string]: (this: Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any; }' is not assignable to type '{ [name: string]: (this: Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<RawDocType> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any; }'.
+            'string' index signatures are incompatible.
+              Type '(this: Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { __v?: infer U | undefined; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any' is not assignable to type '(this: Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<RawDocType> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>, ...args: any[]) => any'.
+                The 'this' types of each signature are incompatible.
+                  Type 'Model<RawDocType, any, any, any, IfAny<RawDocType, any, Document<unknown, any, RawDocType, any, {}> & (Require_id<RawDocType> extends { ...; } ? { ...; } & Require_id<...> : Require_id<...> & { ...; })>, any>' is not assignable to type 'Model<T, any, any, any, IfAny<T, any, Document<unknown, any, T, any, {}> & (Require_id<T> extends { __v?: infer U | undefined; } ? { __v?: U | undefined; } & Require_id<...> : Require_id<...> & { ...; })>, any>'.
+                    The types returned by 'castObject(...)' are incompatible between these types.
+                      Type 'RawDocType' is not assignable to type 'T'.
+                        'T' could be instantiated with an arbitrary type which could be unrelated to 'RawDocType'.
+src/report-generation/docx/services/docx-report.service.ts(66,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/report-generation/generators/report-generators.ts(3,14): error TS2515: Non-abstract class 'StudentActivitiesReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(7,14): error TS2515: Non-abstract class 'FacultyActivitiesReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(11,14): error TS2515: Non-abstract class 'DepartmentActivitiesReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(15,14): error TS2515: Non-abstract class 'NbaReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(19,14): error TS2515: Non-abstract class 'NaacReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(23,14): error TS2515: Non-abstract class 'AicteReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(27,14): error TS2515: Non-abstract class 'AiWorkshopReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/generators/report-generators.ts(31,14): error TS2515: Non-abstract class 'AiIndustrialVisitReportGenerator' does not implement inherited abstract member getGeneratorNotes from class 'BaseReportGenerator'.
+src/report-generation/pdf/renderers/chart.renderer.ts(125,11): error TS6133: 'renderBarChart' is declared but its value is never read.
+src/report-generation/pdf/services/pdf-report.service.ts(53,9): error TS2322: Type 'undefined' is not assignable to type 'number'.
+src/report-generation/pdf/services/pdf-report.service.ts(66,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/report-generation/pdf/services/pdf-report.service.ts(69,9): error TS2322: Type 'undefined' is not assignable to type 'number'.
+src/report-generation/student-activity/builders/student-activity-report-docx.builder.ts(148,52): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ studentName: string; type: string; title: string; organization: string; date: string; }'.
+  Type 'string[]' is missing the following properties from type '{ studentName: string; type: string; title: string; organization: string; date: string; }': studentName, type, title, organization, date
+src/report-generation/student-activity/builders/student-activity-report-pdf.builder.ts(115,81): error TS2345: Argument of type 'string[]' is not assignable to parameter of type '{ studentName: string; type: string; title: string; organization: string; date: string; }'.
+  Type 'string[]' is missing the following properties from type '{ studentName: string; type: string; title: string; organization: string; date: string; }': studentName, type, title, organization, date
+src/report-generation/student-activity/services/student-activity-narrative.service.ts(54,3): error TS6133: 'modules' is declared but its value is never read.
+src/report-generation/template-activity-report/utils/template-module-rows.util.ts(76,3): error TS2322: Type '{ moduleNumber: number; heading: string; sectionKey: string; rows: string[][]; }[]' is not assignable to type 'TemplateModuleTable[]'.
+  Property 'headers' is missing in type '{ moduleNumber: number; heading: string; sectionKey: string; rows: string[][]; }' but required in type 'TemplateModuleTable'.
+src/report-generation/workshop/builders/workshop-report-docx.builder.ts(86,24): error TS2345: Argument of type '{ data: Buffer<ArrayBufferLike>; transformation: { width: number; height: number; }; }' is not assignable to parameter of type 'IImageOptions'.
+  Type '{ data: Buffer<ArrayBufferLike>; transformation: { width: number; height: number; }; }' is not assignable to type 'SvgMediaOptions & CoreImageOptions'.
+    Type '{ data: Buffer<ArrayBufferLike>; transformation: { width: number; height: number; }; }' is missing the following properties from type 'SvgMediaOptions': type, fallback
+src/report-generation/workshop/utils/workshop-report-images.util.ts(22,40): error TS2304: Cannot find name 'WorkshopImagePlacement'.
+src/report-generation/workshop/utils/workshop-report-images.util.ts(69,12): error TS2304: Cannot find name 'WorkshopImageSection'.
+src/report-generation/workshop/utils/workshop-report-normalizer.util.ts(83,3): error TS2322: Type '({ imageReference: string; section: "evidenceGallery"; caption: string; } | null)[]' is not assignable to type 'WorkshopImagePlacement[]'.
+  Type '{ imageReference: string; section: "evidenceGallery"; caption: string; } | null' is not assignable to type 'WorkshopImagePlacement'.
+    Type 'null' is not assignable to type 'WorkshopImagePlacement'.
+src/report-generation/workshop/utils/workshop-report-normalizer.util.ts(96,29): error TS2677: A type predicate's type must be assignable to its parameter's type.
+  Type 'WorkshopImagePlacement' is not assignable to type '{ imageReference: string; section: "evidenceGallery"; caption: string; }'.
+    Types of property 'section' are incompatible.
+      Type 'WorkshopImageSection' is not assignable to type '"evidenceGallery"'.
+        Type '"introduction"' is not assignable to type '"evidenceGallery"'.
+src/report-generation/workshop/utils/workshop-report-normalizer.util.ts(347,3): error TS2322: Type '{ type: "image"; url: string; label: string; uploadedAt: Date; }[]' is not assignable to type 'EventMediaItem[]'.
+  Property 'sourceMessageIndex' is missing in type '{ type: "image"; url: string; label: string; uploadedAt: Date; }' but required in type 'EventMediaItem'.
+src/scripts/fix-misclassified-workshop-to-placement.ts(8,1): error TS6133: 'mongoose' is declared but its value is never read.
+src/scripts/test-ai-extensions-integration.ts(140,38): error TS2345: Argument of type '"News"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-audit-log-model.ts(64,27): error TS2339: Property 'equals' does not exist on type 'string | ObjectId'.
+  Property 'equals' does not exist on type 'string'.
+src/scripts/test-classification-modules.ts(11,3): error TS6133: 'shouldStartEventReportSession' is declared but its value is never read.
+src/scripts/test-classification-modules.ts(15,3): error TS2305: Module '"../ai/utils/pdf-document-mapper.util"' has no exported member 'resolveRecordCategoryWithPdf'.
+src/scripts/test-crud-infrastructure.ts(172,26): error TS2339: Property 'statusCode' does not exist on type 'Error'.
+src/scripts/test-crud-infrastructure.ts(191,10): error TS2367: This comparison appears to be unintentional because the types 'string | ParsedQs | (string | ParsedQs)[] | undefined' and 'number' have no overlap.
+src/scripts/test-crud-infrastructure.ts(192,10): error TS2367: This comparison appears to be unintentional because the types 'string | ParsedQs | (string | ParsedQs)[] | undefined' and 'number' have no overlap.
+src/scripts/test-crud-infrastructure.ts(208,10): error TS2358: The left-hand side of an 'instanceof' expression must be of type 'any', an object type or a type parameter.
+src/scripts/test-executive-summary.ts(73,7): error TS2741: Property 'news' is missing in type '{ studentAchievements: number; facultyAchievements: number; placements: number; internships: number; publications: number; patents: number; completedEventReports: number; pendingReviews: number; }' but required in type 'Record<"placements" | "internships" | "publications" | "patents" | "news" | "studentAchievements" | "completedEventReports" | "facultyAchievements" | "pendingReviews", number>'.
+src/scripts/test-executive-summary.ts(233,50): error TS2345: Argument of type '"Placement"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(259,59): error TS2345: Argument of type '"Placement"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(274,58): error TS2345: Argument of type '"Internship"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(280,65): error TS2345: Argument of type '"Publication"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(307,66): error TS2345: Argument of type '"Placement"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(309,5): error TS2322: Type '"Placement"' is not assignable to type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(336,57): error TS2345: Argument of type '"Placement"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-executive-summary.ts(339,5): error TS2345: Argument of type '"Placement"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-extraction-agent.ts(213,7): error TS2353: Object literal may only specify known properties, and 'certificates' does not exist in type 'Partial<{ studentNames: string[]; facultyNames: string[]; company: string; organization: string; eventName: string; eventType: string; achievementType: string; publicationTitle: string; patentTitle: string; internship: string; placement: string; categoryHint: string; location: string; }>'.
+src/scripts/test-extraction-agent.ts(352,16): error TS2339: Property 'certificates' does not exist on type 'Partial<{ studentNames: string[]; facultyNames: string[]; company: string; organization: string; eventName: string; eventType: string; achievementType: string; publicationTitle: string; patentTitle: string; internship: string; placement: string; categoryHint: string; location: string; }>'.
+src/scripts/test-extraction-agent.ts(355,16): error TS2339: Property 'certificates' does not exist on type 'Partial<{ studentNames: string[]; facultyNames: string[]; company: string; organization: string; eventName: string; eventType: string; achievementType: string; publicationTitle: string; patentTitle: string; internship: string; placement: string; categoryHint: string; location: string; }>'.
+src/scripts/test-extraction-agent.ts(355,35): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/scripts/test-final-qa-evaluation.ts(137,5): error TS18048: 'server' is possibly 'undefined'.
+src/scripts/test-final-qa-evaluation.ts(158,5): error TS18048: 'server' is possibly 'undefined'.
+src/scripts/test-final-qa-evaluation.ts(474,9): error TS6133: 'apiStudentTotal' is declared but its value is never read.
+src/scripts/test-final-qa-evaluation.ts(731,38): error TS2345: Argument of type '"News"' is not assignable to parameter of type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-industrial-visit-routing.ts(26,73): error TS2345: Argument of type '{ title: string; description: string; categoryHint: string; confidence: number; }' is not assignable to parameter of type 'ExtractionResult'.
+  Type '{ title: string; description: string; categoryHint: string; confidence: number; }' is missing the following properties from type 'ExtractionResult': studentNames, facultyNames, company, organization, and 11 more.
+src/scripts/test-multi-image-event-session.ts(137,5): error TS2345: Argument of type '{ text: string; sender: string; media: string | undefined; mediaMetadata: WhatsAppMediaMetadata | null; receivedAt: Date; }[]' is not assignable to parameter of type 'EventReportSessionMessage[]'.
+  Type '{ text: string; sender: string; media: string | undefined; mediaMetadata: WhatsAppMediaMetadata | null; receivedAt: Date; }' is not assignable to type 'EventReportSessionMessage'.
+    Types of property 'mediaMetadata' are incompatible.
+      Type 'WhatsAppMediaMetadata | null' is not assignable to type 'Record<string, unknown> | null | undefined'.
+        Type 'WhatsAppMediaMetadata' is not assignable to type 'Record<string, unknown>'.
+          Index signature for type 'string' is missing in type 'WhatsAppMediaMetadata'.
+src/scripts/test-pending-review-service.ts(74,9): error TS6133: 'internship' is declared but its value is never read.
+src/scripts/test-pending-review-workflow.ts(269,18): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(270,10): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(272,13): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(276,13): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(280,13): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(284,12): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(289,8): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(293,10): error TS18047: 'placementResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(294,10): error TS18047: 'workshopResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(295,10): error TS18047: 'workshopResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(296,10): error TS18047: 'noticeResult' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(479,20): error TS18047: 'result' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(480,42): error TS18047: 'result' is possibly 'null'.
+src/scripts/test-pending-review-workflow.ts(508,47): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/scripts/test-pending-review-workflow.ts(517,36): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/scripts/test-report-model.ts(66,29): error TS2339: Property 'equals' does not exist on type 'string | ObjectId'.
+  Property 'equals' does not exist on type 'string'.
+src/scripts/test-report-templates.ts(30,5): error TS2367: This comparison appears to be unintentional because the types '8' and '10' have no overlap.
+src/scripts/test-report-templates.ts(81,5): error TS2322: Type '"Placement"' is not assignable to type '"Student Activities" | "Faculty Activities" | "Department Activities" | "NBA" | "NAAC" | "AICTE" | "AI Generated Workshop" | "AI Generated Industrial Visit"'.
+src/scripts/test-search-execution.ts(375,17): error TS2352: Conversion of type '{ understanding: { collection: string; filters?: Record<string, unknown> | undefined; sort?: string | undefined; source?: string | undefined; }; results: { items: { recordId: string; summary: string; data?: Record<...> | undefined; }[]; meta: { ...; }; }; } | undefined' to type '{ token: string; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'token' is missing in type '{ understanding: { collection: string; filters?: Record<string, unknown> | undefined; sort?: string | undefined; source?: string | undefined; }; results: { items: { recordId: string; summary: string; data?: Record<...> | undefined; }[]; meta: { ...; }; }; }' but required in type '{ token: string; }'.
+src/scripts/test-search-execution.ts(397,5): error TS2345: Argument of type 'boolean | undefined' is not assignable to parameter of type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+src/scripts/test-smart-search-flow.ts(386,17): error TS2352: Conversion of type 'GlobalSearchApiData | undefined' to type '{ token: string; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'token' is missing in type 'GlobalSearchApiData' but required in type '{ token: string; }'.
+src/scripts/test-whatsapp-cloudinary.ts(129,57): error TS6133: 'tempRoot' is declared but its value is never read.
+src/scripts/test-whatsapp-cloudinary.ts(136,13): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/scripts/test-whatsapp-media-handling.ts(165,23): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/scripts/test-whatsapp-media-handling.ts(200,14): error TS18048: 'metadata.localPath' is possibly 'undefined'.
+src/scripts/test-whatsapp-media-handling.ts(204,46): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(path: PathLike | FileHandle, options?: ({ encoding?: null | undefined; flag?: OpenMode | undefined; } & Abortable) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+  Overload 2 of 3, '(path: PathLike | FileHandle, options?: BufferEncoding | (ObjectEncodingOptions & Abortable & { flag?: OpenMode | undefined; }) | null | undefined): Promise<...>', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'PathLike | FileHandle'.
+      Type 'undefined' is not assignable to type 'PathLike | FileHandle'.
+src/scripts/test-whatsapp-media-handling.ts(205,43): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/scripts/test-whatsapp-media-handling.ts(208,31): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/scripts/test-whatsapp-media-handling.ts(252,9): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/scripts/test-workshop-report-generator.ts(121,9): error TS2322: Type 'Date' is not assignable to type 'string'.
+src/scripts/test-workshop-report-generator.ts(128,9): error TS2322: Type 'Date' is not assignable to type 'string'.
+src/scripts/whatsapp-intake-diagnostic.ts(53,10): error TS2339: Property 'joinedAllowedGroups' does not exist on type 'WhatsAppGroupDetectionResult'.
+src/scripts/whatsapp-intake-diagnostic.ts(53,39): error TS7006: Parameter 'group' implicitly has an 'any' type.
+src/search/config/search-execution.config.ts(86,12): error TS2352: Conversion of type 'Model<IFacultyAchievement, {}, {}, {}, Document<unknown, {}, IFacultyAchievement, {}, {}> & IFacultyAchievement & Required<...> & { ...; }, any>' to type 'Model<IBaseDocument, {}, {}, {}, Document<unknown, {}, IBaseDocument, {}, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The types of 'schema.static' are incompatible between these types.
+    Type '{ <K extends never>(name: K, fn: {}[K]): Schema<IFacultyAchievement, Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ... 6 more ..., Document<...> & ... 2 more ... & { ...; }>; (obj: Partial<...> & { ...; }): Schem...' is not comparable to type '{ <K extends never>(name: K, fn: {}[K]): Schema<IBaseDocument, Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ... 6 more ..., Document<...> & ... 2 more ... & { ...; }>; (obj: Partial<...> & { ...; }): Schema<...>; (name: string, f...'.
+      Types of parameters 'obj' and 'obj' are incompatible.
+        Type 'Partial<{}> & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => any; }' is not comparable to type 'Partial<{}> & { [name: string]: (this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => any; }'.
+          Type 'Partial<{}> & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => any; }' is not comparable to type '{ [name: string]: (this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => any; }'.
+            'string' index signatures are incompatible.
+              Type '(this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => any' is not comparable to type '(this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => any'.
+                The 'this' types of each signature are incompatible.
+                  Type 'Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>' is not comparable to type 'Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>'.
+                    The types of 'schema.statics' are incompatible between these types.
+                      Type '{} & { [name: string]: (this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }' is not comparable to type '{} & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }'.
+                        Type '{} & { [name: string]: (this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }' is not comparable to type '{ [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }'.
+                          'string' index signatures are incompatible.
+                            Type '(this: Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>, ...args: any[]) => unknown' is not comparable to type '(this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => unknown'.
+                              The 'this' types of each signature are incompatible.
+                                Type 'Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>' is not comparable to type 'Model<IFacultyAchievement, any, any, any, Document<unknown, any, IFacultyAchievement, any, {}> & IFacultyAchievement & Required<...> & { ...; }, any>'.
+                                  The types returned by 'castObject(...)' are incompatible between these types.
+                                    Type 'IBaseDocument' is missing the following properties from type 'IFacultyAchievement': facultyName, achievementType, title, photos, date
+src/search/config/search-execution.config.ts(158,12): error TS2352: Conversion of type 'Model<IPatent, {}, {}, {}, Document<unknown, {}, IPatent, {}, {}> & IPatent & Required<{ _id: ObjectId; }> & { __v: number; }, any>' to type 'Model<IBaseDocument, {}, {}, {}, Document<unknown, {}, IBaseDocument, {}, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  The types of 'schema.static' are incompatible between these types.
+    Type '{ <K extends never>(name: K, fn: {}[K]): Schema<IPatent, Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<...> & { ...; }, any>, ... 6 more ..., Document<...> & ... 2 more ... & { ...; }>; (obj: Partial<...> & { ...; }): Schema<...>; (name: string, fn: (this: Model<...>, .....' is not comparable to type '{ <K extends never>(name: K, fn: {}[K]): Schema<IBaseDocument, Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ... 6 more ..., Document<...> & ... 2 more ... & { ...; }>; (obj: Partial<...> & { ...; }): Schema<...>; (name: string, f...'.
+      Types of parameters 'obj' and 'obj' are incompatible.
+        Type 'Partial<{}> & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => any; }' is not comparable to type 'Partial<{}> & { [name: string]: (this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => any; }'.
+          Type 'Partial<{}> & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => any; }' is not comparable to type '{ [name: string]: (this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => any; }'.
+            'string' index signatures are incompatible.
+              Type '(this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => any' is not comparable to type '(this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => any'.
+                The 'this' types of each signature are incompatible.
+                  Type 'Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { __v: number; }, any>' is not comparable to type 'Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>'.
+                    The types of 'schema.statics' are incompatible between these types.
+                      Type '{} & { [name: string]: (this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => unknown; }' is not comparable to type '{} & { [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }'.
+                        Type '{} & { [name: string]: (this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => unknown; }' is not comparable to type '{ [name: string]: (this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<...> & { ...; }, any>, ...args: any[]) => unknown; }'.
+                          'string' index signatures are incompatible.
+                            Type '(this: Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => unknown' is not comparable to type '(this: Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>, ...args: any[]) => unknown'.
+                              The 'this' types of each signature are incompatible.
+                                Type 'Model<IBaseDocument, any, any, any, Document<unknown, any, IBaseDocument, any, {}> & IBaseDocument & Required<{ _id: ObjectId; }> & { ...; }, any>' is not comparable to type 'Model<IPatent, any, any, any, Document<unknown, any, IPatent, any, {}> & IPatent & Required<{ _id: ObjectId; }> & { __v: number; }, any>'.
+                                  The types returned by 'castObject(...)' are incompatible between these types.
+                                    Type 'IBaseDocument' is missing the following properties from type 'IPatent': patentTitle, inventors, status
+src/services/event-correlation.service.ts(24,3): error TS2322: Type 'WhatsAppMediaMetadata | null' is not assignable to type 'Record<string, unknown> | null | undefined'.
+  Type 'WhatsAppMediaMetadata' is not assignable to type 'Record<string, unknown>'.
+    Index signature for type 'string' is missing in type 'WhatsAppMediaMetadata'.
+src/services/event-correlation.service.ts(165,9): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/services/pendingReviewWorkflow.service.ts(147,13): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/services/pendingReviewWorkflow.service.ts(182,9): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/services/pendingReviewWorkflow.service.ts(255,9): error TS2345: Argument of type 'ObjectId' is not assignable to parameter of type 'string'.
+src/utils/pendingRecordApproval.mapper.ts(232,82): error TS2740: Type '{ facultyNames: string[] | null; studentNames: string[] | null; title: string | null; description: string | null; organization: string | null; achievementType: string | null; categoryHint: string | null; eventName: string | null; }' is missing the following properties from type 'ExtractionResult': company, eventType, publicationTitle, patentTitle, and 7 more.
+src/whatsapp/media.service.ts(220,5): error TS2345: Argument of type 'IWebMessageInfo' is not assignable to parameter of type 'WAMessage'.
+  Type 'IWebMessageInfo' is not assignable to type '{ key: WAMessageKey; messageStubParameters?: any; category?: string | undefined; retryCount?: number | undefined; }'.
+    Types of property 'key' are incompatible.
+      Type 'IMessageKey | null | undefined' is not assignable to type 'WAMessageKey'.
+        Type 'undefined' is not assignable to type 'WAMessageKey'.
+          Type 'undefined' is not assignable to type 'IMessageKey'.
+src/whatsapp/message.listener.ts(111,23): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(112,22): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(131,22): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(170,23): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(172,23): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(213,22): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(236,38): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.listener.ts(301,7): error TS2322: Type '(content: IMessage | null | undefined) => IMessage | undefined' is not assignable to type '(message: IMessage) => Record<string, unknown> | null | undefined'.
+  Type 'IMessage | undefined' is not assignable to type 'Record<string, unknown> | null | undefined'.
+    Type 'IMessage' is not assignable to type 'Record<string, unknown>'.
+      Index signature for type 'string' is missing in type 'IMessage'.
+src/whatsapp/message.listener.ts(302,7): error TS2322: Type '(content: IMessage | undefined) => keyof IMessage | undefined' is not assignable to type '(content: Record<string, unknown> | null | undefined) => string | undefined'.
+  Types of parameters 'content' and 'content' are incompatible.
+    Type 'Record<string, unknown> | null | undefined' is not assignable to type 'IMessage | undefined'.
+      Type 'null' is not assignable to type 'IMessage | undefined'.
+src/whatsapp/message.listener.ts(305,5): error TS2322: Type 'BaileysMessageUtils | null' is not assignable to type 'BaileysMessageUtils'.
+  Type 'null' is not assignable to type 'BaileysMessageUtils'.
+src/whatsapp/message.mapper.ts(172,23): error TS18049: 'message.key' is possibly 'null' or 'undefined'.
+src/whatsapp/message.mapper.ts(172,50): error TS18049: 'message.key' is possibly 'null' or 'undefined'.

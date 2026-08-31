@@ -28,6 +28,7 @@ import { Placement } from '../models/Placement';
 import { CompletedEventReport } from '../models/CompletedEventReport';
 import { AuditLog } from '../models/AuditLog';
 import { PendingReviewWorkflowService } from '../services/pendingReviewWorkflow.service';
+import { AiPipelineResult } from '../ai/interfaces/ai-pipeline.interface';
 import { pendingReviewService } from '../services/pendingReview.service';
 import { createTestUser, cleanupTestUser } from './test-helpers';
 import { MessageListener } from '../whatsapp/message.listener';
@@ -44,6 +45,16 @@ const assert = (condition: boolean, message: string): void => {
     throw new Error(`FAIL: ${message}`);
   }
   console.log(`PASS: ${message}`);
+};
+
+const requirePipelineResult = (
+  result: AiPipelineResult | null,
+  label: string,
+): AiPipelineResult => {
+  if (!result) {
+    throw new Error(`FAIL: ${label} returned null`);
+  }
+  return result;
 };
 
 const createWhatsAppMessage = (
@@ -262,9 +273,18 @@ const testWhatsAppToPendingReview = async (
 ): Promise<void> => {
   console.log('\n--- WhatsApp -> AI Pipeline -> Pending Review ---');
 
-  const placementResult = await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.placement);
-  const workshopResult = await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.workshop);
-  const noticeResult = await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.notice);
+  const placementResult = requirePipelineResult(
+    await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.placement),
+    'Placement workflow',
+  );
+  const workshopResult = requirePipelineResult(
+    await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.workshop),
+    'Workshop workflow',
+  );
+  const noticeResult = requirePipelineResult(
+    await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.notice),
+    'Notice workflow',
+  );
 
   assert(Boolean(placementResult.pendingRecord._id), 'Placement message creates pending record');
   assert(placementResult.recordCategory === 'Placement', 'Placement message classified as Placement');
@@ -475,7 +495,10 @@ const testLiveWorkflowOptional = async (): Promise<void> => {
 
   try {
     const workflow = new PendingReviewWorkflowService();
-    const result = await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.placement);
+    const result = requirePipelineResult(
+      await workflow.processIncomingWhatsAppMessage(SAMPLE_MESSAGES.placement),
+      'Live Gemini workflow',
+    );
     assert(Boolean(result.pendingRecord._id), 'Live Gemini workflow creates pending record');
     await PendingRecord.deleteOne({ _id: result.pendingRecord._id });
   } catch (error) {
@@ -505,7 +528,7 @@ const runTests = async (): Promise<void> => {
       confidenceScore: 75,
       status: 'Pending',
     });
-    await testFacultyEditAndApprove(workflow, editPending._id);
+    await testFacultyEditAndApprove(workflow, String(editPending._id));
 
     const rejectPending = await pendingReviewService.createPendingRecord({
       originalMessage: `${TEST_PREFIX} Manual notice for reject path`,
@@ -514,7 +537,7 @@ const runTests = async (): Promise<void> => {
       confidenceScore: 55,
       status: 'Needs Review',
     });
-    await testRejectPath(workflow, rejectPending._id);
+    await testRejectPath(workflow, String(rejectPending._id));
     await testWhatsAppListenerIntegration(workflow);
     await testLiveWorkflowOptional();
   } finally {

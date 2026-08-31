@@ -63,7 +63,7 @@ const runTests = async (): Promise<void> => {
   assert(!!report._id, 'Report creates successfully');
   assert(report.reportTitle === 'Monthly Placement Summary - March 2026', 'reportTitle is stored correctly');
   assert(report.reportType === 'Placement', 'reportType is stored correctly');
-  assert(report.generatedBy.equals(user._id), 'generatedBy is stored correctly');
+  assert(String(report.generatedBy) === String(user._id), 'generatedBy is stored correctly');
   assert(
     (report.filtersApplied as { department?: string })?.department === 'Computer Science',
     'filtersApplied is stored correctly',

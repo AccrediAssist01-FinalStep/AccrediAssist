@@ -10,7 +10,7 @@ export interface IPlacement extends IBaseDocument {
   package?: string;
   joiningDate?: Date;
   offerLetter?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface CreatePlacementInput {
@@ -22,7 +22,7 @@ export interface CreatePlacementInput {
   package?: string;
   joiningDate?: Date;
   offerLetter?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface UpdatePlacementInput {
@@ -34,7 +34,7 @@ export interface UpdatePlacementInput {
   package?: string;
   joiningDate?: Date;
   offerLetter?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface IPlacementResponse {

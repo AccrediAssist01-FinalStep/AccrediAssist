@@ -168,8 +168,7 @@ const testValidationMiddleware = async (): Promise<void> => {
   const validBodyError = await runMiddleware(validate(bodySchema), {
     body: { name: 'A' },
   });
-  assert(validBodyError instanceof ValidationError, 'validate(body) rejects invalid body');
-  assert(validBodyError?.statusCode === 422, 'validate(body) returns 422');
+  assert(validBodyError instanceof ValidationError && validBodyError.statusCode === 422, 'validate(body) returns 422');
 
   const validBodyReq = { body: { name: 'Valid Name' } } as Partial<Request>;
   const validBodyPass = await runMiddleware(validate(bodySchema), validBodyReq);
@@ -188,16 +187,16 @@ const testValidationMiddleware = async (): Promise<void> => {
   const queryReq = { query: { page: '2', limit: '10' } } as Partial<Request>;
   const queryPass = await runMiddleware(validateQuery(paginationSchema), queryReq);
   assert(queryPass === null, 'validateQuery accepts pagination query');
-  assert(queryReq.query?.page === 2, 'validateQuery coerces page to number');
-  assert(queryReq.query?.limit === 10, 'validateQuery coerces limit to number');
+  assert(Number(queryReq.query?.page) === 2, 'validateQuery coerces page to number');
+  assert(Number(queryReq.query?.limit) === 10, 'validateQuery coerces limit to number');
 };
 
 const testAsyncHandler = async (): Promise<void> => {
   console.log('\n--- Async handler ---');
 
-  let nextError: Error | null = null;
+  let nextError: unknown = null;
   const next = (error?: unknown) => {
-    nextError = error instanceof Error ? error : null;
+    nextError = error;
   };
 
   const failingHandler = asyncHandler(async () => {

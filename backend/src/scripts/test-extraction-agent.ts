@@ -44,6 +44,7 @@ interface SampleMessageCase {
     placement: string;
     categoryHint: string;
     location: string;
+    certificates: string[];
   }>;
 }
 

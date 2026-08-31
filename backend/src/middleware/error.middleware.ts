@@ -1,12 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Error as MongooseError } from 'mongoose';
-import {
-  AppError,
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ValidationError,
-} from '../utils/errors';
+import { AppError } from '../utils/errors';
 import { sendError } from '../utils/apiResponse';
 import { logger } from '../utils/logger';
 import { env } from '../config/env';

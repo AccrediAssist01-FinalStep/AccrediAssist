@@ -1,8 +1,9 @@
+import { Types } from 'mongoose';
 import { IAuditLog, IAuditLogResponse } from '../types/auditLog.types';
 
 export const toAuditLogResponse = (record: IAuditLog): IAuditLogResponse => ({
   _id: record._id,
-  userId: record.userId,
+  userId: record.userId as Types.ObjectId | undefined,
   action: record.action,
   module: record.module,
   description: record.description,

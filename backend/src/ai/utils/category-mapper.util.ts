@@ -1,4 +1,4 @@
-import { EVENT_TYPES, EventType, RECORD_CATEGORIES, RecordCategory } from '../../database/enums';
+import { EVENT_TYPES, RECORD_CATEGORIES, RecordCategory } from '../../database/enums';
 import { ClassificationCategory } from '../interfaces/classification.interface';
 import { ExtractionResult } from '../interfaces/extraction.interface';
 import { enrichExtractionAchievementType, inferAchievementTypeFromText, isFacultySponsoredProjectContext } from './achievement-inference.util';
@@ -29,7 +29,7 @@ const ACHIEVEMENT_TYPE_MAP: Record<string, RecordCategory> = {
 const resolveCompletedEventCategory = (extraction: ExtractionResult): RecordCategory => {
   const eventType = extraction.eventType?.trim();
   if (eventType && EVENT_TYPE_SET.has(eventType)) {
-    return eventType as EventType;
+    return eventType as unknown as RecordCategory;
   }
 
   const categoryHint = extraction.categoryHint?.trim();

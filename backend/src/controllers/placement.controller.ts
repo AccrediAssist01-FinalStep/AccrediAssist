@@ -25,7 +25,7 @@ class PlacementController extends BaseController {
   });
 
   getById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const record = await placementService.getById(req.params.id);
+    const record = await placementService.getById(req.params.id as string);
     this.success(res, 'Placement retrieved successfully', record);
   });
 
@@ -37,13 +37,13 @@ class PlacementController extends BaseController {
 
   update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const record = await placementService.updatePlacement(req.params.id, req.body, userId);
+    const record = await placementService.updatePlacement(req.params.id as string, req.body, userId);
     this.success(res, 'Placement updated successfully', record);
   });
 
   remove = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    await placementService.deletePlacement(req.params.id, userId);
+    await placementService.deletePlacement(req.params.id as string, userId);
     this.success(res, 'Placement deleted successfully');
   });
 

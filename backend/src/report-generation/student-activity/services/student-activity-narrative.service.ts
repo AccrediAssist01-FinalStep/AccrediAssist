@@ -51,7 +51,7 @@ const adaptFallbackIntroduction = (
 };
 
 const adaptFallbackConclusion = (
-  modules: StudentActivityModuleTable[],
+  _modules: StudentActivityModuleTable[],
   totalRecords: number,
 ): string[] => {
   if (totalRecords === 0) {

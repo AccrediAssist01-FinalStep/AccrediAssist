@@ -179,7 +179,7 @@ export class DashboardRepository {
       Publication,
       Patent,
       CompletedEventReport,
-    ] as const;
+    ];
 
     const monthlyCounts = await Promise.all(
       Array.from({ length: 12 }, async (_, index) => {
@@ -187,7 +187,9 @@ export class DashboardRepository {
         const range = buildMonthDateRange(year, month);
 
         const counts = await Promise.all(
-          collections.map((model) => countCreatedInRange(model, range.start, range.end)),
+          collections.map((model) =>
+            countCreatedInRange(model as unknown as Model<IBaseDocument>, range.start, range.end),
+          ),
         );
         const pendingCount = await countPendingInRange(range.start, range.end);
 

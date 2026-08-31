@@ -27,12 +27,12 @@ const runTests = async (): Promise<void> => {
   console.log('Running Report Template System tests...\n');
 
   assert(
-    GENERATION_REPORT_TYPES.length === 10,
-    `All 10 report types registered (${GENERATION_REPORT_TYPES.length})`,
+    GENERATION_REPORT_TYPES.length === 8,
+    `All 8 report types registered (${GENERATION_REPORT_TYPES.length})`,
   );
 
   assert(
-    Object.keys(REPORT_TEMPLATE_DEFINITIONS).length === 10,
+    Object.keys(REPORT_TEMPLATE_DEFINITIONS).length === 8,
     'Template definitions exist for all report types',
   );
 
@@ -50,7 +50,7 @@ const runTests = async (): Promise<void> => {
   assert(validation.valid, `All templates validate (${validation.errors.join('; ') || 'no errors'})`);
 
   const list = templateService.listTemplates();
-  assert(list.length === 10, 'Template service lists all templates');
+  assert(list.length === 8, 'Template service lists all templates');
 
   const resolved = templateBuilder.build({
     reportType: 'NBA',
@@ -78,7 +78,7 @@ const runTests = async (): Promise<void> => {
   assert(resolved.enabledSectionKeys[0] === 'cover', 'Cover page is first section');
 
   const disabled = templateBuilder.build({
-    reportType: 'Placement',
+    reportType: 'Student Activities',
     overrides: {
       disabledSections: ['images', 'appendix'],
     },

@@ -1,2 +1,2 @@
-export * from './utils/softDelete';
-export * from './utils/queryHelpers';
+export * from './softDelete';
+export * from './queryHelpers';

@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { IBaseDocument } from './base.types';
+import { WorkshopReportStructuredContent } from '../report-generation/workshop/workshop-report.types';
 
 export type EventReportSessionStatus = 'collecting' | 'processing' | 'completed' | 'failed';
 

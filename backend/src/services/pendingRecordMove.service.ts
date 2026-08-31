@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { pendingRecordRepository } from '../repositories/pendingRecord.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
 import { logPipelineStage, PIPELINE_STAGES } from '../ai/utils/pipeline-stage-logger.util';
@@ -10,6 +10,7 @@ import { Publication } from '../models/Publication';
 import { Patent } from '../models/Patent';
 import { CompletedEventReport } from '../models/CompletedEventReport';
 import { News } from '../models/News';
+import { IBaseDocument } from '../types/base.types';
 import {
   IPendingRecord,
   IPendingRecordResponse,
@@ -87,11 +88,11 @@ export class PendingRecordMoveService {
       delete nextExtractedData.activitySubCategory;
     }
 
-    const recordForMapping: IPendingRecord = {
+    const recordForMapping = {
       ...existing,
       category: nextCategory,
       extractedData: nextExtractedData,
-    };
+    } as unknown as IPendingRecord;
 
     const nextTargetModule = resolveApprovalTargetModuleForRecord(recordForMapping);
 
@@ -253,7 +254,7 @@ export class PendingRecordMoveService {
     recordId: string,
     userId: string,
   ): Promise<void> {
-    const model = this.getModelForTargetModule(targetModule);
+    const model = this.getModelForTargetModule(targetModule) as unknown as Model<IBaseDocument>;
     const deleted = await softDeleteById(model, recordId, userId);
 
     if (!deleted) {

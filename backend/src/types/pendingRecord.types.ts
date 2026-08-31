@@ -9,7 +9,7 @@ export interface PendingRecordEditChange {
 }
 
 export interface PendingRecordEditHistoryEntry {
-  editedBy: Types.ObjectId;
+  editedBy: Types.ObjectId | string;
   editedAt: Date;
   changes: PendingRecordEditChange[];
   previousConfidenceScore?: number;
@@ -32,9 +32,9 @@ export interface IPendingRecord extends IBaseDocument {
   confidenceScore: number;
   status: PendingRecordStatus;
   rejectionReason?: string;
-  reviewedBy?: Types.ObjectId;
+  reviewedBy?: Types.ObjectId | string;
   reviewedAt?: Date;
-  approvedRecordId?: Types.ObjectId;
+  approvedRecordId?: Types.ObjectId | string;
   approvedTargetModule?: string;
   editHistory?: PendingRecordEditHistoryEntry[];
 }
@@ -59,7 +59,7 @@ export interface UpdatePendingRecordInput {
   confidenceScore?: number;
   status?: PendingRecordStatus;
   rejectionReason?: string;
-  reviewedBy?: Types.ObjectId;
+  reviewedBy?: Types.ObjectId | string;
   reviewedAt?: Date;
 }
 

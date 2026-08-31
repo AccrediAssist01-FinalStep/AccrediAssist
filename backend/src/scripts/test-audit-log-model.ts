@@ -61,7 +61,7 @@ const runTests = async (): Promise<void> => {
   assert(!!auditLog._id, 'Audit log creates successfully');
   assert(auditLog.action === 'LOGIN', 'action is stored correctly');
   assert(auditLog.module === 'Auth', 'module is stored correctly');
-  assert(auditLog.userId?.equals(user._id) === true, 'userId is stored correctly');
+  assert(String(auditLog.userId) === String(user._id), 'userId is stored correctly');
   assert(auditLog.timestamp.getTime() === timestamp.getTime(), 'timestamp is stored correctly');
   assert(!!auditLog.createdAt, 'Timestamps: createdAt is set');
   assert(!!auditLog.updatedAt, 'Timestamps: updatedAt is set');

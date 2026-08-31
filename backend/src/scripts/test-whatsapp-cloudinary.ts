@@ -126,14 +126,14 @@ const testCloudinaryServiceUpload = async (): Promise<void> => {
 const testMediaUploadPipeline = async (): Promise<void> => {
   console.log('\n--- Media upload pipeline ---');
 
-  await withTempMediaPath('cloudinary-pipeline', async (tempRoot) => {
+  await withTempMediaPath('cloudinary-pipeline', async () => {
     const utils = createTestMessageUtils();
     const groupJid = '120363012345678901@g.us';
     const uploads: string[] = [];
 
     const mediaService = new MediaService(
       async (message) => {
-        if (message.key.id === 'TEST_PDF_ID') {
+        if (message.key?.id === 'TEST_PDF_ID') {
           return Buffer.from('%PDF-1.4 test pdf');
         }
         return Buffer.from('image-bytes');

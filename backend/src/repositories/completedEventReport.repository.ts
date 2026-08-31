@@ -69,8 +69,10 @@ export class CompletedEventReportRepository extends BaseRepository<ICompletedEve
     const sortOrder = sort.sortOrder === 'asc' ? 1 : -1;
     const sortSpec =
       sort.sortBy === 'date'
-        ? { date: sortOrder, createdAt: sortOrder }
-        : { [sort.sortBy]: sortOrder };
+        ? ({ date: sortOrder as 1 | -1, createdAt: sortOrder as 1 | -1 } as {
+            [key: string]: 1 | -1;
+          })
+        : ({ [sort.sortBy]: sortOrder as 1 | -1 } as { [key: string]: 1 | -1 });
 
     const [items, total] = await Promise.all([
       this.model

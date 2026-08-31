@@ -78,6 +78,7 @@ const createSyntheticAggregation = (): ReportAggregationResult => ({
         publications: 0,
         patents: 0,
         completedEventReports: 0,
+        news: 0,
         pendingReviews: 0,
       },
       growthPercentage: 15,
@@ -230,10 +231,10 @@ const runUnitTests = async (): Promise<void> => {
   assert(validationFailed, 'Validator rejects empty executiveSummary');
 
   const aggregation = createSyntheticAggregation();
-  const fallback = buildFallbackExecutiveSummary('Placement', aggregation, 'test fallback');
+  const fallback = buildFallbackExecutiveSummary('Student Activities', aggregation, 'test fallback');
   assertSummaryShape(fallback);
   assert(fallback.source === 'fallback', 'Fallback summary uses fallback source');
-  assert(fallback.executiveSummary.includes('Placement Report'), 'Fallback references report label');
+  assert(fallback.executiveSummary.includes('Student Activities'), 'Fallback references report label');
 
   const payloadA = buildAggregatedDataPayload('NBA', aggregation);
   const payloadB = buildAggregatedDataPayload('NBA', aggregation);
@@ -256,7 +257,7 @@ const runUnitTests = async (): Promise<void> => {
   const invalidJsonService = new ExecutiveSummaryService(
     new GeminiProvider(createMockGeminiClientInvalidJson()),
   );
-  const invalidResult = await invalidJsonService.generate('Placement', aggregation);
+  const invalidResult = await invalidJsonService.generate('Student Activities', aggregation);
   assert(invalidResult.usedFallback, 'Invalid JSON triggers fallback');
   assertSummaryShape(invalidResult.summary);
   assert(invalidResult.summary.source === 'fallback', 'Invalid JSON uses fallback source');
@@ -271,13 +272,13 @@ const runUnitTests = async (): Promise<void> => {
       }),
     ),
   );
-  const schemaFail = await invalidSchemaService.generate('Internship', aggregation);
+  const schemaFail = await invalidSchemaService.generate('Faculty Activities', aggregation);
   assert(schemaFail.usedFallback, 'Invalid schema triggers fallback');
 
   const originalKey = process.env.GEMINI_API_KEY;
   delete process.env.GEMINI_API_KEY;
   const unconfiguredService = new ExecutiveSummaryService();
-  const unconfiguredResult = await unconfiguredService.generate('Publication', aggregation);
+  const unconfiguredResult = await unconfiguredService.generate('Faculty Activities', aggregation);
   assert(unconfiguredResult.usedFallback, 'Missing API key triggers fallback');
   if (originalKey) {
     process.env.GEMINI_API_KEY = originalKey;
@@ -304,9 +305,9 @@ const runIntegrationTests = async (): Promise<void> => {
     assert(summary.source === 'gemini', `Integration mock Gemini for ${reportType}`);
   }
 
-  const placementCollected = await dataCollectionService.collect('Placement', {});
+  const placementCollected = await dataCollectionService.collect('Student Activities', {});
   const context = await aiSummaryService.summarizeForContext({
-    reportType: 'Placement',
+    reportType: 'Student Activities',
     filters: {},
     collectedData: placementCollected,
   });
@@ -333,10 +334,10 @@ const runLiveGeminiTest = async (): Promise<void> => {
   console.log('--- Live Gemini test ---\n');
   await connectDatabase();
 
-  const collected = await dataCollectionService.collect('Placement', {});
+  const collected = await dataCollectionService.collect('Student Activities', {});
   const liveService = new ExecutiveSummaryService();
   const { summary, usedFallback } = await liveService.generate(
-    'Placement',
+    'Student Activities',
     collected.aggregation!,
   );
 

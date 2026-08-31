@@ -10,7 +10,7 @@ export interface IInternship extends IBaseDocument {
   startDate?: Date;
   endDate?: Date;
   certificateUrl?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface CreateInternshipInput {
@@ -22,7 +22,7 @@ export interface CreateInternshipInput {
   startDate?: Date;
   endDate?: Date;
   certificateUrl?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface UpdateInternshipInput {
@@ -34,7 +34,7 @@ export interface UpdateInternshipInput {
   startDate?: Date;
   endDate?: Date;
   certificateUrl?: string;
-  approvedBy?: Types.ObjectId;
+  approvedBy?: Types.ObjectId | string;
 }
 
 export interface IInternshipResponse {
