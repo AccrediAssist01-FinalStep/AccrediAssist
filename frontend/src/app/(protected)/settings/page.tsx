@@ -9,18 +9,22 @@ import {
   SettingsAccount,
   SettingsAppearance,
   SettingsNotifications,
+  SettingsWhatsApp,
   useUserPreferences,
 } from '@/features/settings';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function SettingsPage() {
   const { preferences, updatePreferences, isLoaded } = useUserPreferences();
+  const { hasPermission } = useAuth();
+  const canManageWhatsApp = hasPermission('whatsapp_settings');
 
   return (
     <PageTransition>
       <FeaturePageHeader
         id="settings-heading"
         title="Settings"
-        description="Configure appearance, notifications, and account preferences for AccrediAssist."
+        description="Configure appearance, notifications, WhatsApp connection, and account preferences for AccrediAssist."
         action={
           <Button variant="outline" asChild className="gap-2">
             <Link href="/profile">
@@ -40,6 +44,7 @@ export default function SettingsPage() {
       ) : (
         <>
           <SettingsAppearance />
+          <SettingsWhatsApp enabled={canManageWhatsApp} />
           <SettingsNotifications preferences={preferences} onChange={updatePreferences} />
           <SettingsAccount preferences={preferences} onChange={updatePreferences} />
         </>
