@@ -6,9 +6,22 @@ import { hashPassword } from '../utils/password';
 
 dotenv.config();
 
-const seedAdmin = async (): Promise<void> => {
-  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@accrediassist.edu';
-  const adminPassword = process.env.ADMIN_PASSWORD ?? 'Admin@12345';
+const SEED_CREDENTIALS_ERROR =
+  'Seed failed: ADMIN_EMAIL and ADMIN_PASSWORD must be set (non-empty) for the one-time admin seed.';
+
+export const requireAdminSeedCredentials = (): { adminEmail: string; adminPassword: string } => {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(SEED_CREDENTIALS_ERROR);
+  }
+
+  return { adminEmail, adminPassword };
+};
+
+export const seedAdmin = async (): Promise<void> => {
+  const { adminEmail, adminPassword } = requireAdminSeedCredentials();
 
   const existingAdmin = await User.findOne({ email: adminEmail });
 
@@ -33,17 +46,25 @@ const seedAdmin = async (): Promise<void> => {
 };
 
 const runSeed = async (): Promise<void> => {
+  let exitCode = 0;
+
   try {
     await connectDatabase();
     await seedAdmin();
     console.log('Database seed completed');
   } catch (error) {
-    console.error('Seed failed:', error);
-    process.exit(1);
+    exitCode = 1;
+    if (error instanceof Error && error.message === SEED_CREDENTIALS_ERROR) {
+      console.error(error.message);
+    } else {
+      console.error('Seed failed:', error);
+    }
   } finally {
     await mongoose.disconnect();
-    process.exit(0);
+    process.exit(exitCode);
   }
 };
 
-runSeed();
+if (require.main === module) {
+  void runSeed();
+}

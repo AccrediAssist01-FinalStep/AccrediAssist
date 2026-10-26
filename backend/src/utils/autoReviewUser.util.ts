@@ -8,12 +8,19 @@ export const getAutoReviewUserId = async (): Promise<string> => {
     return cachedAutoReviewUserId;
   }
 
-  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@accrediassist.edu';
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+
+  if (!adminEmail) {
+    throw new InternalServerError(
+      'ADMIN_EMAIL is not configured. Set it to the same email used when running the one-time admin seed.',
+    );
+  }
+
   const user = await User.findOne({ email: adminEmail, isActive: true }).select('_id');
 
   if (!user) {
     throw new InternalServerError(
-      `Auto-review user not found for ${adminEmail}. Run database seed to create the admin account.`,
+      'Auto-review admin user was not found. Run the one-time admin seed with the same ADMIN_EMAIL.',
     );
   }
 
